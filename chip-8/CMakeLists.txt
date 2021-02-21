@@ -6,7 +6,7 @@ install(TARGETS chip-8-libretro
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-add_library(chip-8 SHARED src/register.cpp)
+add_library(chip-8 SHARED src/register.cpp src/memory.cpp)
 install(TARGETS chip-8
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
