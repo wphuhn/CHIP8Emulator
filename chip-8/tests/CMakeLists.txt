@@ -10,5 +10,7 @@ function(add_chip8_test name)
   gtest_discover_tests(${name})
 endfunction()
 
-add_chip8_test(register-test)
+add_chip8_test(chip8-test)
+add_chip8_test(display-test)
 add_chip8_test(memory-test)
+add_chip8_test(register-test)
