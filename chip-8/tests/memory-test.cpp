@@ -15,8 +15,3 @@ TEST (Memory, LoadsROMAtCorrectLocation) {
         EXPECT_EQ(ram.get_byte(expected_start_address + i), rom[i]);
     }
 }
-
-int main(int argc, char* argv[]) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
