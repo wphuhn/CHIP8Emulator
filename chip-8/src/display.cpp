@@ -16,7 +16,7 @@ void Display::set_pixel(int x, int y, PIXEL_TYPE value) {
 void Display::clear() {
     for (auto & row : screen) {
         for (PIXEL_TYPE & pixel : row) {
-            pixel = 0;
+            pixel = OFF_PIXEL;
         }
     }
 }
