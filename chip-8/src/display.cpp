@@ -5,11 +5,11 @@ Display::Display() {
     clear();
 }
 
-PIXEL_TYPE Display::get_pixel(int x, int y) {
+const PIXEL_TYPE& Display::get_pixel(const int x, const int y) const {
     return screen[y][x];
 }
 
-void Display::set_pixel(int x, int y, PIXEL_TYPE value) {
+void Display::set_pixel(const int x, const int y, const PIXEL_TYPE value) {
     screen[y][x] = value;
 }
 

@@ -25,15 +25,15 @@ TEST (Chip8Machine, PassingUnsupportedOpcodeStopsInterpreter) {
 TEST (Chip8Machine, Opcode00E0ClearsScreen) {
     Chip8Machine machine;
     OPCODE_TYPE opcode = 0x00E0;
-    for (int x = 0; x < machine.display.width; x++) {
-        for (int y = 0; y < machine.display.height; y++) {
-            machine.display.set_pixel(x, y, ON_PIXEL);
+    for (int x = 0; x < machine.display_width; x++) {
+        for (int y = 0; y < machine.display_height; y++) {
+            machine.set_pixel(x, y, ON_PIXEL);
         }
     }
     machine.decode(opcode);
-    for (int x = 0; x < machine.display.width; x++) {
-        for (int y = 0; y < machine.display.height; y++) {
-            EXPECT_EQ(machine.display.get_pixel(x, y), OFF_PIXEL);
+    for (int x = 0; x < machine.display_width; x++) {
+        for (int y = 0; y < machine.display_height; y++) {
+            EXPECT_EQ(machine.get_pixel(x, y), OFF_PIXEL);
         }
     }
 }

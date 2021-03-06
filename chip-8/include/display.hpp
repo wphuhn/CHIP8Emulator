@@ -13,11 +13,11 @@ class Display {
 public:
     Display();
 
-    const int width = MAX_WIDTH;
-    const int height = MAX_HEIGHT;
+    static const int width = MAX_WIDTH;
+    static const int height = MAX_HEIGHT;
 
-    PIXEL_TYPE get_pixel(int, int);
-    void set_pixel(int, int, PIXEL_TYPE);
+    const PIXEL_TYPE& get_pixel(const int, const int) const;
+    void set_pixel(const int, const int, const PIXEL_TYPE);
     void clear();
 private:
     std::vector< std::vector<PIXEL_TYPE> > screen;

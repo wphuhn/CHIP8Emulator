@@ -13,7 +13,14 @@
 class Chip8Machine {
 public:
     Chip8Machine();
+
+    const int display_width;
+    const int display_height;
+    const PIXEL_TYPE& get_pixel(const int, const int) const;
+    void set_pixel(const int, const int, const PIXEL_TYPE);
+
     void decode(OPCODE_TYPE);
+private:
     Display display;
 };
 
