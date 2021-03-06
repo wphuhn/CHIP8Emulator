@@ -37,3 +37,20 @@ TEST (Chip8Machine, Opcode00E0ClearsScreen) {
         }
     }
 }
+
+class ANNNParameterizedTestFixture : public ::testing::TestWithParam<OPCODE_TYPE> {};
+TEST_P (ANNNParameterizedTestFixture, OpcodeANNNSetsIRegisterToNNN) {
+    OPCODE_TYPE opcode = GetParam();
+    Chip8Machine machine;
+    int value = opcode & 0x0FFF;
+    machine.set_i(0x0000);
+    machine.decode(opcode);
+    EXPECT_EQ(machine.get_i(), value);
+}
+INSTANTIATE_TEST_CASE_P(
+        ANNNTests,
+        ANNNParameterizedTestFixture,
+        ::testing::Values(
+                0xA000, 0xABFA, 0xA212, 0xAFFF
+                )
+        );

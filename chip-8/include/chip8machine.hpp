@@ -7,6 +7,7 @@
 #include <string>
 
 #include "display.hpp"
+#include "register.hpp"
 
 #define OPCODE_TYPE uint16_t
 
@@ -19,9 +20,13 @@ public:
     const PIXEL_TYPE& get_pixel(const int, const int) const;
     void set_pixel(const int, const int, const PIXEL_TYPE);
 
+    const int get_i(void);
+    void set_i(const int);
+
     void decode(OPCODE_TYPE);
 private:
     Display display;
+    Register i_register;
 };
 
 class OpcodeNotSupported : public std::runtime_error
