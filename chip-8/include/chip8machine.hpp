@@ -10,6 +10,7 @@
 #include "register.hpp"
 
 #define OPCODE_TYPE uint16_t
+#define NUM_V_REGS 16
 
 class Chip8Machine {
 public:
@@ -21,12 +22,16 @@ public:
     void set_pixel(const int, const int, const PIXEL_TYPE);
 
     const int get_i(void);
+    const int get_v(const int);
+
     void set_i(const int);
+    void set_v(const int, const int);
 
     void decode(OPCODE_TYPE);
 private:
     Display display;
     Register i_register;
+    std::array<Register, NUM_V_REGS> v_register;
 };
 
 class OpcodeNotSupported : public std::runtime_error
