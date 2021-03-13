@@ -10,7 +10,7 @@ class Memory {
 public:
     Memory();
     void load_rom(const std::vector<unsigned char> &);
-    unsigned char get_byte(int);
+    unsigned char get_byte(int) const;
 private:
     std::vector<unsigned char> ram;
 };

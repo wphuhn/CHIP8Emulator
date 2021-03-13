@@ -1,6 +1,6 @@
 #include "register.hpp"
 
-Register::Register() {}
+Register::Register() : value_(0) {}
 
-const int Register::get(void) {return value_;}
+int Register::get() const {return value_;}
 void Register::set(const int new_value) {value_ = new_value;}

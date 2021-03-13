@@ -5,10 +5,10 @@ class Register {
 public:
     Register();
 
-    const int get(void);
-    void set(const int);
+    int get() const;
+    void set(int);
 private:
-    int value_;
+    int value_{};
 };
 
 #endif //CHIP_8_REGISTER_HPP_

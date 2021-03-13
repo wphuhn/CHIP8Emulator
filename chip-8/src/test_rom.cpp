@@ -24,7 +24,7 @@ size_t get_rom_from_file(const char *filename, void **data) {
     return size;
 }
 
-void output_stats(std::map<std::string, int> counter, int n_total) {
+void output_stats(const std::map<std::string, int> & counter, unsigned int n_total) {
     int n_ops = 0;
     for (const auto & pair : counter) {
         n_ops += pair.second;
@@ -41,7 +41,7 @@ OPCODE_TYPE extract_big_endian_opcode(const uint8_t* rom, int pc) {
 
     for (int i = 0; i < N_BYTES_IN_OP; i++) {
         // opcode = (rom[pc] << 8) | (rom[pc+1] << 0);
-        int shift = 8 * (N_BYTES_IN_OP - i - 1);
+        unsigned int shift = 8 * (N_BYTES_IN_OP - i - 1);
         opcode = opcode | (rom[pc + i] << shift);
     }
 
@@ -56,7 +56,7 @@ std::string convert_opcode_to_str(OPCODE_TYPE opcode) {
 
 void test_rom(const void *data, size_t size) {
     Chip8Machine machine;
-    const uint8_t* rom = (const uint8_t*) data;
+    auto rom = (const uint8_t*) data;
     OPCODE_TYPE opcode;
 
     std::cout << "Parsing ROM to check for unimplemented instructions" << std::endl;
@@ -67,7 +67,7 @@ void test_rom(const void *data, size_t size) {
     std::map<std::string, int> unimplemented;
 
     int pc = 0;
-    std::string first_unimplemented = "";
+    std::string first_unimplemented;
     bool has_encountered_unimplemented = false;
 
     while (pc < size) {
@@ -81,7 +81,7 @@ void test_rom(const void *data, size_t size) {
             }
             implemented[opcode_str] += 1;
         }
-        catch (OpcodeNotSupported) {
+        catch (OpcodeNotSupported&) {
             if (unimplemented.count(opcode_str) == 0) {
                 unimplemented[opcode_str] = 0;
             }
@@ -98,7 +98,7 @@ void test_rom(const void *data, size_t size) {
         pc += N_BYTES_IN_OP;
     }
 
-    int n_total = size / N_BYTES_IN_OP;
+    unsigned int n_total = size / N_BYTES_IN_OP;
 
     std::cout <<  std::endl;
     std::cout << "==============================" << std::endl;

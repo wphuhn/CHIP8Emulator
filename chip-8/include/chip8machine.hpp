@@ -18,14 +18,17 @@ public:
 
     const int display_width;
     const int display_height;
-    const PIXEL_TYPE& get_pixel(const int, const int) const;
-    void set_pixel(const int, const int, const PIXEL_TYPE);
+    const PIXEL_TYPE& get_pixel(int, int) const;
+    void set_pixel(int, int, PIXEL_TYPE);
+    void clear_screen();
 
-    const int get_i(void);
-    const int get_v(const int);
+    int get_i() const;
+    int get_v(int) const;
+    int get_flag() const;
 
-    void set_i(const int);
-    void set_v(const int, const int);
+    void set_i(int);
+    void set_v(int, int);
+    void set_flag(int);
 
     void decode(OPCODE_TYPE);
 private:
@@ -37,7 +40,7 @@ private:
 class OpcodeNotSupported : public std::runtime_error
 {
 public:
-    OpcodeNotSupported(const OPCODE_TYPE);
+    explicit OpcodeNotSupported(OPCODE_TYPE);
 };
 
 #endif //CHIP_8_CHIP8MACHINE_HPP_

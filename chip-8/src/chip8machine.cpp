@@ -1,7 +1,7 @@
 #include "chip8machine.hpp"
 
 Chip8Machine::Chip8Machine()
-    : display_height(display.height), display_width(display.width) {};
+    : display_height(Display::height), display_width(Display::width) {}
 
 void Chip8Machine::decode(const OPCODE_TYPE opcode) {
     // Are ya coding, son?
@@ -42,11 +42,16 @@ void Chip8Machine::set_pixel(const int x, const int y, const PIXEL_TYPE value) {
     display.set_pixel(x, y, value);
 }
 
-const int Chip8Machine::get_i(void) {return i_register.get();}
-const int Chip8Machine::get_v(const int reg_num) {
-    if (reg_num < v_register.size()) return v_register[reg_num].get();
-    throw std::runtime_error("Invalid register V" + std::to_string(reg_num) + " specificed.");
+void Chip8Machine::clear_screen() {
+    display.clear();
 }
+
+int Chip8Machine::get_i() const {return i_register.get();}
+int Chip8Machine::get_v(const int reg_num) const {
+    if (reg_num < v_register.size()) return v_register[reg_num].get();
+    throw std::runtime_error("Invalid register V" + std::to_string(reg_num) + " specified.");
+}
+int Chip8Machine::get_flag() const {return get_v(0xF);}
 
 void Chip8Machine::set_i(const int new_value) {i_register.set(new_value);}
 void Chip8Machine::set_v(const int reg_num, const int new_value) {
@@ -54,8 +59,9 @@ void Chip8Machine::set_v(const int reg_num, const int new_value) {
         v_register[reg_num].set(new_value);
         return;
     }
-    throw std::runtime_error("Invalid register V" + std::to_string(reg_num) + " specificed.");
+    throw std::runtime_error("Invalid register V" + std::to_string(reg_num) + " specified.");
 }
+void Chip8Machine::set_flag(const int new_value) {set_v(0xF, new_value);}
 
 static std::string opcode_to_hex_str(const OPCODE_TYPE value) {
     std::stringstream stream;

@@ -15,6 +15,6 @@ void Memory::load_rom(const std::vector<unsigned char> & rom) {
     }
 }
 
-unsigned char Memory::get_byte(int offset) {
+unsigned char Memory::get_byte(int offset) const {
     return ram[offset];
 }

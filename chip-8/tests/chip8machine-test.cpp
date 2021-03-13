@@ -24,6 +24,22 @@ TEST (Chip8Machine, PassingUnsupportedOpcodeStopsInterpreter) {
     }
 }
 
+TEST (Chip8Machine, ClearScreenClearsTheScreen) {
+    Chip8Machine machine;
+    OPCODE_TYPE opcode = 0x00E0;
+    for (int x = 0; x < machine.display_width; x++) {
+        for (int y = 0; y < machine.display_height; y++) {
+            machine.set_pixel(x, y, ON_PIXEL);
+        }
+    }
+    machine.clear_screen();
+    for (int x = 0; x < machine.display_width; x++) {
+        for (int y = 0; y < machine.display_height; y++) {
+            EXPECT_EQ(machine.get_pixel(x, y), OFF_PIXEL);
+        }
+    }
+}
+
 TEST (Chip8Machine, Opcode00E0ClearsScreen) {
     Chip8Machine machine;
     OPCODE_TYPE opcode = 0x00E0;
@@ -99,3 +115,16 @@ INSTANTIATE_TEST_CASE_P(
             std::make_tuple(0xA2, 0x65, 0x07)
         )
 );
+
+/*
+TEST (Chip8Machine, OpcodeDXYNDrawsToScreen) {
+    Chip8Machine machine;
+    OPCODE_TYPE opcode = 0x6001;
+    machine.clear_screen();
+    // Load solid ones into memory
+    machine.set_flag(0);
+    machine.decode(opcode);
+    // Check for screen being drawn to
+    EXPECT_EQ(machine.get_flag(), 0);
+}
+*/
