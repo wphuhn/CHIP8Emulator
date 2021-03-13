@@ -2,6 +2,8 @@
 
 #include "chip8machine.hpp"
 
+#include "utilities.hpp"
+
 TEST (Chip8Machine, HasDefaultConstructor) {
     Chip8Machine machine;
 }
@@ -56,35 +58,44 @@ INSTANTIATE_TEST_CASE_P(
         );
 
 class Opcode6XNNParameterizedTestFixture : public ::testing::TestWithParam<OPCODE_TYPE> {};
-TEST_P (Opcode6XNNParameterizedTestFixture, Opcode6XNNSetsIRegisterVXToNN) {
-    OPCODE_TYPE opcode = GetParam();
+TEST_P (Opcode6XNNParameterizedTestFixture, Opcode6XNNSetsRegisterVXToNN) {
     Chip8Machine machine;
-    int value = opcode & 0x00FF;
-    int reg_num = (opcode & 0x0F00) >> 8;
-    machine.set_v(reg_num, 0x0000);
-    machine.decode(opcode);
-    EXPECT_EQ(machine.get_v(reg_num), value);
+    OPCODE_TYPE value = GetParam();
+    for (int reg_num = 0; reg_num <= 0xF; reg_num++) {
+        OPCODE_TYPE opcode = gen_XYNN_opcode(0x6, reg_num, value);
+        machine.set_v(reg_num, 0x0000);
+        machine.decode(opcode);
+        EXPECT_EQ(machine.get_v(reg_num), value);
+    }
 }
 INSTANTIATE_TEST_CASE_P(
         Opcode6XNNTests,
         Opcode6XNNParameterizedTestFixture,
+        ::testing::Values(0x00, 0x66, 0xF7, 0xFF)
+);
+
+class Opcode7XNNParameterizedTestFixture
+        : public ::testing::TestWithParam<std::tuple<OPCODE_TYPE, OPCODE_TYPE, OPCODE_TYPE>> {};
+TEST_P (Opcode7XNNParameterizedTestFixture, Opcode7XNNAddsNNToRegisterVX) {
+    OPCODE_TYPE initial = std::get<0>(GetParam());
+    OPCODE_TYPE increment = std::get<1>(GetParam());
+    OPCODE_TYPE final = std::get<2>(GetParam());
+    Chip8Machine machine;
+    for (int reg_num = 0; reg_num <= 0xF; reg_num++) {
+        OPCODE_TYPE opcode = gen_XYNN_opcode(0x7, reg_num, increment);
+        machine.set_v(reg_num, initial);
+        machine.decode(opcode);
+        EXPECT_EQ(machine.get_v(reg_num), final);
+    }
+}
+INSTANTIATE_TEST_CASE_P(
+        Opcode7XNNTests,
+        Opcode7XNNParameterizedTestFixture,
         ::testing::Values(
-                0x6000, 0x6066, 0x60F7, 0x60FF,
-                0x6100, 0x6166, 0x61F7, 0x61FF,
-                0x6200, 0x6266, 0x62F7, 0x62FF,
-                0x6300, 0x6366, 0x63F7, 0x63FF,
-                0x6400, 0x6466, 0x64F7, 0x64FF,
-                0x6500, 0x6566, 0x65F7, 0x65FF,
-                // I used an RNG to generate the data, I swear
-                0x6600, 0x6666, 0x66F7, 0x66FF,
-                0x6700, 0x6766, 0x67F7, 0x67FF,
-                0x6800, 0x6866, 0x68F7, 0x68FF,
-                0x6900, 0x6966, 0x69F7, 0x69FF,
-                0x6A00, 0x6A66, 0x6AF7, 0x6AFF,
-                0x6B00, 0x6B66, 0x6BF7, 0x6BFF,
-                0x6C00, 0x6C66, 0x6CF7, 0x6CFF,
-                0x6D00, 0x6D66, 0x6DF7, 0x6DFF,
-                0x6E00, 0x6E66, 0x6EF7, 0x6EFF,
-                0x6F00, 0x6F66, 0x6FF7, 0x6FFF
+            std::make_tuple(0x00, 0x00, 0x00),
+            std::make_tuple(0x9D, 0x00, 0x9D),
+            std::make_tuple(0x00, 0xEF, 0xEF),
+            std::make_tuple(0x6F, 0x38, 0xA7),
+            std::make_tuple(0xA2, 0x65, 0x07)
         )
 );
