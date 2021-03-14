@@ -134,70 +134,78 @@ INSTANTIATE_TEST_CASE_P(
 
 class DXYNRowsParameterizedTestFixture : public ::testing::TestWithParam<int> {};
 TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsCorrectNumberOfRowsToBlankScreen) {
+    int x_reg = 1;
+    int y_reg = 3;
     int n_rows = GetParam();
-    OPCODE_TYPE opcode = 0xD000 + n_rows;
-    int font_address = 0x050;
+    OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+
     unsigned char font_value = 0xFF;
-    Chip8Machine machine;
-    machine.clear_screen();
-    machine.set_flag(0);
-    machine.set_v(0, 0);
-    machine.set_i(font_address);
-    for (int row = 0; row < n_rows; row++) {
-        machine.set_memory_byte(font_address + row, font_value);
-    }
+    std::vector<unsigned char> font(n_rows, font_value);
+
+    int font_address = 0x050;
+    int x_offset = 2;
+    int y_offset = 4;
+    Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
+
     machine.decode(opcode);
-    for (int y = 0; y < n_rows; y++) {
-        for (int x = 0; x < 8; x++) {
+
+    for (int y = y_offset; y < y_offset + n_rows; y++) {
+        for (int x = x_offset; x < x_offset + 8; x++) {
             EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
         }
     }
     EXPECT_EQ(machine.get_flag(), 0);
 }
 TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNFlipsPixelsOnCompletelyFilledScreen) {
+    int x_reg = 1;
+    int y_reg = 3;
     int n_rows = GetParam();
-    OPCODE_TYPE opcode = 0xD000 + n_rows;
-    int font_address = 0x050;
+    OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+
     unsigned char font_value = 0xFF;
-    Chip8Machine machine;
+    std::vector<unsigned char> font(n_rows, font_value);
+
+    int font_address = 0x050;
+    int x_offset = 2;
+    int y_offset = 4;
+    Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
+
     for (int y = 0; y < machine.display_height; y++) {
         for (int x = 0; x < machine.display_width; x++) {
             machine.set_pixel(x, y, ON_PIXEL);
         }
     }
-    machine.set_flag(0);
-    machine.set_v(0, 0);
-    machine.set_i(font_address);
-    for (int row = 0; row < n_rows; row++) {
-        machine.set_memory_byte(font_address + row, font_value);
-    }
+
     machine.decode(opcode);
-    for (int y = 0; y < n_rows; y++) {
-        for (int x = 0; x < 8; x++) {
+
+    for (int y = y_offset; y < y_offset + n_rows; y++) {
+        for (int x = x_offset; x < x_offset + 8; x++) {
             EXPECT_EQ(machine.get_pixel(x, y), OFF_PIXEL);
         }
     }
     EXPECT_EQ(machine.get_flag(), 1);
 }
 TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsModuloOffsetFromRegisters) {
-    int n_rows = GetParam();
     int x_reg = 1;
     int y_reg = 2;
+    int n_rows = GetParam();
+    OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+
+    unsigned char font_value = 0xFF;
+    std::vector<unsigned char> font(n_rows, font_value);
+
     int font_address = 0x050;
     int modulo_x_offset = 1;
     int modulo_y_offset = 4;
-    unsigned char font_value = 0xFF;
-    OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
-    Chip8Machine machine;
-    machine.clear_screen();
-    machine.set_flag(0);
+    // We need to know the machine's width/height to be able to set the offset
+    // past it, so we can't set it in the factory method
+    int dummy_offset = 0;
+    Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, dummy_offset, dummy_offset);
     machine.set_v(x_reg, machine.display_width + modulo_x_offset);
     machine.set_v(y_reg, machine.display_height + modulo_y_offset);
-    machine.set_i(font_address);
-    for (int row = 0; row < n_rows; row++) {
-        machine.set_memory_byte(font_address + row, font_value);
-    }
+
     machine.decode(opcode);
+
     for (int y = modulo_y_offset; y < modulo_y_offset + n_rows; y++) {
         for (int x = modulo_x_offset; x < modulo_x_offset + 8; x++) {
             EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
@@ -219,29 +227,28 @@ TEST_P (DXYNRegistersParameterizedTestFixture, OpcodeDXYNDrawsToCorrectPositionB
     int x_offset = std::get<0>(GetParam());
     int y_offset = std::get<1>(GetParam());
     int n_rows = std::get<2>(GetParam());
+
     // We omit register VF, as it is used as a flag register here
     for (int x_reg = 0; x_reg < 0xF; x_reg++) {
         for (int y_reg = 0; y_reg < 0xF; y_reg++) {
             OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
-            int font_address = 0x050;
+
             unsigned char font_value = 0xFF;
-            Chip8Machine machine;
-            machine.clear_screen();
-            machine.set_flag(0);
-            machine.set_v(x_reg, x_offset);
-            machine.set_v(y_reg, y_offset);
+            std::vector<unsigned char> font(n_rows, font_value);
+
+            int font_address = 0x050;
+            int x_offset_ = x_offset;
             if (x_reg == y_reg) {
                 // Corner case within test; if the x and y registers are the same,
                 // x_offset and y_offset are the same, so pick y_offset
-                x_offset = y_offset;
+                x_offset_ = y_offset;
             }
-            machine.set_i(font_address);
-            for (int row = 0; row < n_rows; row++) {
-                machine.set_memory_byte(font_address + row, font_value);
-            }
+            Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset_, y_offset);
+
             machine.decode(opcode);
+
             for (int y = y_offset; y < y_offset + n_rows; y++) {
-                for (int x = x_offset; x < x_offset + 8; x++) {
+                for (int x = x_offset_; x < x_offset_ + 8; x++) {
                     EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
                 }
             }
@@ -254,7 +261,7 @@ INSTANTIATE_TEST_CASE_P(
         DXYNRegistersParameterizedTestFixture,
         ::testing::Values(
                 std::make_tuple(0x00, 0x00, 0x1),
-                std::make_tuple(0xB4, 0x0D, 0x9),
+                std::make_tuple(0x1B, 0x0D, 0x9),
                 std::make_tuple(0x37, 0x10, 0xF)
         )
 );
@@ -262,24 +269,21 @@ INSTANTIATE_TEST_CASE_P(
 class DXYNHorizTruncationParameterizedTestFixture
         : public ::testing::TestWithParam<std::tuple<int, int, int> > {};
 TEST_P (DXYNHorizTruncationParameterizedTestFixture, OpcodeDXYNTruncatesDrawingWhenReachesHorizontalEdgeOfScreen) {
-    int x_offset = std::get<0>(GetParam());
-    int y_offset = std::get<1>(GetParam());
-    int n_rows = std::get<2>(GetParam());
     int x_reg = 1;
     int y_reg = 2;
+    int n_rows = std::get<2>(GetParam());
     OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
-    int font_address = 0x050;
+
     unsigned char font_value = 0xFF;
-    Chip8Machine machine;
-    machine.clear_screen();
-    machine.set_flag(0);
-    machine.set_v(x_reg, x_offset);
-    machine.set_v(y_reg, y_offset);
-    machine.set_i(font_address);
-    for (int row = 0; row < n_rows; row++) {
-        machine.set_memory_byte(font_address + row, font_value);
-    }
+    std::vector<unsigned char> font(n_rows, font_value);
+
+    int x_offset = std::get<0>(GetParam());
+    int y_offset = std::get<1>(GetParam());
+    int font_address = 0x050;
+    Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
+
     machine.decode(opcode);
+
     // Return offsets back into the screen
     x_offset = x_offset % machine.display_width;
     y_offset = y_offset % machine.display_height;
@@ -310,24 +314,21 @@ INSTANTIATE_TEST_CASE_P(
 class DXYNVertTruncationParameterizedTestFixture
         : public ::testing::TestWithParam<std::tuple<int, int, int> > {};
 TEST_P (DXYNVertTruncationParameterizedTestFixture, OpcodeDXYNWrapsDrawingAroundWhenReachesVerticalEdgeOfScreen) {
-    int x_offset = std::get<0>(GetParam());
-    int y_offset = std::get<1>(GetParam());
-    int n_rows = std::get<2>(GetParam());
     int x_reg = 0xB;
     int y_reg = 0xD;
+    int n_rows = std::get<2>(GetParam());
     OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
-    int font_address = 0x050;
+
     unsigned char font_value = 0xFF;
-    Chip8Machine machine;
-    machine.clear_screen();
-    machine.set_flag(0);
-    machine.set_v(x_reg, x_offset);
-    machine.set_v(y_reg, y_offset);
-    machine.set_i(font_address);
-    for (int row = 0; row < n_rows; row++) {
-        machine.set_memory_byte(font_address + row, font_value);
-    }
+    std::vector<unsigned char> font(n_rows, font_value);
+
+    int font_address = 0x050;
+    int x_offset = std::get<0>(GetParam());
+    int y_offset = std::get<1>(GetParam());
+    Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
+
     machine.decode(opcode);
+
     for (int x = x_offset; x < x_offset + 8; x++) {
         for (int y = y_offset; y < machine.display_height; y++) {
             EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
@@ -350,22 +351,25 @@ INSTANTIATE_TEST_CASE_P(
 class DXYNValuesParameterizedTestFixture
         : public ::testing::TestWithParam<std::tuple<unsigned char, unsigned char> > {};
 TEST_P (DXYNValuesParameterizedTestFixture, OpcodeDXYNDrawsFontPointedToByIRegister) {
+    int x_reg = 1;
+    int y_reg = 2;
     int n_rows = 2;
-    OPCODE_TYPE opcode = 0xD000 + n_rows;
-    int font_address = 0x050;
+    OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+
     unsigned char font_value_1 = std::get<0>(GetParam());
     unsigned char font_value_2 = std::get<1>(GetParam());
-    Chip8Machine machine;
-    machine.clear_screen();
-    machine.set_flag(0);
-    machine.set_v(0, 0);
-    machine.set_i(font_address);
-    machine.set_memory_byte(font_address, font_value_1);
-    machine.set_memory_byte(font_address + 1, font_value_2);
+    std::vector<unsigned char> font = {font_value_1, font_value_2};
+
+    int font_address = 0x050;
+    int x_offset = 2;
+    int y_offset = 4;
+    Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
+
     machine.decode(opcode);
+
     for (int x = 0; x < 8; x++) {
-        EXPECT_EQ(machine.get_pixel(x, 0), (font_value_1 >> (7-x)) & 0x01);
-        EXPECT_EQ(machine.get_pixel(x, 1), (font_value_2 >> (7-x)) & 0x01);
+        EXPECT_EQ(machine.get_pixel(x_offset + x, y_offset), (font_value_1 >> (7-x)) & 0x01);
+        EXPECT_EQ(machine.get_pixel(x_offset + x, y_offset + 1), (font_value_2 >> (7-x)) & 0x01);
     }
     EXPECT_EQ(machine.get_flag(), 0);
 }
