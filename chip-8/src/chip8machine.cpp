@@ -5,6 +5,15 @@ Chip8Machine::Chip8Machine()
 
 void Chip8Machine::decode(const OPCODE_TYPE opcode) {
     // Are ya coding, son?
+    if (opcode == 0x00E0) {
+        display.clear();
+        return;
+    }
+    if ((opcode & 0xF000) == 0x1000) {
+        int value = opcode & 0x0FFF;
+        pc.set(value);
+        return;
+    }
     if ((opcode & 0xF000) == 0x6000) {
         int reg_num = (opcode & 0x0F00) >> 8;
         // In principle, the else condition should never trigger, since there
@@ -27,10 +36,6 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
         i_register.set(opcode & 0x0FFF);
         return;
     }
-    if (opcode == 0x00E0) {
-        display.clear();
-        return;
-    }
     throw OpcodeNotSupported(opcode);
 }
 
@@ -42,8 +47,16 @@ void Chip8Machine::set_pixel(const int x, const int y, const PIXEL_TYPE value) {
     display.set_pixel(x, y, value);
 }
 
+int Chip8Machine::get_pc() const {
+    return pc.get();
+}
+
 void Chip8Machine::clear_screen() {
     display.clear();
+}
+
+void Chip8Machine::set_memory_byte(int address, unsigned char value) {
+    ram.set_byte(address, value);
 }
 
 int Chip8Machine::get_i() const {return i_register.get();}

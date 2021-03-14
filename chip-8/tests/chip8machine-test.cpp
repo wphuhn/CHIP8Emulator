@@ -116,15 +116,37 @@ INSTANTIATE_TEST_CASE_P(
         )
 );
 
-/*
-TEST (Chip8Machine, OpcodeDXYNDrawsToScreen) {
+class OneNNNParameterizedTestFixture : public ::testing::TestWithParam<OPCODE_TYPE> {};
+TEST_P (OneNNNParameterizedTestFixture, Opcode1NNNSetsPCToNNN) {
+    OPCODE_TYPE opcode = GetParam();
     Chip8Machine machine;
-    OPCODE_TYPE opcode = 0x6001;
-    machine.clear_screen();
-    // Load solid ones into memory
-    machine.set_flag(0);
+    int value = opcode & 0x0FFF;
     machine.decode(opcode);
-    // Check for screen being drawn to
+    EXPECT_EQ(machine.get_pc(), value);
+}
+INSTANTIATE_TEST_CASE_P(
+        OneNNNTests,
+        OneNNNParameterizedTestFixture,
+        ::testing::Values(
+                0x1000, 0x1F5D, 0x129A, 0x1FFF
+        )
+);
+
+/*
+TEST (OpcodeDXYN, OpcodeDXYNDrawsToScreen) {
+    OPCODE_TYPE opcode = 0xD001;
+    int font_address = 0x050;
+    unsigned char font_value = 0xFF;
+    Chip8Machine machine;
+    machine.clear_screen();
+    machine.set_flag(0);
+    machine.set_i(font_address);
+    machine.set_memory_byte(font_address, font_value);
+    machine.decode(opcode);
+    for (int x = 0; x < 8; x++) {
+        int y = 0;
+        EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
+    }
     EXPECT_EQ(machine.get_flag(), 0);
 }
 */

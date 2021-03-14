@@ -15,6 +15,10 @@ void Memory::load_rom(const std::vector<unsigned char> & rom) {
     }
 }
 
-unsigned char Memory::get_byte(int offset) const {
+unsigned char Memory::get_byte(const int offset) const {
     return ram[offset];
+}
+
+void Memory::set_byte(const int address, const unsigned char value) {
+    ram[address] = value;
 }

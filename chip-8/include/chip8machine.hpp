@@ -7,6 +7,8 @@
 #include <string>
 
 #include "display.hpp"
+#include "memory.hpp"
+#include "programcounter.hpp"
 #include "register.hpp"
 
 #define OPCODE_TYPE uint16_t
@@ -22,9 +24,12 @@ public:
     void set_pixel(int, int, PIXEL_TYPE);
     void clear_screen();
 
+    void set_memory_byte(int, unsigned char);
+
     int get_i() const;
     int get_v(int) const;
     int get_flag() const;
+    int get_pc() const;
 
     void set_i(int);
     void set_v(int, int);
@@ -33,6 +38,8 @@ public:
     void decode(OPCODE_TYPE);
 private:
     Display display;
+    Memory ram;
+    ProgramCounter pc;
     Register i_register;
     std::array<Register, NUM_V_REGS> v_register;
 };
