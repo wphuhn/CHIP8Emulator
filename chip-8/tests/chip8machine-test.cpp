@@ -133,7 +133,7 @@ INSTANTIATE_TEST_CASE_P(
 );
 
 class DXYNRowsParameterizedTestFixture : public ::testing::TestWithParam<int> {};
-TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsCorrectNumberOfRows) {
+TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsCorrectNumberOfRowsToBlankScreen) {
     int n_rows = GetParam();
     OPCODE_TYPE opcode = 0xD000 + n_rows;
     int font_address = 0x050;
@@ -149,6 +149,57 @@ TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsCorrectNumberOfRows) {
     machine.decode(opcode);
     for (int y = 0; y < n_rows; y++) {
         for (int x = 0; x < 8; x++) {
+            EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
+        }
+    }
+    EXPECT_EQ(machine.get_flag(), 0);
+}
+TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNFlipsPixelsOnCompletelyFilledScreen) {
+    int n_rows = GetParam();
+    OPCODE_TYPE opcode = 0xD000 + n_rows;
+    int font_address = 0x050;
+    unsigned char font_value = 0xFF;
+    Chip8Machine machine;
+    for (int y = 0; y < machine.display_height; y++) {
+        for (int x = 0; x < machine.display_width; x++) {
+            machine.set_pixel(x, y, ON_PIXEL);
+        }
+    }
+    machine.set_flag(0);
+    machine.set_v(0, 0);
+    machine.set_i(font_address);
+    for (int row = 0; row < n_rows; row++) {
+        machine.set_memory_byte(font_address + row, font_value);
+    }
+    machine.decode(opcode);
+    for (int y = 0; y < n_rows; y++) {
+        for (int x = 0; x < 8; x++) {
+            EXPECT_EQ(machine.get_pixel(x, y), OFF_PIXEL);
+        }
+    }
+    EXPECT_EQ(machine.get_flag(), 1);
+}
+TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsModuloOffsetFromRegisters) {
+    int n_rows = GetParam();
+    int x_reg = 1;
+    int y_reg = 2;
+    int font_address = 0x050;
+    int modulo_x_offset = 1;
+    int modulo_y_offset = 4;
+    unsigned char font_value = 0xFF;
+    OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+    Chip8Machine machine;
+    machine.clear_screen();
+    machine.set_flag(0);
+    machine.set_v(x_reg, machine.display_width + modulo_x_offset);
+    machine.set_v(y_reg, machine.display_height + modulo_y_offset);
+    machine.set_i(font_address);
+    for (int row = 0; row < n_rows; row++) {
+        machine.set_memory_byte(font_address + row, font_value);
+    }
+    machine.decode(opcode);
+    for (int y = modulo_y_offset; y < modulo_y_offset + n_rows; y++) {
+        for (int x = modulo_x_offset; x < modulo_x_offset + 8; x++) {
             EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
         }
     }
@@ -229,6 +280,9 @@ TEST_P (DXYNHorizTruncationParameterizedTestFixture, OpcodeDXYNTruncatesDrawingW
         machine.set_memory_byte(font_address + row, font_value);
     }
     machine.decode(opcode);
+    // Return offsets back into the screen
+    x_offset = x_offset % machine.display_width;
+    y_offset = y_offset % machine.display_height;
     for (int y = y_offset; y < y_offset + n_rows; y++) {
         for (int x = x_offset; x < machine.display_width; x++) {
             EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
@@ -245,7 +299,11 @@ INSTANTIATE_TEST_CASE_P(
         ::testing::Values(
                 std::make_tuple(0x3F, 0x00, 0x1),
                 std::make_tuple(0x3D, 0x08, 0x5),
-                std::make_tuple(0x39, 0x01, 0xA)
+                std::make_tuple(0x39, 0x01, 0xA),
+                // Testing for initial offsets modulo the screen size
+                std::make_tuple(0x39 + 0x40, 0x01, 0xA),
+                std::make_tuple(0x39, 0x01 + 0x20, 0xA),
+                std::make_tuple(0x39 + 0x40, 0x01 + 0x20, 0xA)
         )
 );
 

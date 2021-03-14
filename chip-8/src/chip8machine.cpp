@@ -40,15 +40,19 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
         int x_reg = (opcode & 0x0F00) >> 8;
         int y_reg = (opcode & 0x00F0) >> 4;
         int n_rows = opcode & 0x000F;
-        int x_offset = v_register[x_reg].get();
-        int y_offset = v_register[y_reg].get();
+        int x_offset = v_register[x_reg].get() % display_width;
+        int y_offset = v_register[y_reg].get() % display_height;
         int addr = i_register.get();
         for (int y = y_offset; y < y_offset + n_rows; y++) {
             if (y >= display_height) break;
             unsigned char byte_to_draw = ram.get_byte(addr);
             for (int x = 0; x < 8; x++) {
                 if (x + x_offset >= display_width) break;
-                display.set_pixel(x + x_offset, y, (byte_to_draw >> (7-x)) & 0x1);
+                PIXEL_TYPE current = display.get_pixel(x + x_offset, y);
+                PIXEL_TYPE bit_to_draw = (byte_to_draw >> (7-x)) & 0x1;
+                PIXEL_TYPE new_value = current ^ bit_to_draw;
+                display.set_pixel(x + x_offset, y, new_value);
+                if (current != 0x0 && new_value == 0x0) set_flag(0x1);
             }
             addr += 1;
         }
