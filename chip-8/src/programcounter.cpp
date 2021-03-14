@@ -1,6 +1,6 @@
 #include "programcounter.hpp"
 
-ProgramCounter::ProgramCounter() : value_(0) {};
+ProgramCounter::ProgramCounter() : value_(0) {}
 
 int ProgramCounter::get() const {
     return value_;

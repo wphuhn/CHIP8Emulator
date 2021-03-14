@@ -24,3 +24,27 @@ INSTANTIATE_TEST_CASE_P(
                 std::make_tuple(0xD, 0x0, 0x741, 0xD041)
         )
 );
+
+class GenWXYZParameterizedTestFixture
+        : public ::testing::TestWithParam<std::tuple<int, int, int, int, OPCODE_TYPE> >{};
+TEST_P (GenWXYZParameterizedTestFixture, GenAXNNGeneratesExpectedCode) {
+    int W = std::get<0>(GetParam());
+    int X = std::get<1>(GetParam());
+    int Y = std::get<2>(GetParam());
+    int Z = std::get<3>(GetParam());
+    OPCODE_TYPE expected = std::get<4>(GetParam());
+    OPCODE_TYPE actual = gen_WXYZ_opcode(W, X, Y, Z);
+    EXPECT_EQ(expected, actual);
+}
+INSTANTIATE_TEST_CASE_P(
+        GenWXYZTests,
+        GenWXYZParameterizedTestFixture,
+        ::testing::Values(
+                std::make_tuple(0x0, 0x0, 0x00, 0x0, 0x0000),
+                std::make_tuple(0xC, 0x5, 0x1, 0xF, 0xC51F),
+                std::make_tuple(0x4E, 0x4, 0xC, 0x6, 0xE4C6),
+                std::make_tuple(0x1, 0xCC, 0xD, 0xC, 0x1CDC),
+                std::make_tuple(0x5, 0x8, 0x7B, 0x3, 0x58B3),
+                std::make_tuple(0x3, 0x6, 0xD, 0xDB, 0x36DB)
+        )
+);

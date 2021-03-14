@@ -36,6 +36,24 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
         i_register.set(opcode & 0x0FFF);
         return;
     }
+    if ((opcode & 0xF000) == 0xD000) {
+        int x_reg = (opcode & 0x0F00) >> 8;
+        int y_reg = (opcode & 0x00F0) >> 4;
+        int n_rows = opcode & 0x000F;
+        int x_offset = v_register[x_reg].get();
+        int y_offset = v_register[y_reg].get();
+        int addr = i_register.get();
+        for (int y = y_offset; y < y_offset + n_rows; y++) {
+            if (y >= display_height) break;
+            unsigned char byte_to_draw = ram.get_byte(addr);
+            for (int x = 0; x < 8; x++) {
+                if (x + x_offset >= display_width) break;
+                display.set_pixel(x + x_offset, y, (byte_to_draw >> (7-x)) & 0x1);
+            }
+            addr += 1;
+        }
+       return;
+    }
     throw OpcodeNotSupported(opcode);
 }
 
@@ -64,7 +82,7 @@ int Chip8Machine::get_v(const int reg_num) const {
     if (reg_num < v_register.size()) return v_register[reg_num].get();
     throw std::runtime_error("Invalid register V" + std::to_string(reg_num) + " specified.");
 }
-int Chip8Machine::get_flag() const {return get_v(0xF);}
+int Chip8Machine::get_flag() const {return v_register[0xF].get();}
 
 void Chip8Machine::set_i(const int new_value) {i_register.set(new_value);}
 void Chip8Machine::set_v(const int reg_num, const int new_value) {

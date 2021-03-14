@@ -132,21 +132,189 @@ INSTANTIATE_TEST_CASE_P(
         )
 );
 
-/*
-TEST (OpcodeDXYN, OpcodeDXYNDrawsToScreen) {
-    OPCODE_TYPE opcode = 0xD001;
+class DXYNRowsParameterizedTestFixture : public ::testing::TestWithParam<int> {};
+TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsCorrectNumberOfRows) {
+    int n_rows = GetParam();
+    OPCODE_TYPE opcode = 0xD000 + n_rows;
     int font_address = 0x050;
     unsigned char font_value = 0xFF;
     Chip8Machine machine;
     machine.clear_screen();
     machine.set_flag(0);
+    machine.set_v(0, 0);
     machine.set_i(font_address);
-    machine.set_memory_byte(font_address, font_value);
+    for (int row = 0; row < n_rows; row++) {
+        machine.set_memory_byte(font_address + row, font_value);
+    }
     machine.decode(opcode);
-    for (int x = 0; x < 8; x++) {
-        int y = 0;
-        EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
+    for (int y = 0; y < n_rows; y++) {
+        for (int x = 0; x < 8; x++) {
+            EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
+        }
     }
     EXPECT_EQ(machine.get_flag(), 0);
 }
-*/
+INSTANTIATE_TEST_CASE_P(
+        DXYNTests,
+        DXYNRowsParameterizedTestFixture,
+        ::testing::Values(
+                0x1, 0x8, 0xF
+        )
+);
+
+class DXYNRegistersParameterizedTestFixture
+    : public ::testing::TestWithParam<std::tuple<int, int, int> > {};
+TEST_P (DXYNRegistersParameterizedTestFixture, OpcodeDXYNDrawsToCorrectPositionBasedOnRegisterValues) {
+    int x_offset = std::get<0>(GetParam());
+    int y_offset = std::get<1>(GetParam());
+    int n_rows = std::get<2>(GetParam());
+    // We omit register VF, as it is used as a flag register here
+    for (int x_reg = 0; x_reg < 0xF; x_reg++) {
+        for (int y_reg = 0; y_reg < 0xF; y_reg++) {
+            OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+            int font_address = 0x050;
+            unsigned char font_value = 0xFF;
+            Chip8Machine machine;
+            machine.clear_screen();
+            machine.set_flag(0);
+            machine.set_v(x_reg, x_offset);
+            machine.set_v(y_reg, y_offset);
+            if (x_reg == y_reg) {
+                // Corner case within test; if the x and y registers are the same,
+                // x_offset and y_offset are the same, so pick y_offset
+                x_offset = y_offset;
+            }
+            machine.set_i(font_address);
+            for (int row = 0; row < n_rows; row++) {
+                machine.set_memory_byte(font_address + row, font_value);
+            }
+            machine.decode(opcode);
+            for (int y = y_offset; y < y_offset + n_rows; y++) {
+                for (int x = x_offset; x < x_offset + 8; x++) {
+                    EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
+                }
+            }
+            EXPECT_EQ(machine.get_flag(), 0);
+        }
+    }
+}
+INSTANTIATE_TEST_CASE_P(
+        DXYNTests,
+        DXYNRegistersParameterizedTestFixture,
+        ::testing::Values(
+                std::make_tuple(0x00, 0x00, 0x1),
+                std::make_tuple(0xB4, 0x0D, 0x9),
+                std::make_tuple(0x37, 0x10, 0xF)
+        )
+);
+
+class DXYNHorizTruncationParameterizedTestFixture
+        : public ::testing::TestWithParam<std::tuple<int, int, int> > {};
+TEST_P (DXYNHorizTruncationParameterizedTestFixture, OpcodeDXYNTruncatesDrawingWhenReachesHorizontalEdgeOfScreen) {
+    int x_offset = std::get<0>(GetParam());
+    int y_offset = std::get<1>(GetParam());
+    int n_rows = std::get<2>(GetParam());
+    int x_reg = 1;
+    int y_reg = 2;
+    OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+    int font_address = 0x050;
+    unsigned char font_value = 0xFF;
+    Chip8Machine machine;
+    machine.clear_screen();
+    machine.set_flag(0);
+    machine.set_v(x_reg, x_offset);
+    machine.set_v(y_reg, y_offset);
+    machine.set_i(font_address);
+    for (int row = 0; row < n_rows; row++) {
+        machine.set_memory_byte(font_address + row, font_value);
+    }
+    machine.decode(opcode);
+    for (int y = y_offset; y < y_offset + n_rows; y++) {
+        for (int x = x_offset; x < machine.display_width; x++) {
+            EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
+        }
+        for (int x = 0; x < (x_offset + 8) - machine.display_width; x++) {
+            EXPECT_EQ(machine.get_pixel(x, y), OFF_PIXEL);
+        }
+    }
+    EXPECT_EQ(machine.get_flag(), 0);
+}
+INSTANTIATE_TEST_CASE_P(
+        DXYNTests,
+        DXYNHorizTruncationParameterizedTestFixture,
+        ::testing::Values(
+                std::make_tuple(0x3F, 0x00, 0x1),
+                std::make_tuple(0x3D, 0x08, 0x5),
+                std::make_tuple(0x39, 0x01, 0xA)
+        )
+);
+
+class DXYNVertTruncationParameterizedTestFixture
+        : public ::testing::TestWithParam<std::tuple<int, int, int> > {};
+TEST_P (DXYNVertTruncationParameterizedTestFixture, OpcodeDXYNWrapsDrawingAroundWhenReachesVerticalEdgeOfScreen) {
+    int x_offset = std::get<0>(GetParam());
+    int y_offset = std::get<1>(GetParam());
+    int n_rows = std::get<2>(GetParam());
+    int x_reg = 0xB;
+    int y_reg = 0xD;
+    OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+    int font_address = 0x050;
+    unsigned char font_value = 0xFF;
+    Chip8Machine machine;
+    machine.clear_screen();
+    machine.set_flag(0);
+    machine.set_v(x_reg, x_offset);
+    machine.set_v(y_reg, y_offset);
+    machine.set_i(font_address);
+    for (int row = 0; row < n_rows; row++) {
+        machine.set_memory_byte(font_address + row, font_value);
+    }
+    machine.decode(opcode);
+    for (int x = x_offset; x < x_offset + 8; x++) {
+        for (int y = y_offset; y < machine.display_height; y++) {
+            EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
+        }
+        for (int y = 0; y < y_offset + n_rows - machine.display_height; y++) {
+            EXPECT_EQ(machine.get_pixel(x, y), OFF_PIXEL);
+        }
+    }
+    EXPECT_EQ(machine.get_flag(), 0);
+}
+INSTANTIATE_TEST_CASE_P(
+        DXYNTests,
+        DXYNVertTruncationParameterizedTestFixture,
+        ::testing::Values(
+                std::make_tuple(0x00, 0x1F, 0x2),
+                std::make_tuple(0x25, 0x13, 0xF)
+        )
+);
+
+class DXYNValuesParameterizedTestFixture
+        : public ::testing::TestWithParam<std::tuple<unsigned char, unsigned char> > {};
+TEST_P (DXYNValuesParameterizedTestFixture, OpcodeDXYNDrawsFontPointedToByIRegister) {
+    int n_rows = 2;
+    OPCODE_TYPE opcode = 0xD000 + n_rows;
+    int font_address = 0x050;
+    unsigned char font_value_1 = std::get<0>(GetParam());
+    unsigned char font_value_2 = std::get<1>(GetParam());
+    Chip8Machine machine;
+    machine.clear_screen();
+    machine.set_flag(0);
+    machine.set_v(0, 0);
+    machine.set_i(font_address);
+    machine.set_memory_byte(font_address, font_value_1);
+    machine.set_memory_byte(font_address + 1, font_value_2);
+    machine.decode(opcode);
+    for (int x = 0; x < 8; x++) {
+        EXPECT_EQ(machine.get_pixel(x, 0), (font_value_1 >> (7-x)) & 0x01);
+        EXPECT_EQ(machine.get_pixel(x, 1), (font_value_2 >> (7-x)) & 0x01);
+    }
+    EXPECT_EQ(machine.get_flag(), 0);
+}
+INSTANTIATE_TEST_CASE_P(
+        DXYNTests,
+        DXYNValuesParameterizedTestFixture,
+        ::testing::Values(
+                std::make_tuple(0xA5, 0x5A)
+        )
+);
