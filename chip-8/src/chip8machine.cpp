@@ -73,12 +73,32 @@ int Chip8Machine::get_pc() const {
     return pc.get();
 }
 
+void Chip8Machine::set_pc(const int new_pc) {
+    pc.set(new_pc);
+}
+
 void Chip8Machine::clear_screen() {
     display.clear();
 }
 
 void Chip8Machine::set_memory_byte(int address, unsigned char value) {
     ram.set_byte(address, value);
+}
+
+unsigned char Chip8Machine::get_memory_byte(int address) const {
+    return ram.get_byte(address);
+}
+
+void Chip8Machine::load_rom(const std::vector<unsigned char> &rom) {
+    ram.load_rom(rom);
+}
+
+OPCODE_TYPE Chip8Machine::fetch_instruction() {
+    int pc_ = pc.get();
+    unsigned char byte_one = ram.get_byte(pc_);
+    unsigned char byte_two = ram.get_byte(pc_ + 1);
+    pc.set(pc_ + INSTRUCTION_LENGTH);
+    return (byte_one << 8) + byte_two;
 }
 
 int Chip8Machine::get_i() const {return i_register.get();}

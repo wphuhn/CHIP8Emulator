@@ -12,6 +12,7 @@
 #include "register.hpp"
 
 #define OPCODE_TYPE uint16_t
+#define INSTRUCTION_LENGTH 2
 #define NUM_V_REGS 16
 
 class Chip8Machine {
@@ -25,6 +26,7 @@ public:
     void clear_screen();
 
     void set_memory_byte(int, unsigned char);
+    unsigned char get_memory_byte(int) const;
 
     int get_i() const;
     int get_v(int) const;
@@ -34,8 +36,11 @@ public:
     void set_i(int);
     void set_v(int, int);
     void set_flag(int);
+    void set_pc(int);
 
+    void load_rom(const std::vector<unsigned char> &);
     void decode(OPCODE_TYPE);
+    OPCODE_TYPE fetch_instruction();
 private:
     Display display;
     Memory ram;

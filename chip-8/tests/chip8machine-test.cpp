@@ -380,3 +380,56 @@ INSTANTIATE_TEST_CASE_P(
                 std::make_tuple(0xA5, 0x5A)
         )
 );
+
+TEST (Chip8Machine, LoadsROMAtCorrectLocation) {
+    const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
+    Chip8Machine machine;
+    machine.load_rom(rom);
+    int expected_start_address = 0x200;
+    for (int i = 0; i < rom.size(); i++) {
+        EXPECT_EQ(machine.get_memory_byte(expected_start_address + i), rom[i]);
+    }
+}
+
+class FetchInstructionParameterizedTestFixture
+        : public ::testing::TestWithParam<OPCODE_TYPE> {};
+TEST_P (FetchInstructionParameterizedTestFixture, FetchInstructionGrabsInstructionAtPCFromMemory) {
+    int opcode = GetParam();
+    int pc_start = 0x200;
+
+    unsigned char byte_one = (opcode >> 8) & 0x00FF;
+    unsigned char byte_two = opcode & 0x00FF;
+    std::vector<unsigned char> rom = {byte_one, byte_two};
+
+    Chip8Machine machine;
+    machine.set_pc(pc_start);
+    machine.load_rom(rom);
+
+    int actual = machine.fetch_instruction();
+    EXPECT_EQ(opcode, actual);
+}
+TEST_P (FetchInstructionParameterizedTestFixture, FetchInstructionIncrementsPC) {
+    int opcode = GetParam();
+    int pc_start = 0x200;
+
+    unsigned char byte_one = (opcode >> 8) & 0x00FF;
+    unsigned char byte_two = opcode & 0x00FF;
+    std::vector<unsigned char> rom = {byte_one, byte_two};
+
+    Chip8Machine machine;
+    machine.set_pc(pc_start);
+    machine.load_rom(rom);
+
+    machine.fetch_instruction();
+
+    int expected = pc_start + 2;
+    int actual = machine.get_pc();
+    EXPECT_EQ(expected, actual);
+}
+INSTANTIATE_TEST_CASE_P(
+        FetchInstrutionTests,
+        FetchInstructionParameterizedTestFixture,
+        ::testing::Values(
+                0x0000, 0x5302, 0xFFFF
+        )
+);

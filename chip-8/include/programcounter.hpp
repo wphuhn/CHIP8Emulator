@@ -3,8 +3,11 @@
 class ProgramCounter{
 public:
     ProgramCounter();
+
     int get() const;
     void set(int);
+
+    void add(int);
 private:
     int value_;
 };

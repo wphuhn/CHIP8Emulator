@@ -9,3 +9,8 @@ int ProgramCounter::get() const {
 void ProgramCounter::set(const int new_value) {
     value_ = new_value;
 }
+
+void ProgramCounter::add(const int increment) {
+    value_ += increment;
+    value_ &= 0xFFFF;
+}
