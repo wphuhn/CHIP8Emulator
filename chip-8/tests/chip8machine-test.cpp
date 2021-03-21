@@ -8,6 +8,14 @@ TEST (Chip8Machine, HasDefaultConstructor) {
     Chip8Machine machine;
 }
 
+TEST (Chip8Machine, ResetSetsPCToPointToStartOfROM) {
+    Chip8Machine machine;
+    machine.set_pc(0);
+    machine.reset();
+    int expected = 0x200;
+    EXPECT_EQ(machine.get_pc(), expected);
+}
+
 TEST (Chip8Machine, PassingUnsupportedOpcodeStopsInterpreter) {
     Chip8Machine machine;
     // 0x9000 was chosen because it's not part of CHIP-8 instruction set
@@ -384,10 +392,11 @@ INSTANTIATE_TEST_CASE_P(
 TEST (Chip8Machine, LoadsROMAtCorrectLocation) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
     Chip8Machine machine;
+    machine.reset();
     machine.load_rom(rom);
-    int expected_start_address = 0x200;
+    int pc_start = machine.get_pc();
     for (int i = 0; i < rom.size(); i++) {
-        EXPECT_EQ(machine.get_memory_byte(expected_start_address + i), rom[i]);
+        EXPECT_EQ(machine.get_memory_byte(pc_start + i), rom[i]);
     }
 }
 
@@ -395,36 +404,17 @@ class FetchInstructionParameterizedTestFixture
         : public ::testing::TestWithParam<OPCODE_TYPE> {};
 TEST_P (FetchInstructionParameterizedTestFixture, FetchInstructionGrabsInstructionAtPCFromMemory) {
     int opcode = GetParam();
-    int pc_start = 0x200;
 
     unsigned char byte_one = (opcode >> 8) & 0x00FF;
     unsigned char byte_two = opcode & 0x00FF;
     std::vector<unsigned char> rom = {byte_one, byte_two};
 
     Chip8Machine machine;
-    machine.set_pc(pc_start);
+    machine.reset();
     machine.load_rom(rom);
 
     int actual = machine.fetch_instruction();
     EXPECT_EQ(opcode, actual);
-}
-TEST_P (FetchInstructionParameterizedTestFixture, FetchInstructionIncrementsPC) {
-    int opcode = GetParam();
-    int pc_start = 0x200;
-
-    unsigned char byte_one = (opcode >> 8) & 0x00FF;
-    unsigned char byte_two = opcode & 0x00FF;
-    std::vector<unsigned char> rom = {byte_one, byte_two};
-
-    Chip8Machine machine;
-    machine.set_pc(pc_start);
-    machine.load_rom(rom);
-
-    machine.fetch_instruction();
-
-    int expected = pc_start + 2;
-    int actual = machine.get_pc();
-    EXPECT_EQ(expected, actual);
 }
 INSTANTIATE_TEST_CASE_P(
         FetchInstrutionTests,
@@ -433,3 +423,56 @@ INSTANTIATE_TEST_CASE_P(
                 0x0000, 0x5302, 0xFFFF
         )
 );
+
+TEST (Chip8Machine, AdvanceIncrementsPCForNonJumpInstructions) {
+    int reg_int = 1;
+    int reg_value = 63;
+    OPCODE_TYPE opcode = gen_XYNN_opcode(0x6, reg_int, reg_value);
+
+    unsigned char byte_one = (opcode >> 8) & 0x00FF;
+    unsigned char byte_two = opcode & 0x00FF;
+    std::vector<unsigned char> rom = {byte_one, byte_two};
+
+    Chip8Machine machine;
+    machine.reset();
+    machine.load_rom(rom);
+
+    int pc_start = machine.get_pc();
+    machine.advance();
+    EXPECT_EQ(pc_start + 2, machine.get_pc());
+}
+
+TEST (Chip8Machine, AdvanceSetsPCExplicitlyForJumpInstructions) {
+    int jump_address = 0x227;
+    OPCODE_TYPE opcode = 0x1000 + jump_address;
+
+    unsigned char byte_one = (opcode >> 8) & 0x00FF;
+    unsigned char byte_two = opcode & 0x00FF;
+    std::vector<unsigned char> rom = {byte_one, byte_two};
+
+    Chip8Machine machine;
+    machine.reset();
+    machine.load_rom(rom);
+
+    machine.advance();
+    EXPECT_EQ(jump_address, machine.get_pc());
+}
+
+TEST (Chip8Machine, AdvanceExecutesInstructionPointedToByPC) {
+    // Chose a simple instruction (set register to NN) for this
+    int reg_int = 1;
+    int reg_value = 63;
+    OPCODE_TYPE opcode = gen_XYNN_opcode(0x6, reg_int, reg_value);
+
+    unsigned char byte_one = (opcode >> 8) & 0x00FF;
+    unsigned char byte_two = opcode & 0x00FF;
+    std::vector<unsigned char> rom = {byte_one, byte_two};
+
+    Chip8Machine machine;
+    machine.reset();
+    machine.load_rom(rom);
+
+    machine.set_v(reg_int, 0);
+    machine.advance();
+    EXPECT_EQ(reg_value, machine.get_v(reg_int));
+}

@@ -20,3 +20,18 @@ void Display::clear() {
         }
     }
 }
+
+Display::operator std::string() const {
+    std::stringstream stream;
+    for (auto & row : screen) {
+        for (const PIXEL_TYPE & pixel : row) {
+            if (pixel == OFF_PIXEL) {
+                stream << " ";
+            } else {
+                stream << "X";
+            }
+        }
+        stream << std::endl;
+    }
+    return stream.str();
+}

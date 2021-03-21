@@ -93,12 +93,17 @@ void Chip8Machine::load_rom(const std::vector<unsigned char> &rom) {
     ram.load_rom(rom);
 }
 
-OPCODE_TYPE Chip8Machine::fetch_instruction() {
+OPCODE_TYPE Chip8Machine::fetch_instruction() const {
     int pc_ = pc.get();
     unsigned char byte_one = ram.get_byte(pc_);
     unsigned char byte_two = ram.get_byte(pc_ + 1);
-    pc.set(pc_ + INSTRUCTION_LENGTH);
     return (byte_one << 8) + byte_two;
+}
+
+void Chip8Machine::advance() {
+    OPCODE_TYPE opcode = fetch_instruction();
+    pc.add(INSTRUCTION_LENGTH);
+    decode(opcode);
 }
 
 int Chip8Machine::get_i() const {return i_register.get();}
@@ -123,6 +128,28 @@ static std::string opcode_to_hex_str(const OPCODE_TYPE value) {
     stream << "0x" << std::hex << value;
     return stream.str();
 }
+
+Chip8Machine::operator std::string() const {
+    std::stringstream stream;
+    stream << "Current status of Chip8Machine:" << std::endl;
+    stream << "- PC: " << opcode_to_hex_str(pc.get()) << " , ";
+    stream << "I: " << opcode_to_hex_str(i_register.get()) << " , ";
+    stream << "Flag: " << opcode_to_hex_str(get_flag()) << " , ";
+    stream << "Opcode: " << opcode_to_hex_str(fetch_instruction()) << std::endl;
+    stream <<  "- V[0]: " << opcode_to_hex_str(v_register[0].get());
+    for (int n = 1; n < NUM_V_REGS - 1; n++) {
+        stream << " , V[" << n << "]: " << opcode_to_hex_str(v_register[n].get());
+    }
+    return stream.str();
+}
+
+void Chip8Machine::reset() {
+    pc.set(ROM_START_ADDRESS);
+}
+
+std::string Chip8Machine::display_str() const {
+    return std::string(display);
+};
 
 OpcodeNotSupported::OpcodeNotSupported(const OPCODE_TYPE opcode)
     : std::runtime_error("Opcode " + opcode_to_hex_str(opcode) + " not supported") {}

@@ -27,6 +27,7 @@ public:
 
     void set_memory_byte(int, unsigned char);
     unsigned char get_memory_byte(int) const;
+    std::string display_str() const;
 
     int get_i() const;
     int get_v(int) const;
@@ -40,7 +41,10 @@ public:
 
     void load_rom(const std::vector<unsigned char> &);
     void decode(OPCODE_TYPE);
-    OPCODE_TYPE fetch_instruction();
+    OPCODE_TYPE fetch_instruction() const;
+    void advance();
+    void reset();
+    operator std::string() const;
 private:
     Display display;
     Memory ram;

@@ -1,10 +1,14 @@
+#include <chrono>
 #include <cstdint>
 #include <iostream>
 #include <map>
+#include <thread>
 
 #include "chip8machine.hpp"
 
 #define N_BYTES_IN_OP sizeof(OPCODE_TYPE)
+
+#define SLEEP_MS 500
 
 size_t get_rom_from_file(const char *filename, void **data) {
     // Read ROM file into memory
@@ -24,7 +28,20 @@ size_t get_rom_from_file(const char *filename, void **data) {
     return size;
 }
 
-void output_stats(const std::map<std::string, int> & counter, unsigned int n_total) {
+std::vector<unsigned char> convert_data_to_vector(const void *data, const size_t size) {
+    auto rom = (const unsigned char*) data;
+
+    int pc = 0;
+    std::vector<unsigned char> rom_vec (size, 0x0000);
+    while (pc < size) {
+        rom_vec[pc] = rom[pc];
+        pc += 1;
+    }
+
+    return rom_vec;
+}
+
+void output_stats(const std::map<std::string, int> & counter, const unsigned int n_total) {
     int n_ops = 0;
     for (const auto & pair : counter) {
         n_ops += pair.second;
@@ -36,7 +53,7 @@ void output_stats(const std::map<std::string, int> & counter, unsigned int n_tot
     }
 }
 
-OPCODE_TYPE extract_big_endian_opcode(const uint8_t* rom, int pc) {
+OPCODE_TYPE extract_big_endian_opcode(const std::vector<unsigned char> & rom, const int pc) {
     OPCODE_TYPE opcode = 0;
 
     for (int i = 0; i < N_BYTES_IN_OP; i++) {
@@ -48,15 +65,14 @@ OPCODE_TYPE extract_big_endian_opcode(const uint8_t* rom, int pc) {
     return opcode;
 }
 
-std::string convert_opcode_to_str(OPCODE_TYPE opcode) {
+std::string convert_opcode_to_str(const OPCODE_TYPE opcode) {
     std::stringstream stream;
     stream << "0x" << std::hex << std::setw(2*N_BYTES_IN_OP) << std::setfill('0') << opcode;
     return stream.str();
 }
 
-void test_rom(const void *data, size_t size) {
+void check_implemented_instructions(const std::vector<unsigned char> & rom) {
     Chip8Machine machine;
-    auto rom = (const uint8_t*) data;
     OPCODE_TYPE opcode;
 
     std::cout << "Parsing ROM to check for unimplemented instructions" << std::endl;
@@ -70,7 +86,7 @@ void test_rom(const void *data, size_t size) {
     std::string first_unimplemented;
     bool has_encountered_unimplemented = false;
 
-    while (pc < size) {
+    while (pc < rom.size()) {
         opcode = extract_big_endian_opcode(rom, pc);
         std::string opcode_str = convert_opcode_to_str(opcode);
 
@@ -98,7 +114,7 @@ void test_rom(const void *data, size_t size) {
         pc += N_BYTES_IN_OP;
     }
 
-    unsigned int n_total = size / N_BYTES_IN_OP;
+    unsigned int n_total = rom.size() / N_BYTES_IN_OP;
 
     std::cout <<  std::endl;
     std::cout << "==============================" << std::endl;
@@ -116,6 +132,23 @@ void test_rom(const void *data, size_t size) {
     std::cout << "First unimplemented opcode encountered: " << first_unimplemented << std::endl;
 }
 
+void run_rom(const std::vector<unsigned char> & rom) {
+    Chip8Machine machine;
+
+    std::cout << std::endl;
+    std::cout << "Running ROM" << std::endl;
+    std::cout << std::endl;
+
+    machine.reset();
+    machine.load_rom(rom);
+    while (true) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_MS));
+        std::cout << std::string(machine) << std::endl;
+        std:: cout << machine.display_str() << std::endl;
+        machine.advance();
+    }
+}
+
 int main (int argc, char** argv) {
   if (argc < 2) {
     std::cout << "Please specify a file as an argument" << std::endl;
@@ -124,7 +157,10 @@ int main (int argc, char** argv) {
 
   void* data;
   size_t size = get_rom_from_file(argv[1], &data);
+  std::vector<unsigned char> rom = convert_data_to_vector(data, size);
 
-  test_rom(data, size);
+  check_implemented_instructions(rom);
+  run_rom(rom);
+
   return 0;
 }
