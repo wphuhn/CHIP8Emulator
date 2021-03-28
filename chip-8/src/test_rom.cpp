@@ -10,37 +10,6 @@
 
 #define SLEEP_MS 500
 
-size_t get_rom_from_file(const char *filename, void **data) {
-    // Read ROM file into memory
-    FILE *f = fopen(filename, "rb");
-    if (f == nullptr) {
-        std::cout << "error: Couldn't open " << filename << std::endl;
-        exit(1);
-    }
-
-    // Get the file size and read it into a memory buffer
-    fseek(f, 0L, SEEK_END);
-    size_t size = ftell(f);
-    (*data) = (void*) malloc(size);
-    fseek(f, 0L, SEEK_SET);
-    fread(*data, size, 1, f);
-    fclose(f);
-    return size;
-}
-
-std::vector<unsigned char> convert_data_to_vector(const void *data, const size_t size) {
-    auto rom = (const unsigned char*) data;
-
-    int pc = 0;
-    std::vector<unsigned char> rom_vec (size, 0x0000);
-    while (pc < size) {
-        rom_vec[pc] = rom[pc];
-        pc += 1;
-    }
-
-    return rom_vec;
-}
-
 void output_stats(const std::map<std::string, int> & counter, const unsigned int n_total) {
     int n_ops = 0;
     for (const auto & pair : counter) {
@@ -156,8 +125,9 @@ int main (int argc, char** argv) {
   }
 
   void* data;
-  size_t size = get_rom_from_file(argv[1], &data);
-  std::vector<unsigned char> rom = convert_data_to_vector(data, size);
+  size_t size;
+  std::tie(data, size) = Memory::get_bitstream_from_file(std::string(argv[1]));
+  std::vector<unsigned char> rom = Memory::convert_bitstream_to_vector(data, size);
 
   check_implemented_instructions(rom);
   run_rom(rom);

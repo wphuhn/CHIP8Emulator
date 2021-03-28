@@ -21,6 +21,7 @@ public:
 
     const int display_width;
     const int display_height;
+    const int memory_size;
     const PIXEL_TYPE& get_pixel(int, int) const;
     void set_pixel(int, int, PIXEL_TYPE);
     void clear_screen();
