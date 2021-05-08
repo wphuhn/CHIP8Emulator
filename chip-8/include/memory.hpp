@@ -16,6 +16,7 @@ public:
     static const int size = RAM_SIZE;
 
     void load_rom(const std::vector<unsigned char> &);
+    std::vector<unsigned char> get_ram(bool = true) const;
     unsigned char get_byte(int) const;
     void set_byte(int, unsigned char);
 

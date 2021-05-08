@@ -73,6 +73,10 @@ int Chip8Machine::get_pc() const {
     return pc.get();
 }
 
+std::vector<unsigned char> Chip8Machine::get_ram(bool include_start) const {
+    return ram.get_ram(include_start);
+}
+
 void Chip8Machine::set_pc(const int new_pc) {
     pc.set(new_pc);
 }

@@ -82,12 +82,38 @@ TEST (Memory, ConvertBitstreamToVectorGivesExpectedContent) {
     }
 }
 
-TEST (Memory, LoadROMLoadsROMAtCorrectLocation) {
+// TODO:  Just remove this test?
+TEST (Memory, LoadROMLoadsROMAtCorrectLocation_AccessByByte) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
     Memory ram;
     ram.load_rom(rom);
     int expected_start_address = 0x200;
     for (int i = 0; i < rom.size(); i++) {
         EXPECT_EQ(ram.get_byte(expected_start_address + i), rom[i]);
+    }
+}
+
+// This is *not* a redundant test case, as it verifies that the STL container
+// is properly set up, which the AccessByByte variant does not (it's possible
+// to write past the boundaries of the original STL container and then access
+// memory beyond the boundary of the original STL container)
+TEST (Memory, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetAllRAM) {
+    const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
+    Memory ram;
+    ram.load_rom(rom);
+    const std::vector<unsigned char> returned_ram = ram.get_ram();
+    int expected_start_address = 0x200;
+    for (int i = 0; i < rom.size(); i++) {
+        EXPECT_EQ(returned_ram[expected_start_address + i], rom[i]);
+    }
+}
+
+TEST (Memory, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetActivePortion) {
+    const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
+    Memory ram;
+    ram.load_rom(rom);
+    const std::vector<unsigned char> returned_ram = ram.get_ram(false);
+    for (int i = 0; i < rom.size(); i++) {
+        EXPECT_EQ(returned_ram[i], rom[i]);
     }
 }

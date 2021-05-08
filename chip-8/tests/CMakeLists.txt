@@ -1,7 +1,7 @@
 include(GoogleTest)
 
 add_executable(libretro-test libretro-test.cpp)
-target_link_libraries(libretro-test chip-8-libretro gtest)
+target_link_libraries(libretro-test chip-8-libretro chip-8 gtest)
 gtest_discover_tests(libretro-test)
 
 file(GLOB TESTS_SRC "*.cpp")

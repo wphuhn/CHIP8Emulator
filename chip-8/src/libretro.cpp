@@ -1,6 +1,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
+#include <exception>
 #include <iostream>
 
 #include "libretro.h"
@@ -10,28 +11,27 @@ using namespace std;
 static retro_video_refresh_t video_cb;
 static retro_audio_sample_t audio_cb;
 
-RETRO_API void retro_init(void) {}
-RETRO_API void retro_deinit(void) {}
+RETRO_API void retro_init(void) {
+    chip8machine_init(machine);
+}
+
+RETRO_API void retro_deinit(void) {
+    chip8machine_deinit(machine);
+}
 
 RETRO_API unsigned retro_api_version(void) { return RETRO_API_VERSION; }
 
 RETRO_API void retro_get_system_info(struct retro_system_info *info) {
     memset(info, 0, sizeof(*info));
-    info->library_name = "lib-retro";
-    info->library_version = "1.0.0";
+    info->library_name = "chip8-libretro";
+    info->library_version = "0.0.1";
     info->valid_extensions = "";
     info->need_fullpath = false;
     info->block_extract = false;
 }
+
 RETRO_API void retro_get_system_av_info(struct retro_system_av_info *info) {
-    memset(info, 0, sizeof(*info));
-    info->geometry.aspect_ratio = 1.0;
-    info->geometry.base_height = 400;
-    info->geometry.base_width = 400;
-    info->geometry.max_height = 400;
-    info->geometry.max_width = 400;
-    info->timing.fps = 60.0;
-    info->timing.sample_rate = 44100;
+    chip8machine_get_system_av_info(info, machine);
 }
 
 RETRO_API void retro_set_environment(retro_environment_t environment) {}
@@ -83,7 +83,10 @@ void sine_wave(retro_audio_sample_t audio_cb) {
     }
 }
 
-RETRO_API void retro_reset(void) {}
+RETRO_API void retro_reset(void) {
+    chip8machine_reset(machine);
+}
+
 RETRO_API void retro_run(void) {
     unsigned short framebuffer[400 * 400];
     for (int i = 0; i < 200 * 400; i++) framebuffer[i] = 0x001F;
@@ -109,7 +112,9 @@ RETRO_API bool retro_unserialize(const void* data, size_t size)
 RETRO_API void retro_cheat_reset(void) {}
 RETRO_API void retro_cheat_set(unsigned index, bool enabled, const char *code) {}
 
-RETRO_API bool retro_load_game(const struct retro_game_info *game) { return true; }
+RETRO_API bool retro_load_game(const struct retro_game_info *game) {
+    return chip8machine_load_game(game, machine);
+}
 RETRO_API bool retro_load_game_special(unsigned game_type, const struct retro_game_info* game_info, size_t num_info) {return true;}
 RETRO_API void retro_unload_game(void) {}
 
@@ -119,4 +124,48 @@ RETRO_API void* retro_get_memory_data(unsigned id) {
     void* data;
     return data;
 }
-RETRO_API size_t retro_get_memory_size(unsigned int) {return 0;}
+RETRO_API size_t retro_get_memory_size(unsigned int id) {
+    return chip8machine_get_memory_size(id, machine);
+}
+RETRO_API void chip8machine_init(Chip8Machine* &my_machine) {
+    // This has potential for a memory leak, but don't know how
+    // to smoothly put it into the libretro framework otherwise
+    my_machine = new Chip8Machine;
+    my_machine->reset();
+}
+
+RETRO_API void chip8machine_deinit(Chip8Machine* &my_machine) {
+    delete my_machine;
+    my_machine = nullptr;
+}
+
+RETRO_API void chip8machine_get_system_av_info(struct retro_system_av_info *info, Chip8Machine* my_machine) {
+    memset(info, 0, sizeof(*info));
+    int height = my_machine->display_height;
+    int width = my_machine->display_width;
+
+    info->geometry.aspect_ratio = 1.0;
+    info->geometry.base_height = height;
+    info->geometry.base_width = width;
+    info->geometry.max_height = height;
+    info->geometry.max_width = width;
+    info->timing.fps = 60.0;
+    info->timing.sample_rate = 44100;
+}
+
+RETRO_API void chip8machine_reset(Chip8Machine* &my_machine) {
+    my_machine->reset();
+}
+
+RETRO_API bool chip8machine_load_game(const struct retro_game_info *game, Chip8Machine* &my_machine) {
+    if (game->size == 0) return false;
+    if (game->data == nullptr) return false;
+    if (my_machine == nullptr) return false;
+    std::vector<unsigned char> rom = Memory::convert_bitstream_to_vector(game->data, game->size);
+    my_machine->load_rom(rom);
+    return true;
+}
+
+RETRO_API size_t chip8machine_get_memory_size(unsigned int id, Chip8Machine* my_machine) {
+    return my_machine->memory_size;
+}

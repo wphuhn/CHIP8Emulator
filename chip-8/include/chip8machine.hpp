@@ -34,6 +34,7 @@ public:
     int get_v(int) const;
     int get_flag() const;
     int get_pc() const;
+    std::vector<unsigned char> get_ram(bool = true) const;
 
     void set_i(int);
     void set_v(int, int);

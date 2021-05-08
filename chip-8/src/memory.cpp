@@ -1,7 +1,7 @@
 #include "memory.hpp"
 
 Memory::Memory() {
-   ram.reserve(RAM_SIZE);
+   ram.resize(size);
    for (unsigned char& value : ram) {
        value = 0x00;
    }
@@ -13,6 +13,18 @@ void Memory::load_rom(const std::vector<unsigned char> & rom) {
         ram[offset] = value;
         offset += 1;
     }
+}
+
+// CHIP-8 code can be self-altering, hence the slightly different name
+// When include_start is true, returns the entirety of RAM, including the 512 dead
+// bytes at the beginning, otherwise return only the writeable portion
+std::vector<unsigned char> Memory::get_ram(bool include_start) const {
+    auto first = ram.begin();
+    if (not include_start) {
+        first += ROM_START_ADDRESS;
+    }
+    auto last = ram.end();
+    return std::vector<unsigned char>(first, last);
 }
 
 unsigned char Memory::get_byte(const int offset) const {
