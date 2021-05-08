@@ -11,11 +11,20 @@ using namespace std;
 static retro_video_refresh_t video_cb;
 static retro_audio_sample_t audio_cb;
 
+// Creation of a singleton for libretro purposes, but allowing for a
+// backend that's TDD friendly
+static Chip8Machine& get_machine() {
+    static Chip8Machine machine;
+    return machine;
+}
+
 RETRO_API void retro_init(void) {
+    Chip8Machine machine = get_machine();
     chip8machine_init(machine);
 }
 
 RETRO_API void retro_deinit(void) {
+    Chip8Machine machine = get_machine();
     chip8machine_deinit(machine);
 }
 
@@ -31,6 +40,7 @@ RETRO_API void retro_get_system_info(struct retro_system_info *info) {
 }
 
 RETRO_API void retro_get_system_av_info(struct retro_system_av_info *info) {
+    Chip8Machine machine = get_machine();
     chip8machine_get_system_av_info(info, machine);
 }
 
@@ -84,6 +94,7 @@ void sine_wave(retro_audio_sample_t audio_cb) {
 }
 
 RETRO_API void retro_reset(void) {
+    Chip8Machine machine = get_machine();
     chip8machine_reset(machine);
 }
 
@@ -113,6 +124,7 @@ RETRO_API void retro_cheat_reset(void) {}
 RETRO_API void retro_cheat_set(unsigned index, bool enabled, const char *code) {}
 
 RETRO_API bool retro_load_game(const struct retro_game_info *game) {
+    Chip8Machine machine = get_machine();
     return chip8machine_load_game(game, machine);
 }
 RETRO_API bool retro_load_game_special(unsigned game_type, const struct retro_game_info* game_info, size_t num_info) {return true;}
@@ -125,24 +137,21 @@ RETRO_API void* retro_get_memory_data(unsigned id) {
     return data;
 }
 RETRO_API size_t retro_get_memory_size(unsigned int id) {
+    Chip8Machine machine = get_machine();
     return chip8machine_get_memory_size(id, machine);
 }
-RETRO_API void chip8machine_init(Chip8Machine* &my_machine) {
-    // This has potential for a memory leak, but don't know how
-    // to smoothly put it into the libretro framework otherwise
-    my_machine = new Chip8Machine;
-    my_machine->reset();
+RETRO_API void chip8machine_init(Chip8Machine &my_machine) {
+    my_machine.reset();
 }
 
-RETRO_API void chip8machine_deinit(Chip8Machine* &my_machine) {
-    delete my_machine;
-    my_machine = nullptr;
+RETRO_API void chip8machine_deinit(Chip8Machine &my_machine) {
+    my_machine.reset();
 }
 
-RETRO_API void chip8machine_get_system_av_info(struct retro_system_av_info *info, Chip8Machine* my_machine) {
+RETRO_API void chip8machine_get_system_av_info(struct retro_system_av_info *info, const Chip8Machine &my_machine) {
     memset(info, 0, sizeof(*info));
-    int height = my_machine->display_height;
-    int width = my_machine->display_width;
+    int height = my_machine.display_height;
+    int width = my_machine.display_width;
 
     info->geometry.aspect_ratio = 1.0;
     info->geometry.base_height = height;
@@ -153,19 +162,18 @@ RETRO_API void chip8machine_get_system_av_info(struct retro_system_av_info *info
     info->timing.sample_rate = 44100;
 }
 
-RETRO_API void chip8machine_reset(Chip8Machine* &my_machine) {
-    my_machine->reset();
+RETRO_API void chip8machine_reset(Chip8Machine &my_machine) {
+    my_machine.reset();
 }
 
-RETRO_API bool chip8machine_load_game(const struct retro_game_info *game, Chip8Machine* &my_machine) {
+RETRO_API bool chip8machine_load_game(const struct retro_game_info *game, Chip8Machine &my_machine) {
     if (game->size == 0) return false;
     if (game->data == nullptr) return false;
-    if (my_machine == nullptr) return false;
     std::vector<unsigned char> rom = Memory::convert_bitstream_to_vector(game->data, game->size);
-    my_machine->load_rom(rom);
+    my_machine.load_rom(rom);
     return true;
 }
 
-RETRO_API size_t chip8machine_get_memory_size(unsigned int id, Chip8Machine* my_machine) {
-    return my_machine->memory_size;
+RETRO_API size_t chip8machine_get_memory_size(unsigned int id, const Chip8Machine &my_machine) {
+    return my_machine.memory_size;
 }

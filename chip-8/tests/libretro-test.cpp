@@ -3,29 +3,28 @@
 #include "gtest/gtest.h"
 
 TEST (RetroInit, InitializesChip8InDefaultState) {
-    Chip8Machine* my_machine;
+    Chip8Machine my_machine;
     chip8machine_init(my_machine);
-    int pc = my_machine->get_pc();
+    int pc = my_machine.get_pc();
     EXPECT_EQ( pc, 0x200 );
-    delete my_machine;
 }
 
 TEST (RetroInit, ReinitializesIfAlreadyInitialized) {
-    Chip8Machine* my_machine;
+    Chip8Machine my_machine;
     chip8machine_init(my_machine);
-    my_machine->set_pc(0x201);
-    // TODO:  Memory leak!
+    my_machine.set_pc(0x201);
     chip8machine_init(my_machine);
-    int pc = my_machine->get_pc();
+    int pc = my_machine.get_pc();
     EXPECT_EQ( pc, 0x200 );
 }
 
-// TODO:  Does not check if machine was actually deleted!
-TEST (RetroDeinit, SetsMachinePointerToNull) {
-    Chip8Machine* my_machine;
+TEST (RetroDeinit, ResetsChip8ToDefaultState) {
+    Chip8Machine my_machine;
     chip8machine_init(my_machine);
+    my_machine.set_pc(0x201);
     chip8machine_deinit(my_machine);
-    EXPECT_EQ (my_machine, nullptr);
+    int pc = my_machine.get_pc();
+    EXPECT_EQ( pc, 0x200 );
 }
 
 TEST (RetroApiVersion, ReturnsPublicAPIVersion) {
@@ -47,12 +46,12 @@ TEST (RetroGetSystemInfo, SetsProperVariables) {
 TEST (RetroGetSystemAvInfo, SetsProperVariables) {
     retro_system_av_info* info = (retro_system_av_info*) malloc(sizeof(retro_system_av_info));
 
-    Chip8Machine* my_machine;
+    Chip8Machine my_machine;
     chip8machine_init(my_machine);
     chip8machine_get_system_av_info(info, my_machine);
 
-    int height = my_machine->display_height;
-    int width = my_machine->display_width;
+    int height = my_machine.display_height;
+    int width = my_machine.display_width;
 
     EXPECT_FLOAT_EQ(info->geometry.aspect_ratio, 1.0);
     EXPECT_EQ(info->geometry.base_height, height);
@@ -106,18 +105,18 @@ TEST (RetroSetControllerPortDevice, Exists) {
 }
 
 TEST (RetroReset, ResetsStateOfEmulator) {
-    Chip8Machine* my_machine;
+    Chip8Machine my_machine;
     chip8machine_init(my_machine);
-    my_machine->set_pc(0x201);
+    my_machine.set_pc(0x201);
     chip8machine_reset(my_machine);
-    int pc = my_machine->get_pc();
+    int pc = my_machine.get_pc();
     EXPECT_EQ( pc, 0x200 );
 }
 
 // TODO:  Figure out how to test...
-/*TEST (RetroRun, Exists) {
-    retro_run();
-}*/
+//TEST (RetroRun, Exists) {
+//    retro_run();
+//}
 
 // TODO:  Ignoring serialization tests for now
 TEST (RetroSerializeSize, ReturnsOne) {
@@ -177,7 +176,7 @@ TEST (RetroCheatSet, Exists) {
 
 TEST (RetroLoadGame, ReturnsTrueWhenInfoValidAndInitCalled) {
     retro_game_info *game = new retro_game_info;
-    Chip8Machine* my_machine;
+    Chip8Machine my_machine;
     chip8machine_init(my_machine);
     game->size = 4;
     game->data = (void *) new unsigned char[4] {0xDE, 0xAD, 0xBE, 0xEF};
@@ -187,33 +186,21 @@ TEST (RetroLoadGame, ReturnsTrueWhenInfoValidAndInitCalled) {
 
 TEST (RetroLoadGame, LoadsROMIntoMemoryWhenCallSuccessful) {
     retro_game_info *game = new retro_game_info;
-    Chip8Machine* my_machine;
+    Chip8Machine my_machine;
     chip8machine_init(my_machine);
     game->size = 4;
     game->data = (void *) new unsigned char[4] {0xDE, 0xAD, 0xBE, 0xEF};
     chip8machine_load_game(game, my_machine);
     // Only grab the active portion of RAM
-    std::vector<unsigned char> ram = my_machine->get_ram(false);
+    std::vector<unsigned char> ram = my_machine.get_ram(false);
     for (int i = 0; i < game->size; i++) {
         EXPECT_EQ (((unsigned char *)game->data)[i], ram[i]);
     }
 }
 
-// TODO:  Figure out way to find if retro_init() was never called.
-TEST (RetroLoadGame, ReturnsFalseWhenMachineNotInitialized) {
-    retro_game_info *game = new retro_game_info;
-    Chip8Machine* my_machine;
-    chip8machine_init(my_machine);
-    chip8machine_deinit(my_machine);
-    game->size = 4;
-    game->data = (void *) new unsigned char[4] {0xDE, 0xAD, 0xBE, 0xEF};
-    bool result = chip8machine_load_game(game, my_machine);
-    EXPECT_EQ (result, false);
-}
-
 TEST (RetroLoadGame, ReturnsFalseWhenSizeZero) {
     retro_game_info *game = new retro_game_info;
-    Chip8Machine* my_machine;
+    Chip8Machine my_machine;
     chip8machine_init(my_machine);
     game->size = 0;
     game->data = (void *) new unsigned char[4] {0xDE, 0xAD, 0xBE, 0xEF};
@@ -223,7 +210,7 @@ TEST (RetroLoadGame, ReturnsFalseWhenSizeZero) {
 
 TEST (RetroLoadGame, ReturnsFalseWhenDataNull) {
     retro_game_info *game = new retro_game_info;
-    Chip8Machine* my_machine;
+    Chip8Machine my_machine;
     chip8machine_init(my_machine);
     game->size = 1;
     game->data = nullptr;
@@ -259,7 +246,7 @@ TEST (RetroGetMemoryData, Exists) {
 
 TEST (RetoGetMemorySize, ReturnsCorrectSize) {
     unsigned dummy;
-    Chip8Machine* my_machine;
+    Chip8Machine my_machine;
     chip8machine_init(my_machine);
     size_t actual, expected = 0x1000;
     actual = chip8machine_get_memory_size(dummy, my_machine);

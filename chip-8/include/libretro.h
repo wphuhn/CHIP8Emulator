@@ -3058,8 +3058,6 @@ RETRO_API size_t retro_get_memory_size(unsigned id);
 }
 #endif
 
-// Forgive me master, but I must go all out this one last time
-Chip8Machine* machine;
 // It's implicit in libretro's design that you'll need to have singletons that
 // contain emulator-specific state of the game at the time.
 // For obvious reasons, not a great idea for unit testing (I'd even argue
@@ -3068,11 +3066,11 @@ Chip8Machine* machine;
 // behavior is assumed, I've created a chip8machine_* variant that takes in a
 // stateful object and is properly encapsulated, and the retro_* call is a
 // wrapper around these subroutines using the singleton objects as arguments.
-RETRO_API void chip8machine_init(Chip8Machine*&);
-RETRO_API void chip8machine_deinit(Chip8Machine*&);
-RETRO_API void chip8machine_get_system_av_info(struct retro_system_av_info*, Chip8Machine*);
-RETRO_API void chip8machine_reset(Chip8Machine*&);
-RETRO_API bool chip8machine_load_game(const struct retro_game_info *game, Chip8Machine*&);
-RETRO_API size_t chip8machine_get_memory_size(unsigned int, Chip8Machine*);
+RETRO_API void chip8machine_init(Chip8Machine&);
+RETRO_API void chip8machine_deinit(Chip8Machine&);
+RETRO_API void chip8machine_get_system_av_info(struct retro_system_av_info*, const Chip8Machine &);
+RETRO_API void chip8machine_reset(Chip8Machine&);
+RETRO_API bool chip8machine_load_game(const struct retro_game_info *game, Chip8Machine&);
+RETRO_API size_t chip8machine_get_memory_size(unsigned int, const Chip8Machine &);
 
 #endif
