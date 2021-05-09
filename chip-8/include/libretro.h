@@ -3054,10 +3054,6 @@ RETRO_API unsigned retro_get_region(void);
 RETRO_API void *retro_get_memory_data(unsigned id);
 RETRO_API size_t retro_get_memory_size(unsigned id);
 
-#ifdef __cplusplus
-}
-#endif
-
 // It's implicit in libretro's design that you'll need to have singletons that
 // contain emulator-specific state of the game at the time.
 // For obvious reasons, not a great idea for unit testing (I'd even argue
@@ -3070,7 +3066,12 @@ RETRO_API void chip8machine_init(Chip8Machine&);
 RETRO_API void chip8machine_deinit(Chip8Machine&);
 RETRO_API void chip8machine_get_system_av_info(struct retro_system_av_info*, const Chip8Machine &);
 RETRO_API void chip8machine_reset(Chip8Machine&);
+RETRO_API void chip8machine_run(Chip8Machine&);
 RETRO_API bool chip8machine_load_game(const struct retro_game_info *game, Chip8Machine&);
 RETRO_API size_t chip8machine_get_memory_size(unsigned int, const Chip8Machine &);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

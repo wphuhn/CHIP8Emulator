@@ -99,13 +99,8 @@ RETRO_API void retro_reset(void) {
 }
 
 RETRO_API void retro_run(void) {
-    unsigned short framebuffer[400 * 400];
-    for (int i = 0; i < 200 * 400; i++) framebuffer[i] = 0x001F;
-    for (int i = 200 * 400; i < 300 * 400; i++) framebuffer[i] = 0x03E0;
-    for (int i = 300 * 400; i < 400 * 400; i++) framebuffer[i] = 0x7C00;
-    video_cb(framebuffer, 400, 400, sizeof(unsigned short) * 400);
-
-    random_noise(audio_cb);
+    Chip8Machine machine = get_machine();
+    chip8machine_run(machine);
 }
 
 RETRO_API size_t retro_serialize_size(void) {return 1;}
@@ -152,18 +147,40 @@ RETRO_API void chip8machine_get_system_av_info(struct retro_system_av_info *info
     memset(info, 0, sizeof(*info));
     int height = my_machine.display_height;
     int width = my_machine.display_width;
+    int x_scale = my_machine.x_scale;
+    int y_scale = my_machine.y_scale;
 
-    info->geometry.aspect_ratio = 1.0;
-    info->geometry.base_height = height;
-    info->geometry.base_width = width;
-    info->geometry.max_height = height;
-    info->geometry.max_width = width;
+    info->geometry.aspect_ratio = -1.0; // Use default
+    info->geometry.base_height = y_scale * height;
+    info->geometry.base_width = x_scale * width;
+    info->geometry.max_height = y_scale * height;
+    info->geometry.max_width = x_scale * width;
     info->timing.fps = 60.0;
     info->timing.sample_rate = 44100;
 }
 
 RETRO_API void chip8machine_reset(Chip8Machine &my_machine) {
     my_machine.reset();
+}
+
+RETRO_API void chip8machine_run(Chip8Machine &my_machine) {
+    // TODO:  Strong suspicion this will break the moment users try to size screen
+    int width = my_machine.x_scale * my_machine.display_width;
+    int height = my_machine.y_scale * my_machine.display_height;
+
+    int offset_1 = width * height / 4;
+    int offset_2 = width * height / 2;
+    int offset_3 = 3 * width * height / 4;
+    int offset_4 = width * height;
+
+    unsigned short framebuffer[width * height];
+    for (int i = offset_1; i < offset_2; i++) framebuffer[i] = 0x0000;
+    for (int i = offset_1; i < offset_2; i++) framebuffer[i] = 0x001F;
+    for (int i = offset_2; i < offset_3; i++) framebuffer[i] = 0x03E0;
+    for (int i = offset_3; i < offset_4; i++) framebuffer[i] = 0x7C00;
+    video_cb(framebuffer, width, height, sizeof(unsigned short) * width);
+
+    random_noise(audio_cb);
 }
 
 RETRO_API bool chip8machine_load_game(const struct retro_game_info *game, Chip8Machine &my_machine) {

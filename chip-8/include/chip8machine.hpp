@@ -15,12 +15,17 @@
 #define INSTRUCTION_LENGTH 2
 #define NUM_V_REGS 16
 
+#define X_SCALE 8
+#define Y_SCALE 8
+
 class Chip8Machine {
 public:
     Chip8Machine();
 
     const int display_width;
     const int display_height;
+    static const int x_scale = X_SCALE;
+    static const int y_scale = Y_SCALE;
     const int memory_size;
     const PIXEL_TYPE& get_pixel(int, int) const;
     void set_pixel(int, int, PIXEL_TYPE);

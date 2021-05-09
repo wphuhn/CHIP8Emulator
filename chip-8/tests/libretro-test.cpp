@@ -52,12 +52,14 @@ TEST (RetroGetSystemAvInfo, SetsProperVariables) {
 
     int height = my_machine.display_height;
     int width = my_machine.display_width;
+    int x_scale = my_machine.x_scale;
+    int y_scale = my_machine.y_scale;
 
-    EXPECT_FLOAT_EQ(info->geometry.aspect_ratio, 1.0);
-    EXPECT_EQ(info->geometry.base_height, height);
-    EXPECT_EQ(info->geometry.base_width, width);
-    EXPECT_EQ(info->geometry.max_height, height);
-    EXPECT_EQ(info->geometry.max_width, width);
+    EXPECT_FLOAT_EQ(info->geometry.aspect_ratio, -1.0);
+    EXPECT_EQ(info->geometry.base_height, y_scale * height);
+    EXPECT_EQ(info->geometry.base_width, x_scale * width);
+    EXPECT_EQ(info->geometry.max_height, y_scale * height);
+    EXPECT_EQ(info->geometry.max_width, x_scale * width);
     EXPECT_FLOAT_EQ(info->timing.fps, 60.0);
     EXPECT_FLOAT_EQ(info->timing.sample_rate, 44100.0);
 }
@@ -244,7 +246,7 @@ TEST (RetroGetMemoryData, Exists) {
     data = retro_get_memory_data(id);
 }
 
-TEST (RetoGetMemorySize, ReturnsCorrectSize) {
+TEST (RetroGetMemorySize, ReturnsCorrectSize) {
     unsigned dummy;
     Chip8Machine my_machine;
     chip8machine_init(my_machine);
@@ -252,6 +254,20 @@ TEST (RetoGetMemorySize, ReturnsCorrectSize) {
     actual = chip8machine_get_memory_size(dummy, my_machine);
     EXPECT_EQ (expected, actual);
 }
+
+/*
+TEST (RetroRun, AdvancesOneInstruction) {
+    retro_game_info *game = new retro_game_info;
+    Chip8Machine my_machine;
+    chip8machine_init(my_machine);
+    game->size = 4;
+    game->data = (void *) new unsigned char[4] {0xDE, 0xAD, 0xBE, 0xEF};
+    chip8machine_load_game(game, my_machine);
+    chip8machine_run(my_machine);
+    int pc = my_machine.get_pc();
+    EXPECT_EQ( pc, 0x202 );
+}
+*/
 
 int main(int argc, char* argv[]) {
   testing::InitGoogleTest(&argc, argv);
