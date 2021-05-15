@@ -255,7 +255,6 @@ TEST (RetroGetMemorySize, ReturnsCorrectSize) {
     EXPECT_EQ (expected, actual);
 }
 
-/*
 TEST (RetroRun, AdvancesOneInstruction) {
     retro_game_info *game = new retro_game_info;
     Chip8Machine my_machine;
@@ -263,11 +262,11 @@ TEST (RetroRun, AdvancesOneInstruction) {
     game->size = 4;
     game->data = (void *) new unsigned char[4] {0xDE, 0xAD, 0xBE, 0xEF};
     chip8machine_load_game(game, my_machine);
-    chip8machine_run(my_machine);
+    chip8machine_run(my_machine, true);
     int pc = my_machine.get_pc();
     EXPECT_EQ( pc, 0x202 );
+    EXPECT_EQ(my_machine.get_ram()[pc], 0xBE);
 }
-*/
 
 int main(int argc, char* argv[]) {
   testing::InitGoogleTest(&argc, argv);

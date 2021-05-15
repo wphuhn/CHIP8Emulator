@@ -3066,7 +3066,8 @@ RETRO_API void chip8machine_init(Chip8Machine&);
 RETRO_API void chip8machine_deinit(Chip8Machine&);
 RETRO_API void chip8machine_get_system_av_info(struct retro_system_av_info*, const Chip8Machine &);
 RETRO_API void chip8machine_reset(Chip8Machine&);
-RETRO_API void chip8machine_run(Chip8Machine&);
+// When run_silent is True, will not pass state changes to callbacks (used for unit testing)
+RETRO_API void chip8machine_run(Chip8Machine&, bool = false);
 RETRO_API bool chip8machine_load_game(const struct retro_game_info *game, Chip8Machine&);
 RETRO_API size_t chip8machine_get_memory_size(unsigned int, const Chip8Machine &);
 

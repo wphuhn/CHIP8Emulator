@@ -163,10 +163,13 @@ RETRO_API void chip8machine_reset(Chip8Machine &my_machine) {
     my_machine.reset();
 }
 
-RETRO_API void chip8machine_run(Chip8Machine &my_machine) {
+RETRO_API void chip8machine_run(Chip8Machine &my_machine, bool run_silent) {
     // TODO:  Strong suspicion this will break the moment users try to size screen
     int width = my_machine.x_scale * my_machine.display_width;
     int height = my_machine.y_scale * my_machine.display_height;
+
+    // TODO:  For now, each frame is one instruction
+    my_machine.advance();
 
     int offset_1 = width * height / 4;
     int offset_2 = width * height / 2;
@@ -178,9 +181,11 @@ RETRO_API void chip8machine_run(Chip8Machine &my_machine) {
     for (int i = offset_1; i < offset_2; i++) framebuffer[i] = 0x001F;
     for (int i = offset_2; i < offset_3; i++) framebuffer[i] = 0x03E0;
     for (int i = offset_3; i < offset_4; i++) framebuffer[i] = 0x7C00;
-    video_cb(framebuffer, width, height, sizeof(unsigned short) * width);
 
-    random_noise(audio_cb);
+    if (not run_silent) {
+        video_cb(framebuffer, width, height, sizeof(unsigned short) * width);
+        random_noise(audio_cb);
+    }
 }
 
 RETRO_API bool chip8machine_load_game(const struct retro_game_info *game, Chip8Machine &my_machine) {
