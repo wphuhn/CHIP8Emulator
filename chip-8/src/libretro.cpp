@@ -13,19 +13,19 @@ static retro_audio_sample_t audio_cb;
 
 // Creation of a singleton for libretro purposes, but allowing for a
 // backend that's TDD friendly
-static Chip8Machine& get_machine() {
-    static Chip8Machine machine;
-    return machine;
+static Chip8Machine& get_instance() {
+    static Chip8Machine instance;
+    return instance;
 }
 
 RETRO_API void retro_init(void) {
-    Chip8Machine machine = get_machine();
-    chip8machine_init(machine);
+    Chip8Machine *instance = &get_instance();
+    chip8machine_init(*instance);
 }
 
 RETRO_API void retro_deinit(void) {
-    Chip8Machine machine = get_machine();
-    chip8machine_deinit(machine);
+    Chip8Machine *instance = &get_instance();
+    chip8machine_deinit(*instance);
 }
 
 RETRO_API unsigned retro_api_version(void) { return RETRO_API_VERSION; }
@@ -40,8 +40,8 @@ RETRO_API void retro_get_system_info(struct retro_system_info *info) {
 }
 
 RETRO_API void retro_get_system_av_info(struct retro_system_av_info *info) {
-    Chip8Machine machine = get_machine();
-    chip8machine_get_system_av_info(info, machine);
+    Chip8Machine *instance = &get_instance();
+    chip8machine_get_system_av_info(info, *instance);
 }
 
 RETRO_API void retro_set_environment(retro_environment_t environment) {}
@@ -94,13 +94,13 @@ void sine_wave(retro_audio_sample_t audio_cb) {
 }
 
 RETRO_API void retro_reset(void) {
-    Chip8Machine machine = get_machine();
-    chip8machine_reset(machine);
+    Chip8Machine *instance = &get_instance();
+    chip8machine_reset(*instance);
 }
 
 RETRO_API void retro_run(void) {
-    Chip8Machine machine = get_machine();
-    chip8machine_run(machine);
+    Chip8Machine *instance = &get_instance();
+    chip8machine_run(*instance);
 }
 
 RETRO_API size_t retro_serialize_size(void) {return 1;}
@@ -119,8 +119,8 @@ RETRO_API void retro_cheat_reset(void) {}
 RETRO_API void retro_cheat_set(unsigned index, bool enabled, const char *code) {}
 
 RETRO_API bool retro_load_game(const struct retro_game_info *game) {
-    Chip8Machine machine = get_machine();
-    return chip8machine_load_game(game, machine);
+    Chip8Machine *instance = &get_instance();
+    return chip8machine_load_game(game, *instance);
 }
 RETRO_API bool retro_load_game_special(unsigned game_type, const struct retro_game_info* game_info, size_t num_info) {return true;}
 RETRO_API void retro_unload_game(void) {}
@@ -132,8 +132,11 @@ RETRO_API void* retro_get_memory_data(unsigned id) {
     return data;
 }
 RETRO_API size_t retro_get_memory_size(unsigned int id) {
-    Chip8Machine machine = get_machine();
-    return chip8machine_get_memory_size(id, machine);
+    // TODO:  I have no idea why this dummy invocation is needed...
+    Chip8Machine dummy_instance = get_instance();
+
+    Chip8Machine *instance = &get_instance();
+    return chip8machine_get_memory_size(id, *instance);
 }
 RETRO_API void chip8machine_init(Chip8Machine &my_machine) {
     my_machine.reset();
