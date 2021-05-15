@@ -11,6 +11,8 @@ using namespace std;
 static retro_video_refresh_t video_cb;
 static retro_audio_sample_t audio_cb;
 
+#define PIXEL_COLOR 0xFFFF
+
 // Creation of a singleton for libretro purposes, but allowing for a
 // backend that's TDD friendly
 static Chip8Machine& get_instance() {
@@ -174,20 +176,28 @@ RETRO_API void chip8machine_run(Chip8Machine &my_machine, bool run_silent) {
     // TODO:  For now, each frame is one instruction
     my_machine.advance();
 
-    int offset_1 = width * height / 4;
-    int offset_2 = width * height / 2;
-    int offset_3 = 3 * width * height / 4;
-    int offset_4 = width * height;
+    unsigned short framebuffer[height * width];
 
-    unsigned short framebuffer[width * height];
-    for (int i = offset_1; i < offset_2; i++) framebuffer[i] = 0x0000;
-    for (int i = offset_1; i < offset_2; i++) framebuffer[i] = 0x001F;
-    for (int i = offset_2; i < offset_3; i++) framebuffer[i] = 0x03E0;
-    for (int i = offset_3; i < offset_4; i++) framebuffer[i] = 0x7C00;
+    for (int y_machine = 0; y_machine < my_machine.display_height; y_machine++) {
+        for (int x_machine = 0; x_machine < my_machine.display_width; x_machine++) {
+            unsigned short pixel = my_machine.get_pixel(x_machine, y_machine);
+            if (pixel > 0) {
+                pixel = PIXEL_COLOR;
+            }
+            for (int y_sub = 0; y_sub < my_machine.y_scale; y_sub++) {
+                for (int x_sub = 0; x_sub < my_machine.x_scale; x_sub++) {
+                    unsigned short x = my_machine.y_scale * x_machine + x_sub;
+                    unsigned short y = my_machine.y_scale * y_machine + y_sub;
+                    framebuffer[y * width + x] = pixel;
+
+                }
+            }
+        }
+    }
 
     if (not run_silent) {
         video_cb(framebuffer, width, height, sizeof(unsigned short) * width);
-        random_noise(audio_cb);
+ //       random_noise(audio_cb);
     }
 }
 
