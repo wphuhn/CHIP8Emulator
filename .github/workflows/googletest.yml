@@ -1,0 +1,44 @@
+name: Google Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Download Google Test
+      working-directory: ${{github.workspace}}
+      run: |
+           git clone https://github.com/google/googletest.git
+           cd googletest
+           git checkout d128fc8252d53baad6ea456fa08cbf9028d255f4
+           cd ..
+    - name: Configure CMake
+      working-directory: ${{github.workspace}}
+      run: |
+           mkdir build && cd build
+           cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+    - name: Build Core CHIP-8 Library
+      working-directory: ${{github.workspace}}/build
+      run: make -j chip-8
+    - name: Test Core CHIP-8 Library
+      working-directory: ${{github.workspace}}/build
+      run: |
+           make -j chip8-tests
+           ./chip-8/tests/chip8-tests
+    - name: Build LibRetro Library
+      working-directory: ${{github.workspace}}/build
+      run: make -j chip-8-libretro
+    - name: Test LibRetro Library
+      working-directory: ${{github.workspace}}/build
+      run: |
+           make -j libretro-test
+           ./chip-8/tests/libretro-test
