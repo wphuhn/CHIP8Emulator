@@ -27,7 +27,14 @@
 #include <stddef.h>
 #include <limits.h>
 
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <random>
+
 #include "chip8machine.hpp"
+#include "upscaler.hpp"
 
 #ifdef __cplusplus
 extern "C" {

@@ -101,7 +101,7 @@ void check_implemented_instructions(const std::vector<unsigned char> & rom) {
     std::cout << "First unimplemented opcode encountered: " << first_unimplemented << std::endl;
 }
 
-void run_rom(const std::vector<unsigned char> & rom) {
+[[noreturn]] void run_rom(const std::vector<unsigned char> & rom) {
     Chip8Machine machine;
 
     std::cout << std::endl;
@@ -131,6 +131,4 @@ int main (int argc, char** argv) {
 
   check_implemented_instructions(rom);
   run_rom(rom);
-
-  return 0;
 }

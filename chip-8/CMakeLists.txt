@@ -1,7 +1,7 @@
 include_directories(include)
 
 add_library(chip8-only OBJECT src/register.cpp src/memory.cpp src/chip8machine.cpp src/display.cpp src/utilities.cpp src/programcounter.cpp)
-add_library(libretro-only OBJECT src/libretro.cpp)
+add_library(libretro-only OBJECT src/libretro.cpp src/upscaler.cpp)
 set_property(TARGET chip8-only PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET libretro-only PROPERTY POSITION_INDEPENDENT_CODE ON)
 

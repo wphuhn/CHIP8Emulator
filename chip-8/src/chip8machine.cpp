@@ -42,10 +42,10 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
         int n_rows = opcode & 0x000F;
         int x_offset = v_register[x_reg].get() % display_width;
         int y_offset = v_register[y_reg].get() % display_height;
-        int addr = i_register.get();
+        int address = i_register.get();
         for (int y = y_offset; y < y_offset + n_rows; y++) {
             if (y >= display_height) break;
-            unsigned char byte_to_draw = ram.get_byte(addr);
+            unsigned char byte_to_draw = ram.get_byte(address);
             for (int x = 0; x < 8; x++) {
                 if (x + x_offset >= display_width) break;
                 PIXEL_TYPE current = display.get_pixel(x + x_offset, y);
@@ -54,7 +54,7 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
                 display.set_pixel(x + x_offset, y, new_value);
                 if (current != 0x0 && new_value == 0x0) set_flag(0x1);
             }
-            addr += 1;
+            address += 1;
         }
        return;
     }
@@ -153,7 +153,7 @@ void Chip8Machine::reset() {
 
 std::string Chip8Machine::display_str() const {
     return std::string(display);
-};
+}
 
 OpcodeNotSupported::OpcodeNotSupported(const OPCODE_TYPE opcode)
     : std::runtime_error("Opcode " + opcode_to_hex_str(opcode) + " not supported") {}

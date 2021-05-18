@@ -52,8 +52,8 @@ TEST (RetroGetSystemAvInfo, SetsProperVariables) {
 
     int height = my_machine.display_height;
     int width = my_machine.display_width;
-    int x_scale = my_machine.x_scale;
-    int y_scale = my_machine.y_scale;
+    int x_scale = Upscaler::x_scale;
+    int y_scale = Upscaler::y_scale;
 
     EXPECT_FLOAT_EQ(info->geometry.aspect_ratio, -1.0);
     EXPECT_EQ(info->geometry.base_height, y_scale * height);
@@ -64,14 +64,17 @@ TEST (RetroGetSystemAvInfo, SetsProperVariables) {
     EXPECT_FLOAT_EQ(info->timing.sample_rate, 44100.0);
 }
 
-// TODO:  Ignoring environment tests for now
-TEST (RetroSetEnvironment, Exists) {
+// We don't need this subroutine for anything, but the RetroArch API
+// requires it, so test only that it exists and can be called
+TEST (RetroSetEnvironment, ExistsAndDoesntCrash) {
    retro_environment_t environment;
    retro_set_environment(environment);
 }
 
-// TODO:  Ignoring video tests for now
-TEST (RetroSetVideoRefresh, Exists) {
+// This is a boilerplate subroutine that sets the callback, we don't
+// need any special modification for it, so test only that it exists
+// and can be called
+TEST (RetroSetVideoRefresh, ExistsAndDoesntCrash) {
     retro_video_refresh_t videoRefresh;
     retro_set_video_refresh(videoRefresh);
 }
@@ -114,11 +117,6 @@ TEST (RetroReset, ResetsStateOfEmulator) {
     int pc = my_machine.get_pc();
     EXPECT_EQ( pc, 0x200 );
 }
-
-// TODO:  Figure out how to test...
-//TEST (RetroRun, Exists) {
-//    retro_run();
-//}
 
 // TODO:  Ignoring serialization tests for now
 TEST (RetroSerializeSize, ReturnsOne) {

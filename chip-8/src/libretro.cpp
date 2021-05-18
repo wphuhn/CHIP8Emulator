@@ -1,17 +1,11 @@
-#include <string.h>
-#include <math.h>
-#include <stdlib.h>
-#include <exception>
-#include <iostream>
-
 #include "libretro.h"
 
-using namespace std;
-
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "UnusedParameter"
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
+static const short MAX_AUDIO_VALUE = 32767;
 static retro_video_refresh_t video_cb;
 static retro_audio_sample_t audio_cb;
-
-#define PIXEL_COLOR 0xFFFF
 
 // Creation of a singleton for libretro purposes, but allowing for a
 // backend that's TDD friendly
@@ -50,47 +44,86 @@ RETRO_API void retro_set_environment(retro_environment_t environment) {}
 RETRO_API void retro_set_video_refresh(retro_video_refresh_t videoRefresh) {
     video_cb = videoRefresh;
 }
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "UnusedValue"
 RETRO_API void retro_set_audio_sample(retro_audio_sample_t audioSample){
     audio_cb = audioSample;
 }
+#pragma clang diagnostic pop
+
 RETRO_API void retro_set_audio_sample_batch(retro_audio_sample_batch_t audioSampleBatch) {}
 RETRO_API void retro_set_input_poll(retro_input_poll_t inputPoll) {}
 RETRO_API void retro_set_input_state(retro_input_state_t inputState) {}
 RETRO_API void retro_set_controller_port_device(unsigned port, unsigned device) {}
 
-void random_noise(retro_audio_sample_t audio_cb) {
-    for (int j = 0; j < 735; j++) {
-        audio_cb(rand() % 32768, rand() % 32768);
+void random_noise(retro_audio_sample_t my_audio_cb) {
+    // Shameless copy-paste from Google
+    // If this subroutine actually gets used, generator creation should be
+    // moved out of this subroutine
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<short> distribution(0, MAX_AUDIO_VALUE);
+
+    // 735 iterations to reach 44.100 kHz sampling @ 60 fps
+    const int n_iterations = 735;
+    for (int j = 0; j < n_iterations; j++) {
+        my_audio_cb(distribution(gen), distribution(gen));
     }
 }
 
-void square_wave(retro_audio_sample_t audio_cb) {
-    // 420 Hz Triangle wave (7 cycles per frame, 60 frames per second
-    for (int j = 0; j < 7; j++) {
-        // 735 iterations per frame to reach 44.100 kHz sampling @ 60 fps
-        for (int i = 0; i < 52; i++) audio_cb(32768, 32768);
-        for (int i = 0; i < 53; i++) audio_cb(0, 0);
+void square_wave(retro_audio_sample_t my_audio_cb) {
+    // 420 Hz Triangle wave (7 cycles per frame, 60 frames per second)
+    const int n_cycles_per_frame = 7;
+    // 105 iterations per cycle to reach 44.100 kHz sampling @ 60 fps @ 7 cycles per frame
+    const int n_iterations_per_cycle = 105;
+    // Corresponds to duty cycle of 50%
+    const int n_high_per_cycle = 52;
+
+    int n_low_per_cycle = n_iterations_per_cycle - n_high_per_cycle;
+    for (int j = 0; j < n_cycles_per_frame; j++) {
+        for (int i = 0; i < n_high_per_cycle; i++) my_audio_cb(MAX_AUDIO_VALUE, MAX_AUDIO_VALUE);
+        for (int i = 0; i < n_low_per_cycle; i++) my_audio_cb(0, 0);
     }
 }
 
-void triangle_wave(retro_audio_sample_t audio_cb) {
-    // 420 Hz Triangle wave (7 cycles per frame, 60 frames per second
-    for (int j = 0; j < 7; j++) {
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
+void triangle_wave(retro_audio_sample_t my_audio_cb) {
+    // 420 Hz Triangle wave (7 cycles per frame, 60 frames per second)
+    const int n_cycles_per_frame = 7;
+    // 105 iterations per cycle to reach 44.100 kHz sampling @ 60 fps @ 7 cycles per frame
+    const int n_iterations_per_cycle = 105;
+    // Corresponds to duty cycle of 50%
+    const int n_rising_per_cycle = 52;
+    // For a max value of 32767, the closest
+    const short rising_increment = 630;
+    const short falling_increment = 628;
+
+    short n_falling_per_cycle = n_iterations_per_cycle - n_rising_per_cycle;
+    for (int j = 0; j < n_cycles_per_frame; j++) {
         // 735 iterations per frame to reach 44.100 kHz sampling @ 60 fps
-        for (int i = 0; i < 52; i++) audio_cb(i * 630, i * 630);
-        for (int i = 0; i < 53; i++) audio_cb(32768 - i * 630, 32768 - i * 630);
+        for (int i = 0; i < n_rising_per_cycle; i++) my_audio_cb(i * rising_increment, i * rising_increment);
+        for (int i = 0; i < n_falling_per_cycle; i++) my_audio_cb(MAX_AUDIO_VALUE - i * falling_increment,
+                                                                  MAX_AUDIO_VALUE - i * falling_increment);
     }
 }
+#pragma clang diagnostic pop
 
-void sine_wave(retro_audio_sample_t audio_cb) {
-    // 420 Hz Triangle wave (7 cycles per frame, 60 frames per second
-    unsigned short amp;
-    for (int j = 0; j < 7; j++) {
-        // 735 iterations per frame to reach 44.100 kHz sampling @ 60 fps
-        for (int i = 0; i < 105; i++) {
-            amp = (unsigned short) 32768.0 * (1.0 + sin(2.0 * M_PI * i / 105.0)) / 2.0;
-            audio_cb(amp, amp);
-            std::cout << amp << std::endl;
+void sine_wave(retro_audio_sample_t my_audio_cb) {
+    // 420 Hz Triangle wave (7 cycles per frame, 60 frames per second)
+    const int n_cycles_per_frame = 7;
+    // 105 iterations per cycle to reach 44.100 kHz sampling @ 60 fps @ 7 cycles per frame
+    const int n_iterations_per_cycle = 105;
+
+    short signal;
+    double phase;
+    for (int j = 0; j < n_cycles_per_frame; j++) {
+        for (int i = 0; i < n_iterations_per_cycle; i++) {
+            phase = 2.0 * M_PI * i / n_iterations_per_cycle;
+            signal = static_cast<short>((1.0 * MAX_AUDIO_VALUE) * sin(phase) / 2.0);
+            my_audio_cb(signal, signal);
+            std::cout << signal << std::endl;
         }
     }
 }
@@ -129,10 +162,14 @@ RETRO_API void retro_unload_game(void) {}
 
 RETRO_API unsigned retro_get_region(void) {return 0;}
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wuninitialized"
 RETRO_API void* retro_get_memory_data(unsigned id) {
     void* data;
     return data;
 }
+#pragma clang diagnostic pop
+
 RETRO_API size_t retro_get_memory_size(unsigned int id) {
     // TODO:  I have no idea why this dummy invocation is needed...
     Chip8Machine dummy_instance = get_instance();
@@ -152,8 +189,8 @@ RETRO_API void chip8machine_get_system_av_info(struct retro_system_av_info *info
     memset(info, 0, sizeof(*info));
     int height = my_machine.display_height;
     int width = my_machine.display_width;
-    int x_scale = my_machine.x_scale;
-    int y_scale = my_machine.y_scale;
+    int x_scale = Upscaler::x_scale;
+    int y_scale = Upscaler::y_scale;
 
     info->geometry.aspect_ratio = -1.0; // Use default
     info->geometry.base_height = y_scale * height;
@@ -170,34 +207,19 @@ RETRO_API void chip8machine_reset(Chip8Machine &my_machine) {
 
 RETRO_API void chip8machine_run(Chip8Machine &my_machine, bool run_silent) {
     // TODO:  Strong suspicion this will break the moment users try to size screen
-    int width = my_machine.x_scale * my_machine.display_width;
-    int height = my_machine.y_scale * my_machine.display_height;
+    int width = Upscaler::x_scale * my_machine.display_width;
+    int height = Upscaler::y_scale * my_machine.display_height;
 
     // TODO:  For now, each frame is one instruction
     my_machine.advance();
 
-    unsigned short framebuffer[height * width];
+    unsigned short frame_buffer[height * width];
 
-    for (int y_machine = 0; y_machine < my_machine.display_height; y_machine++) {
-        for (int x_machine = 0; x_machine < my_machine.display_width; x_machine++) {
-            unsigned short pixel = my_machine.get_pixel(x_machine, y_machine);
-            if (pixel > 0) {
-                pixel = PIXEL_COLOR;
-            }
-            for (int y_sub = 0; y_sub < my_machine.y_scale; y_sub++) {
-                for (int x_sub = 0; x_sub < my_machine.x_scale; x_sub++) {
-                    unsigned short x = my_machine.y_scale * x_machine + x_sub;
-                    unsigned short y = my_machine.y_scale * y_machine + y_sub;
-                    framebuffer[y * width + x] = pixel;
-
-                }
-            }
-        }
-    }
+    Upscaler::upscale(frame_buffer, width, my_machine);
 
     if (not run_silent) {
-        video_cb(framebuffer, width, height, sizeof(unsigned short) * width);
- //       random_noise(audio_cb);
+        video_cb(frame_buffer, width, height, sizeof(unsigned short) * width);
+        //sine_wave(audio_cb);
     }
 }
 
@@ -212,3 +234,9 @@ RETRO_API bool chip8machine_load_game(const struct retro_game_info *game, Chip8M
 RETRO_API size_t chip8machine_get_memory_size(unsigned int id, const Chip8Machine &my_machine) {
     return my_machine.memory_size;
 }
+
+// CLion has a long-standing bug (3 years old...) about this being incorrectly identified as
+// having no associated push statement, so remove it only for the CLion IDE
+#ifndef __CLION_IDE_
+#pragma clang diagnostic pop
+#endif

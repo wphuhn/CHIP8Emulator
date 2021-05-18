@@ -20,7 +20,7 @@ public:
     const PIXEL_TYPE& get_pixel(int, int) const;
     void set_pixel(int, int, PIXEL_TYPE);
     void clear();
-    operator std::string() const;
+    explicit operator std::string() const;
 private:
     std::vector< std::vector<PIXEL_TYPE> > screen;
 };
