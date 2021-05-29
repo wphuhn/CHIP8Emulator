@@ -2,12 +2,15 @@
 
 #include "display.hpp"
 
-TEST (Display, HasDefaultConstructor) {
-    Display display;
+#define OFF_PIXEL 0
+#define ON_PIXEL 1
+
+static Display get_display() {
+    return Display(32, 64);
 }
 
 TEST (Display, InitiallyIsClear) {
-    Display display;
+    Display display = get_display();
     for (int x = 0; x < display.width; x++) {
         for (int y = 0; y < display.height; y++) {
             EXPECT_EQ(display.get_pixel(x, y), OFF_PIXEL);
@@ -16,7 +19,7 @@ TEST (Display, InitiallyIsClear) {
 }
 
 TEST (Display, PixelCanBeChanged) {
-    Display display;
+    Display display = get_display();
     int x = 5;
     int y = 3;
     int expected = ON_PIXEL;
@@ -26,7 +29,7 @@ TEST (Display, PixelCanBeChanged) {
 }
 
 TEST (Display, ClearClearsTheScreen) {
-    Display display;
+    Display display = get_display();
     for (int x = 0; x < display.width; x++) {
         for (int y = 0; y < display.height; y++) {
             display.set_pixel(x, y, ON_PIXEL);

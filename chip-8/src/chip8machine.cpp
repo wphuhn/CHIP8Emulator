@@ -1,7 +1,8 @@
 #include "chip8machine.hpp"
 
 Chip8Machine::Chip8Machine()
-    : display_height(Display::height), display_width(Display::width), memory_size(Memory::size) {}
+    : display_height(MAX_HEIGHT), display_width(MAX_WIDTH), memory_size(RAM_SIZE),
+      ram(RAM_SIZE, ROM_START_ADDRESS), display(MAX_HEIGHT, MAX_WIDTH) {}
 
 void Chip8Machine::decode(const OPCODE_TYPE opcode) {
     // Are ya coding, son?

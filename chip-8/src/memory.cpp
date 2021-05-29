@@ -1,6 +1,6 @@
 #include "memory.hpp"
 
-Memory::Memory() {
+Memory::Memory(int size_, int rom_start_address_) : size(size_), rom_start_address(rom_start_address_) {
    ram.resize(size);
    for (unsigned char& value : ram) {
        value = 0x00;
@@ -8,7 +8,7 @@ Memory::Memory() {
 }
 
 void Memory::load_rom(const std::vector<unsigned char> & rom) {
-    int offset = ROM_START_ADDRESS;
+    int offset = rom_start_address;
     for (unsigned char value : rom) {
         ram[offset] = value;
         offset += 1;
@@ -21,7 +21,7 @@ void Memory::load_rom(const std::vector<unsigned char> & rom) {
 std::vector<unsigned char> Memory::get_ram(bool include_start) const {
     auto first = ram.begin();
     if (not include_start) {
-        first += ROM_START_ADDRESS;
+        first += rom_start_address;
     }
     auto last = ram.end();
     return std::vector<unsigned char>(first, last);

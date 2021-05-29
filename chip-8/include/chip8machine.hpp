@@ -7,6 +7,7 @@
 #include <string>
 
 #include "chip8constants.hpp"
+#include "chip8types.hpp"
 #include "display.hpp"
 #include "memory.hpp"
 #include "programcounter.hpp"

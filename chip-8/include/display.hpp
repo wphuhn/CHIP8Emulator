@@ -4,14 +4,15 @@
 #include <iomanip>
 #include <vector>
 
-#include "chip8constants.hpp"
+#include "chip8types.hpp"
 
 class Display {
 public:
-    Display();
+    Display(int, int, PIXEL_TYPE = 0);
 
-    static const int width = MAX_WIDTH;
-    static const int height = MAX_HEIGHT;
+    const int width;
+    const int height;
+    const int off_pixel;
 
     const PIXEL_TYPE& get_pixel(int, int) const;
     void set_pixel(int, int, PIXEL_TYPE);

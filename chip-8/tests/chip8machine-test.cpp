@@ -4,6 +4,9 @@
 
 #include "utilities.hpp"
 
+#define OFF_PIXEL 0
+#define ON_PIXEL 1
+
 TEST (Chip8Machine, HasDefaultConstructor) {
     Chip8Machine machine;
 }

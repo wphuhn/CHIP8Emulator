@@ -6,13 +6,12 @@
 #include <string>
 #include <vector>
 
-#include "chip8constants.hpp"
-
 class Memory {
 public:
-    Memory();
+    Memory(int, int);
 
-    static const int size = RAM_SIZE;
+    const int size;
+    const int rom_start_address;
 
     void load_rom(const std::vector<unsigned char> &);
     std::vector<unsigned char> get_ram(bool = true) const;

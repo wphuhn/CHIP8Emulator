@@ -2,8 +2,8 @@
 
 #include "memory.hpp"
 
-TEST (Memory, HasDefaultConstructor) {
-    Memory ram;
+static Memory get_memory() {
+    return Memory(0x1000, 0x200);
 }
 
 TEST (Memory, GetBitstreamFromFileThrowsExceptionIfFileNotFound) {
@@ -85,7 +85,7 @@ TEST (Memory, ConvertBitstreamToVectorGivesExpectedContent) {
 // TODO:  Just remove this test?
 TEST (Memory, LoadROMLoadsROMAtCorrectLocation_AccessByByte) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
-    Memory ram;
+    Memory ram = get_memory();
     ram.load_rom(rom);
     int expected_start_address = 0x200;
     for (int i = 0; i < rom.size(); i++) {
@@ -99,7 +99,7 @@ TEST (Memory, LoadROMLoadsROMAtCorrectLocation_AccessByByte) {
 // memory beyond the boundary of the original STL container)
 TEST (Memory, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetAllRAM) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
-    Memory ram;
+    Memory ram = get_memory();
     ram.load_rom(rom);
     const std::vector<unsigned char> returned_ram = ram.get_ram();
     int expected_start_address = 0x200;
@@ -110,7 +110,7 @@ TEST (Memory, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetAllRAM) {
 
 TEST (Memory, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetActivePortion) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
-    Memory ram;
+    Memory ram = get_memory();
     ram.load_rom(rom);
     const std::vector<unsigned char> returned_ram = ram.get_ram(false);
     for (int i = 0; i < rom.size(); i++) {
