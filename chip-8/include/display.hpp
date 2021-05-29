@@ -4,11 +4,7 @@
 #include <iomanip>
 #include <vector>
 
-#define MAX_WIDTH 64
-#define MAX_HEIGHT 32
-#define OFF_PIXEL 0
-#define ON_PIXEL 1
-#define PIXEL_TYPE int
+#include "chip8constants.hpp"
 
 class Display {
 public:

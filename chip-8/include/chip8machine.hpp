@@ -6,14 +6,11 @@
 #include <stdexcept>
 #include <string>
 
+#include "chip8constants.hpp"
 #include "display.hpp"
 #include "memory.hpp"
 #include "programcounter.hpp"
 #include "register.hpp"
-
-#define OPCODE_TYPE uint16_t
-#define INSTRUCTION_LENGTH 2
-#define NUM_V_REGS 16
 
 class Chip8Machine {
 public:

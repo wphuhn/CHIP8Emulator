@@ -6,8 +6,7 @@
 #include <string>
 #include <vector>
 
-#define RAM_SIZE 0x1000
-#define ROM_START_ADDRESS 0x200
+#include "chip8constants.hpp"
 
 class Memory {
 public:
