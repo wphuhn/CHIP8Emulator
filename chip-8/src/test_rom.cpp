@@ -22,7 +22,7 @@ void output_stats(const std::map<std::string, int> & counter, const unsigned int
     }
 }
 
-OPCODE_TYPE extract_big_endian_opcode(const std::vector<unsigned char> & rom, const int pc) {
+OPCODE_TYPE extract_big_endian_opcode(const std::vector<MEM_TYPE> & rom, const ADDR_TYPE pc) {
     OPCODE_TYPE opcode = 0;
 
     for (int i = 0; i < N_BYTES_IN_OP; i++) {
@@ -40,7 +40,7 @@ std::string convert_opcode_to_str(const OPCODE_TYPE opcode) {
     return stream.str();
 }
 
-void check_implemented_instructions(const std::vector<unsigned char> & rom) {
+void check_implemented_instructions(const std::vector<MEM_TYPE> & rom) {
     Chip8Machine machine;
     OPCODE_TYPE opcode;
 
@@ -101,7 +101,7 @@ void check_implemented_instructions(const std::vector<unsigned char> & rom) {
     std::cout << "First unimplemented opcode encountered: " << first_unimplemented << std::endl;
 }
 
-[[noreturn]] void run_rom(const std::vector<unsigned char> & rom) {
+[[noreturn]] void run_rom(const std::vector<MEM_TYPE> & rom) {
     Chip8Machine machine;
 
     std::cout << std::endl;
@@ -127,7 +127,7 @@ int main (int argc, char** argv) {
   void* data;
   size_t size;
   std::tie(data, size) = Memory::get_bitstream_from_file(std::string(argv[1]));
-  std::vector<unsigned char> rom = Memory::convert_bitstream_to_vector(data, size);
+  std::vector<MEM_TYPE> rom = Memory::convert_bitstream_to_vector(data, size);
 
   check_implemented_instructions(rom);
   run_rom(rom);

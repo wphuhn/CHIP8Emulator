@@ -12,7 +12,7 @@ public:
 
     const int width;
     const int height;
-    const int off_pixel;
+    const PIXEL_TYPE off_pixel;
 
     const PIXEL_TYPE& get_pixel(int, int) const;
     void set_pixel(int, int, PIXEL_TYPE);

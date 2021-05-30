@@ -1,15 +1,15 @@
 #include "memory.hpp"
 
-Memory::Memory(int size_, int rom_start_address_) : size(size_), rom_start_address(rom_start_address_) {
+Memory::Memory(ADDR_TYPE size_, ADDR_TYPE rom_start_address_) : size(size_), rom_start_address(rom_start_address_) {
    ram.resize(size);
-   for (unsigned char& value : ram) {
+   for (MEM_TYPE& value : ram) {
        value = 0x00;
    }
 }
 
-void Memory::load_rom(const std::vector<unsigned char> & rom) {
-    int offset = rom_start_address;
-    for (unsigned char value : rom) {
+void Memory::load_rom(const std::vector<MEM_TYPE> & rom) {
+    ADDR_TYPE offset = rom_start_address;
+    for (MEM_TYPE value : rom) {
         ram[offset] = value;
         offset += 1;
     }
@@ -18,20 +18,20 @@ void Memory::load_rom(const std::vector<unsigned char> & rom) {
 // CHIP-8 code can be self-altering, hence the slightly different name
 // When include_start is true, returns the entirety of RAM, including the 512 dead
 // bytes at the beginning, otherwise return only the writeable portion
-std::vector<unsigned char> Memory::get_ram(bool include_start) const {
+std::vector<MEM_TYPE> Memory::get_ram(bool include_start) const {
     auto first = ram.begin();
     if (not include_start) {
         first += rom_start_address;
     }
     auto last = ram.end();
-    return std::vector<unsigned char>(first, last);
+    return std::vector<MEM_TYPE>(first, last);
 }
 
-unsigned char Memory::get_byte(const int offset) const {
+MEM_TYPE Memory::get_byte(const ADDR_TYPE offset) const {
     return ram[offset];
 }
 
-void Memory::set_byte(const int address, const unsigned char value) {
+void Memory::set_byte(const ADDR_TYPE address, const MEM_TYPE value) {
     ram[address] = value;
 }
 
@@ -62,11 +62,11 @@ std::pair<void*, size_t> Memory::get_bitstream_from_file(const std::string& path
     return {data, data_size};
 }
 
-std::vector<unsigned char> Memory::convert_bitstream_to_vector(const void* bitstream, const size_t bitstream_size) {
-    auto rom = (const unsigned char*) bitstream;
+std::vector<MEM_TYPE> Memory::convert_bitstream_to_vector(const void* bitstream, const size_t bitstream_size) {
+    auto rom = (const MEM_TYPE*) bitstream;
 
-    int pc = 0;
-    std::vector<unsigned char> rom_vec (bitstream_size, 0x0000);
+    size_t pc = 0;
+    std::vector<MEM_TYPE> rom_vec (bitstream_size, 0x0000);
     while (pc < bitstream_size) {
         rom_vec[pc] = rom[pc];
         pc += 1;

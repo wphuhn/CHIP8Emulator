@@ -19,27 +19,27 @@ public:
 
     const int display_width;
     const int display_height;
-    const int memory_size;
+    const ADDR_TYPE memory_size;
     const PIXEL_TYPE& get_pixel(int, int) const;
     void set_pixel(int, int, PIXEL_TYPE);
     void clear_screen();
 
-    void set_memory_byte(int, unsigned char);
-    unsigned char get_memory_byte(int) const;
+    void set_memory_byte(ADDR_TYPE, MEM_TYPE);
+    MEM_TYPE get_memory_byte(ADDR_TYPE) const;
     std::string display_str() const;
 
-    int get_i() const;
-    int get_v(int) const;
-    int get_flag() const;
-    int get_pc() const;
-    std::vector<unsigned char> get_ram(bool = true) const;
+    REG_TYPE get_i() const;
+    REG_TYPE get_v(int) const;
+    REG_TYPE get_flag() const;
+    ADDR_TYPE get_pc() const;
+    std::vector<MEM_TYPE> get_ram(bool = true) const;
 
-    void set_i(int);
-    void set_v(int, int);
-    void set_flag(int);
-    void set_pc(int);
+    void set_i(REG_TYPE);
+    void set_v(int, REG_TYPE);
+    void set_flag(REG_TYPE);
+    void set_pc(ADDR_TYPE);
 
-    void load_rom(const std::vector<unsigned char> &);
+    void load_rom(const std::vector<MEM_TYPE> &);
     void decode(OPCODE_TYPE);
     OPCODE_TYPE fetch_instruction() const;
     void advance();

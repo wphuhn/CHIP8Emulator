@@ -1,14 +1,17 @@
 #ifndef CHIP_8_PROGRAMCOUNTER_HPP_
 #define CHIP_8_PROGRAMCOUNTER_HPP_
+
+#include "chip8types.hpp"
+
 class ProgramCounter{
 public:
     ProgramCounter();
 
-    int get() const;
-    void set(int);
+    ADDR_TYPE get() const;
+    void set(ADDR_TYPE);
 
-    void add(int);
+    void add(ADDR_TYPE);
 private:
-    int value_;
+    ADDR_TYPE value_;
 };
 #endif //CHIP_8_PROGRAMCOUNTER_HPP_

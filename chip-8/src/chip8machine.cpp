@@ -46,7 +46,7 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
         int address = i_register.get();
         for (int y = y_offset; y < y_offset + n_rows; y++) {
             if (y >= display_height) break;
-            unsigned char byte_to_draw = ram.get_byte(address);
+            MEM_TYPE byte_to_draw = ram.get_byte(address);
             for (int x = 0; x < 8; x++) {
                 if (x + x_offset >= display_width) break;
                 PIXEL_TYPE current = display.get_pixel(x + x_offset, y);
@@ -70,15 +70,15 @@ void Chip8Machine::set_pixel(const int x, const int y, const PIXEL_TYPE value) {
     display.set_pixel(x, y, value);
 }
 
-int Chip8Machine::get_pc() const {
+ADDR_TYPE Chip8Machine::get_pc() const {
     return pc.get();
 }
 
-std::vector<unsigned char> Chip8Machine::get_ram(bool include_start) const {
+std::vector<MEM_TYPE> Chip8Machine::get_ram(bool include_start) const {
     return ram.get_ram(include_start);
 }
 
-void Chip8Machine::set_pc(const int new_pc) {
+void Chip8Machine::set_pc(const ADDR_TYPE new_pc) {
     pc.set(new_pc);
 }
 
@@ -86,22 +86,22 @@ void Chip8Machine::clear_screen() {
     display.clear();
 }
 
-void Chip8Machine::set_memory_byte(int address, unsigned char value) {
+void Chip8Machine::set_memory_byte(ADDR_TYPE address, MEM_TYPE value) {
     ram.set_byte(address, value);
 }
 
-unsigned char Chip8Machine::get_memory_byte(int address) const {
+MEM_TYPE Chip8Machine::get_memory_byte(ADDR_TYPE address) const {
     return ram.get_byte(address);
 }
 
-void Chip8Machine::load_rom(const std::vector<unsigned char> &rom) {
+void Chip8Machine::load_rom(const std::vector<MEM_TYPE> &rom) {
     ram.load_rom(rom);
 }
 
 OPCODE_TYPE Chip8Machine::fetch_instruction() const {
-    int pc_ = pc.get();
-    unsigned char byte_one = ram.get_byte(pc_);
-    unsigned char byte_two = ram.get_byte(pc_ + 1);
+    ADDR_TYPE pc_ = pc.get();
+    MEM_TYPE byte_one = ram.get_byte(pc_);
+    MEM_TYPE byte_two = ram.get_byte(pc_ + 1);
     return (byte_one << 8) + byte_two;
 }
 
@@ -111,22 +111,22 @@ void Chip8Machine::advance() {
     decode(opcode);
 }
 
-int Chip8Machine::get_i() const {return i_register.get();}
-int Chip8Machine::get_v(const int reg_num) const {
+REG_TYPE Chip8Machine::get_i() const {return i_register.get();}
+REG_TYPE Chip8Machine::get_v(const int reg_num) const {
     if (reg_num < v_register.size()) return v_register[reg_num].get();
     throw std::runtime_error("Invalid register V" + std::to_string(reg_num) + " specified.");
 }
-int Chip8Machine::get_flag() const {return v_register[0xF].get();}
+REG_TYPE Chip8Machine::get_flag() const {return v_register[0xF].get();}
 
-void Chip8Machine::set_i(const int new_value) {i_register.set(new_value);}
-void Chip8Machine::set_v(const int reg_num, const int new_value) {
+void Chip8Machine::set_i(const REG_TYPE new_value) {i_register.set(new_value);}
+void Chip8Machine::set_v(const int reg_num, const REG_TYPE new_value) {
     if (reg_num < v_register.size()) {
         v_register[reg_num].set(new_value);
         return;
     }
     throw std::runtime_error("Invalid register V" + std::to_string(reg_num) + " specified.");
 }
-void Chip8Machine::set_flag(const int new_value) {set_v(0xF, new_value);}
+void Chip8Machine::set_flag(const REG_TYPE new_value) {set_v(0xF, new_value);}
 
 static std::string opcode_to_hex_str(const OPCODE_TYPE value) {
     std::stringstream stream;

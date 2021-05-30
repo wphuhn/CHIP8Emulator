@@ -2,5 +2,5 @@
 
 Register::Register() : value_(0) {}
 
-int Register::get() const {return value_;}
-void Register::set(const int new_value) {value_ = new_value;}
+REG_TYPE Register::get() const {return value_;}
+void Register::set(const REG_TYPE new_value) {value_ = new_value;}

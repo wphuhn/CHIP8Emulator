@@ -17,8 +17,8 @@ OPCODE_TYPE gen_WXYZ_opcode(const int W, const int X, const int Y, const int Z) 
     return (W_ << 12) + (X_ << 8) + (Y_ << 4) + Z_;
 }
 
-Chip8Machine create_machine_for_drawing(const OPCODE_TYPE opcode, const int font_address,
-                                        const std::vector<unsigned char>& font, const int x_offset, const int y_offset) {
+Chip8Machine create_machine_for_drawing(const OPCODE_TYPE opcode, const ADDR_TYPE font_address,
+                                        const std::vector<MEM_TYPE>& font, const int x_offset, const int y_offset) {
     Chip8Machine machine;
     machine.clear_screen();
     machine.set_flag(0);
