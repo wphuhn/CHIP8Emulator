@@ -33,6 +33,7 @@ public:
     REG_TYPE get_flag() const;
     ADDR_TYPE get_pc() const;
     std::vector<MEM_TYPE> get_ram(bool = true) const;
+    void* get_pointer_to_ram_start() const;
 
     void set_i(REG_TYPE);
     void set_v(int, REG_TYPE);

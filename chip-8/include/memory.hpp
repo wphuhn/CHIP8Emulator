@@ -17,6 +17,7 @@ public:
 
     void load_rom(const std::vector<MEM_TYPE> &);
     std::vector<MEM_TYPE> get_ram(bool = true) const;
+    void * get_pointer_to_ram_start() const;
     MEM_TYPE get_byte(ADDR_TYPE) const;
     void set_byte(ADDR_TYPE, MEM_TYPE);
 

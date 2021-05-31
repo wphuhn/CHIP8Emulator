@@ -27,6 +27,10 @@ std::vector<MEM_TYPE> Memory::get_ram(bool include_start) const {
     return std::vector<MEM_TYPE>(first, last);
 }
 
+void * Memory::get_pointer_to_ram_start() const {
+    return (void *) &ram[0];
+}
+
 MEM_TYPE Memory::get_byte(const ADDR_TYPE offset) const {
     return ram[offset];
 }

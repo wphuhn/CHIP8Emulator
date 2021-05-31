@@ -162,18 +162,12 @@ RETRO_API void retro_unload_game(void) {}
 
 RETRO_API unsigned retro_get_region(void) {return 0;}
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wuninitialized"
 RETRO_API void* retro_get_memory_data(unsigned id) {
-    void* data;
-    return data;
+    Chip8Machine *instance = &get_instance();
+    return chip8machine_get_memory_data(id, *instance);
 }
-#pragma clang diagnostic pop
 
 RETRO_API size_t retro_get_memory_size(unsigned int id) {
-    // TODO:  I have no idea why this dummy invocation is needed...
-    Chip8Machine dummy_instance = get_instance();
-
     Chip8Machine *instance = &get_instance();
     return chip8machine_get_memory_size(id, *instance);
 }
@@ -231,8 +225,13 @@ RETRO_API bool chip8machine_load_game(const struct retro_game_info *game, Chip8M
     return true;
 }
 
+RETRO_API void* chip8machine_get_memory_data(unsigned id, const Chip8Machine &my_machine) {
+    return my_machine.get_pointer_to_ram_start();
+}
+
 RETRO_API size_t chip8machine_get_memory_size(unsigned int id, const Chip8Machine &my_machine) {
-    return my_machine.memory_size;
+    return 0;
+    //return my_machine.memory_size;
 }
 
 // CLion has a long-standing bug (3 years old...) about this being incorrectly identified as

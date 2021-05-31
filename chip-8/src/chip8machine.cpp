@@ -78,6 +78,10 @@ std::vector<MEM_TYPE> Chip8Machine::get_ram(bool include_start) const {
     return ram.get_ram(include_start);
 }
 
+void * Chip8Machine::get_pointer_to_ram_start() const {
+    return ram.get_pointer_to_ram_start();
+}
+
 void Chip8Machine::set_pc(const ADDR_TYPE new_pc) {
     pc.set(new_pc);
 }
