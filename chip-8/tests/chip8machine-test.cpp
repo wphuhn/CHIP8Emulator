@@ -2,6 +2,7 @@
 
 #include "chip8machine.hpp"
 
+#include "chip8machinetester.hpp"
 #include "utilities.hpp"
 
 #define OFF_PIXEL 0
@@ -71,8 +72,9 @@ class ANNNParameterizedTestFixture : public ::testing::TestWithParam<OPCODE_TYPE
 TEST_P (ANNNParameterizedTestFixture, OpcodeANNNSetsIRegisterToNNN) {
     OPCODE_TYPE opcode = GetParam();
     Chip8Machine machine;
+    Chip8MachineTester tester(&machine);
     int value = opcode & 0x0FFF;
-    machine.set_i(0x0000);
+    tester.set_i(0x0000);
     machine.decode(opcode);
     EXPECT_EQ(machine.get_i(), value);
 }

@@ -17,6 +17,8 @@ class Chip8Machine {
 public:
     Chip8Machine();
 
+    friend class Chip8MachineTester;
+
     const int display_width;
     const int display_height;
     const ADDR_TYPE memory_size;
