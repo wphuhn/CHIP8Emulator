@@ -8,13 +8,22 @@
 #define OFF_PIXEL 0
 #define ON_PIXEL 1
 
+class Chip8MachineFixture : public ::testing::Test {
+protected:
+    Chip8MachineFixture() {
+        tester.set_machine(&machine);
+    }
+
+    Chip8Machine machine;
+    Chip8MachineTester tester;
+};
+
 TEST (Chip8Machine, HasDefaultConstructor) {
     Chip8Machine machine;
 }
 
-TEST (Chip8Machine, ResetSetsPCToPointToStartOfROM) {
-    Chip8Machine machine;
-    machine.set_pc(0);
+TEST_F (Chip8MachineFixture, ResetSetsPCToPointToStartOfROM) {
+    tester.set_pc(0);
     machine.reset();
     int expected = 0x200;
     EXPECT_EQ(machine.get_pc(), expected);
@@ -72,7 +81,8 @@ class ANNNParameterizedTestFixture : public ::testing::TestWithParam<OPCODE_TYPE
 TEST_P (ANNNParameterizedTestFixture, OpcodeANNNSetsIRegisterToNNN) {
     OPCODE_TYPE opcode = GetParam();
     Chip8Machine machine;
-    Chip8MachineTester tester(&machine);
+    Chip8MachineTester tester;
+    tester.set_machine(&machine);
     int value = opcode & 0x0FFF;
     tester.set_i(0x0000);
     machine.decode(opcode);
