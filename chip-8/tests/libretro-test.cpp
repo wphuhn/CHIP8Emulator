@@ -4,31 +4,30 @@
 
 #include "chip8machinetester.hpp"
 
-TEST (RetroInit, InitializesChip8InDefaultState) {
+class RetroFixture : public ::testing::Test {
+protected:
+    RetroFixture() {
+        tester.set_machine(&my_machine);
+        chip8machine_init(my_machine);
+    }
+
     Chip8Machine my_machine;
     Chip8MachineTester tester;
-    tester.set_machine(&my_machine);
-    chip8machine_init(my_machine);
+};
+
+TEST_F (RetroFixture, RetroInitInitializesChip8InDefaultState) {
     int pc = tester.get_pc();
     EXPECT_EQ( pc, 0x200 );
 }
 
-TEST (RetroInit, ReinitializesIfAlreadyInitialized) {
-    Chip8Machine my_machine;
-    Chip8MachineTester tester;
-    tester.set_machine(&my_machine);
-    chip8machine_init(my_machine);
+TEST_F (RetroFixture, RetroInitReinitializesIfAlreadyInitialized) {
     tester.set_pc(0x201);
     chip8machine_init(my_machine);
     int pc = tester.get_pc();
     EXPECT_EQ( pc, 0x200 );
 }
 
-TEST (RetroDeinit, ResetsChip8ToDefaultState) {
-    Chip8Machine my_machine;
-    Chip8MachineTester tester;
-    tester.set_machine(&my_machine);
-    chip8machine_init(my_machine);
+TEST_F (RetroFixture, RetroDeinitResetsChip8ToDefaultState) {
     tester.set_pc(0x201);
     chip8machine_deinit(my_machine);
     int pc = tester.get_pc();
@@ -51,11 +50,9 @@ TEST (RetroGetSystemInfo, SetsProperVariables) {
     EXPECT_EQ(info->block_extract, false);
 }
 
-TEST (RetroGetSystemAvInfo, SetsProperVariables) {
+TEST_F (RetroFixture, RetroGetSystemAvInfoSetsProperVariables) {
     retro_system_av_info* info = (retro_system_av_info*) malloc(sizeof(retro_system_av_info));
 
-    Chip8Machine my_machine;
-    chip8machine_init(my_machine);
     chip8machine_get_system_av_info(info, my_machine);
 
     int height = my_machine.display_height;
@@ -117,11 +114,7 @@ TEST (RetroSetControllerPortDevice, Exists) {
     retro_set_controller_port_device(port, device);
 }
 
-TEST (RetroReset, ResetsStateOfEmulator) {
-    Chip8Machine my_machine;
-    Chip8MachineTester tester;
-    tester.set_machine(&my_machine);
-    chip8machine_init(my_machine);
+TEST_F (RetroFixture, RetroResetResetsStateOfEmulator) {
     tester.set_pc(0x201);
     chip8machine_reset(my_machine);
     int pc = tester.get_pc();
@@ -184,22 +177,16 @@ TEST (RetroCheatSet, Exists) {
     retro_cheat_set(index, enabled, code);
 }
 
-TEST (RetroLoadGame, ReturnsTrueWhenInfoValidAndInitCalled) {
+TEST_F (RetroFixture, RetroLoadGameReturnsTrueWhenInfoValidAndInitCalled) {
     retro_game_info *game = new retro_game_info;
-    Chip8Machine my_machine;
-    chip8machine_init(my_machine);
     game->size = 4;
     game->data = (void *) new unsigned char[4] {0xDE, 0xAD, 0xBE, 0xEF};
     bool result = chip8machine_load_game(game, my_machine);
     EXPECT_EQ (result, true);
 }
 
-TEST (RetroLoadGame, LoadsROMIntoMemoryWhenCallSuccessful) {
+TEST_F (RetroFixture, RetroLoadGameLoadsROMIntoMemoryWhenCallSuccessful) {
     retro_game_info *game = new retro_game_info;
-    Chip8Machine my_machine;
-    Chip8MachineTester tester;
-    tester.set_machine(&my_machine);
-    chip8machine_init(my_machine);
     game->size = 4;
     game->data = (void *) new unsigned char[4] {0xDE, 0xAD, 0xBE, 0xEF};
     chip8machine_load_game(game, my_machine);
@@ -210,20 +197,16 @@ TEST (RetroLoadGame, LoadsROMIntoMemoryWhenCallSuccessful) {
     }
 }
 
-TEST (RetroLoadGame, ReturnsFalseWhenSizeZero) {
+TEST_F (RetroFixture, RetroLoadGameReturnsFalseWhenSizeZero) {
     retro_game_info *game = new retro_game_info;
-    Chip8Machine my_machine;
-    chip8machine_init(my_machine);
     game->size = 0;
     game->data = (void *) new unsigned char[4] {0xDE, 0xAD, 0xBE, 0xEF};
     bool result = chip8machine_load_game(game, my_machine);
     EXPECT_EQ (result, false);
 }
 
-TEST (RetroLoadGame, ReturnsFalseWhenDataNull) {
+TEST_F (RetroFixture, RetroLoadGameReturnsFalseWhenDataNull) {
     retro_game_info *game = new retro_game_info;
-    Chip8Machine my_machine;
-    chip8machine_init(my_machine);
     game->size = 1;
     game->data = nullptr;
     bool result = chip8machine_load_game(game, my_machine);
@@ -250,11 +233,9 @@ TEST (RetroGetRegion, ReturnsZero) {
     EXPECT_EQ (expected, actual);
 }
 
-TEST (RetroGetMemoryData, ReturnsPointerToMachineMemory) {
+TEST_F (RetroFixture, RetroGetMemoryDataReturnsPointerToMachineMemory) {
     retro_game_info *game = new retro_game_info;
     unsigned id;
-    Chip8Machine my_machine;
-    chip8machine_init(my_machine);
     game->size = 4;
     game->data = (void *) new unsigned char[4] {0xDE, 0xAD, 0xBE, 0xEF};
     chip8machine_load_game(game, my_machine);
@@ -264,22 +245,16 @@ TEST (RetroGetMemoryData, ReturnsPointerToMachineMemory) {
     }
 }
 
-TEST (RetroGetMemorySize, ReturnsCorrectSize) {
+TEST_F (RetroFixture, RetroGetMemorySizeReturnsCorrectSize) {
     unsigned dummy;
-    Chip8Machine my_machine;
-    chip8machine_init(my_machine);
     //size_t actual, expected = 0x1000;
     size_t actual, expected = 0;
     actual = chip8machine_get_memory_size(dummy, my_machine);
     EXPECT_EQ (expected, actual);
 }
 
-TEST (RetroRun, AdvancesOneInstruction) {
+TEST_F (RetroFixture, RetroRunAdvancesOneInstruction) {
     retro_game_info *game = new retro_game_info;
-    Chip8Machine my_machine;
-    Chip8MachineTester tester;
-    tester.set_machine(&my_machine);
-    chip8machine_init(my_machine);
     game->size = 4;
     game->data = (void *) new unsigned char[4] {0xDE, 0xAD, 0xBE, 0xEF};
     chip8machine_load_game(game, my_machine);
