@@ -18,9 +18,7 @@ protected:
     Chip8MachineTester tester;
 };
 
-TEST (Chip8Machine, HasDefaultConstructor) {
-    Chip8Machine machine;
-}
+TEST_F (Chip8MachineFixture, HasDefaultConstructor) {}
 
 TEST_F (Chip8MachineFixture, ResetSetsPCToPointToStartOfROM) {
     tester.set_pc(0);
@@ -29,8 +27,7 @@ TEST_F (Chip8MachineFixture, ResetSetsPCToPointToStartOfROM) {
     EXPECT_EQ(machine.get_pc(), expected);
 }
 
-TEST (Chip8Machine, PassingUnsupportedOpcodeStopsInterpreter) {
-    Chip8Machine machine;
+TEST_F (Chip8MachineFixture, PassingUnsupportedOpcodeStopsInterpreter) {
     // 0x9000 was chosen because it's not part of CHIP-8 instruction set
     OPCODE_TYPE bad_opcode = 0x9000;
     try {
@@ -45,12 +42,10 @@ TEST (Chip8Machine, PassingUnsupportedOpcodeStopsInterpreter) {
     }
 }
 
-TEST (Chip8Machine, ClearScreenClearsTheScreen) {
-    Chip8Machine machine;
-    OPCODE_TYPE opcode = 0x00E0;
+TEST_F (Chip8MachineFixture, ClearScreenClearsTheScreen) {
     for (int x = 0; x < machine.display_width; x++) {
         for (int y = 0; y < machine.display_height; y++) {
-            machine.set_pixel(x, y, ON_PIXEL);
+            tester.set_pixel(x, y, ON_PIXEL);
         }
     }
     machine.clear_screen();
@@ -61,12 +56,11 @@ TEST (Chip8Machine, ClearScreenClearsTheScreen) {
     }
 }
 
-TEST (Chip8Machine, Opcode00E0ClearsScreen) {
-    Chip8Machine machine;
+TEST_F (Chip8MachineFixture, Opcode00E0ClearsScreen) {
     OPCODE_TYPE opcode = 0x00E0;
     for (int x = 0; x < machine.display_width; x++) {
         for (int y = 0; y < machine.display_height; y++) {
-            machine.set_pixel(x, y, ON_PIXEL);
+            tester.set_pixel(x, y, ON_PIXEL);
         }
     }
     machine.decode(opcode);
@@ -77,12 +71,10 @@ TEST (Chip8Machine, Opcode00E0ClearsScreen) {
     }
 }
 
-class ANNNParameterizedTestFixture : public ::testing::TestWithParam<OPCODE_TYPE> {};
+class ANNNParameterizedTestFixture : public Chip8MachineFixture,
+                                     public ::testing::WithParamInterface<OPCODE_TYPE> {};
 TEST_P (ANNNParameterizedTestFixture, OpcodeANNNSetsIRegisterToNNN) {
     OPCODE_TYPE opcode = GetParam();
-    Chip8Machine machine;
-    Chip8MachineTester tester;
-    tester.set_machine(&machine);
     int value = opcode & 0x0FFF;
     tester.set_i(0x0000);
     machine.decode(opcode);
@@ -96,13 +88,13 @@ INSTANTIATE_TEST_CASE_P(
                 )
         );
 
-class Opcode6XNNParameterizedTestFixture : public ::testing::TestWithParam<OPCODE_TYPE> {};
+class Opcode6XNNParameterizedTestFixture : public Chip8MachineFixture,
+                                           public ::testing::WithParamInterface<OPCODE_TYPE> {};
 TEST_P (Opcode6XNNParameterizedTestFixture, Opcode6XNNSetsRegisterVXToNN) {
-    Chip8Machine machine;
     OPCODE_TYPE value = GetParam();
     for (int reg_num = 0; reg_num <= 0xF; reg_num++) {
         OPCODE_TYPE opcode = gen_XYNN_opcode(0x6, reg_num, value);
-        machine.set_v(reg_num, 0x0000);
+        tester.set_v(reg_num, 0x0000);
         machine.decode(opcode);
         EXPECT_EQ(machine.get_v(reg_num), value);
     }
@@ -113,16 +105,15 @@ INSTANTIATE_TEST_CASE_P(
         ::testing::Values(0x00, 0x66, 0xF7, 0xFF)
 );
 
-class Opcode7XNNParameterizedTestFixture
-        : public ::testing::TestWithParam<std::tuple<OPCODE_TYPE, OPCODE_TYPE, OPCODE_TYPE>> {};
+class Opcode7XNNParameterizedTestFixture : public Chip8MachineFixture,
+        public ::testing::WithParamInterface<std::tuple<OPCODE_TYPE, OPCODE_TYPE, OPCODE_TYPE>> {};
 TEST_P (Opcode7XNNParameterizedTestFixture, Opcode7XNNAddsNNToRegisterVX) {
     OPCODE_TYPE initial = std::get<0>(GetParam());
     OPCODE_TYPE increment = std::get<1>(GetParam());
     OPCODE_TYPE final = std::get<2>(GetParam());
-    Chip8Machine machine;
     for (int reg_num = 0; reg_num <= 0xF; reg_num++) {
         OPCODE_TYPE opcode = gen_XYNN_opcode(0x7, reg_num, increment);
-        machine.set_v(reg_num, initial);
+        tester.set_v(reg_num, initial);
         machine.decode(opcode);
         EXPECT_EQ(machine.get_v(reg_num), final);
     }
@@ -139,10 +130,10 @@ INSTANTIATE_TEST_CASE_P(
         )
 );
 
-class OneNNNParameterizedTestFixture : public ::testing::TestWithParam<OPCODE_TYPE> {};
+class OneNNNParameterizedTestFixture : public Chip8MachineFixture,
+        public ::testing::WithParamInterface<OPCODE_TYPE> {};
 TEST_P (OneNNNParameterizedTestFixture, Opcode1NNNSetsPCToNNN) {
     OPCODE_TYPE opcode = GetParam();
-    Chip8Machine machine;
     int value = opcode & 0x0FFF;
     machine.decode(opcode);
     EXPECT_EQ(machine.get_pc(), value);
@@ -404,9 +395,8 @@ INSTANTIATE_TEST_CASE_P(
         )
 );
 
-TEST (Chip8Machine, LoadsROMAtCorrectLocation) {
+TEST_F (Chip8MachineFixture, LoadsROMAtCorrectLocation) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
-    Chip8Machine machine;
     machine.reset();
     machine.load_rom(rom);
     int pc_start = machine.get_pc();
@@ -415,8 +405,8 @@ TEST (Chip8Machine, LoadsROMAtCorrectLocation) {
     }
 }
 
-class FetchInstructionParameterizedTestFixture
-        : public ::testing::TestWithParam<OPCODE_TYPE> {};
+class FetchInstructionParameterizedTestFixture : public Chip8MachineFixture,
+        public ::testing::WithParamInterface<OPCODE_TYPE> {};
 TEST_P (FetchInstructionParameterizedTestFixture, FetchInstructionGrabsInstructionAtPCFromMemory) {
     int opcode = GetParam();
 
@@ -424,7 +414,6 @@ TEST_P (FetchInstructionParameterizedTestFixture, FetchInstructionGrabsInstructi
     unsigned char byte_two = opcode & 0x00FF;
     std::vector<unsigned char> rom = {byte_one, byte_two};
 
-    Chip8Machine machine;
     machine.reset();
     machine.load_rom(rom);
 
@@ -439,7 +428,7 @@ INSTANTIATE_TEST_CASE_P(
         )
 );
 
-TEST (Chip8Machine, AdvanceIncrementsPCForNonJumpInstructions) {
+TEST_F (Chip8MachineFixture, AdvanceIncrementsPCForNonJumpInstructions) {
     int reg_int = 1;
     int reg_value = 63;
     OPCODE_TYPE opcode = gen_XYNN_opcode(0x6, reg_int, reg_value);
@@ -448,7 +437,6 @@ TEST (Chip8Machine, AdvanceIncrementsPCForNonJumpInstructions) {
     unsigned char byte_two = opcode & 0x00FF;
     std::vector<unsigned char> rom = {byte_one, byte_two};
 
-    Chip8Machine machine;
     machine.reset();
     machine.load_rom(rom);
 
@@ -457,7 +445,7 @@ TEST (Chip8Machine, AdvanceIncrementsPCForNonJumpInstructions) {
     EXPECT_EQ(pc_start + 2, machine.get_pc());
 }
 
-TEST (Chip8Machine, AdvanceSetsPCExplicitlyForJumpInstructions) {
+TEST_F (Chip8MachineFixture, AdvanceSetsPCExplicitlyForJumpInstructions) {
     int jump_address = 0x227;
     OPCODE_TYPE opcode = 0x1000 + jump_address;
 
@@ -465,7 +453,6 @@ TEST (Chip8Machine, AdvanceSetsPCExplicitlyForJumpInstructions) {
     unsigned char byte_two = opcode & 0x00FF;
     std::vector<unsigned char> rom = {byte_one, byte_two};
 
-    Chip8Machine machine;
     machine.reset();
     machine.load_rom(rom);
 
@@ -473,7 +460,7 @@ TEST (Chip8Machine, AdvanceSetsPCExplicitlyForJumpInstructions) {
     EXPECT_EQ(jump_address, machine.get_pc());
 }
 
-TEST (Chip8Machine, AdvanceExecutesInstructionPointedToByPC) {
+TEST_F (Chip8MachineFixture, AdvanceExecutesInstructionPointedToByPC) {
     // Chose a simple instruction (set register to NN) for this
     int reg_int = 1;
     int reg_value = 63;
@@ -483,11 +470,10 @@ TEST (Chip8Machine, AdvanceExecutesInstructionPointedToByPC) {
     unsigned char byte_two = opcode & 0x00FF;
     std::vector<unsigned char> rom = {byte_one, byte_two};
 
-    Chip8Machine machine;
     machine.reset();
     machine.load_rom(rom);
 
-    machine.set_v(reg_int, 0);
+    tester.set_v(reg_int, 0);
     machine.advance();
     EXPECT_EQ(reg_value, machine.get_v(reg_int));
 }

@@ -6,6 +6,13 @@ static Memory get_memory() {
     return Memory(0x1000, 0x200);
 }
 
+class MemoryFixture : public ::testing::Test {
+protected:
+    MemoryFixture() : ram(get_memory()) {}
+
+    Memory ram;
+};
+
 TEST (Memory, GetBitstreamFromFileThrowsExceptionIfFileNotFound) {
     void* dummy;
     size_t dummy_s;
@@ -83,9 +90,8 @@ TEST (Memory, ConvertBitstreamToVectorGivesExpectedContent) {
 }
 
 // TODO:  Just remove this test?
-TEST (Memory, LoadROMLoadsROMAtCorrectLocation_AccessByByte) {
+TEST_F (MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByByte) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
-    Memory ram = get_memory();
     ram.load_rom(rom);
     int expected_start_address = 0x200;
     for (int i = 0; i < rom.size(); i++) {
@@ -97,9 +103,8 @@ TEST (Memory, LoadROMLoadsROMAtCorrectLocation_AccessByByte) {
 // is properly set up, which the AccessByByte variant does not (it's possible
 // to write past the boundaries of the original STL container and then access
 // memory beyond the boundary of the original STL container)
-TEST (Memory, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetAllRAM) {
+TEST_F (MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetAllRAM) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
-    Memory ram = get_memory();
     ram.load_rom(rom);
     const std::vector<unsigned char> returned_ram = ram.get_ram();
     int expected_start_address = 0x200;
@@ -108,9 +113,8 @@ TEST (Memory, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetAllRAM) {
     }
 }
 
-TEST (Memory, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetActivePortion) {
+TEST_F (MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetActivePortion) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
-    Memory ram = get_memory();
     ram.load_rom(rom);
     const std::vector<unsigned char> returned_ram = ram.get_ram(false);
     for (int i = 0; i < rom.size(); i++) {
