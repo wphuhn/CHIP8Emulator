@@ -24,7 +24,7 @@ TEST_F (Chip8MachineFixture, ResetSetsPCToPointToStartOfROM) {
     tester.set_pc(0);
     machine.reset();
     int expected = 0x200;
-    EXPECT_EQ(machine.get_pc(), expected);
+    EXPECT_EQ(tester.get_pc(), expected);
 }
 
 TEST_F (Chip8MachineFixture, PassingUnsupportedOpcodeStopsInterpreter) {
@@ -78,7 +78,7 @@ TEST_P (ANNNParameterizedTestFixture, OpcodeANNNSetsIRegisterToNNN) {
     int value = opcode & 0x0FFF;
     tester.set_i(0x0000);
     machine.decode(opcode);
-    EXPECT_EQ(machine.get_i(), value);
+    EXPECT_EQ(tester.get_i(), value);
 }
 INSTANTIATE_TEST_CASE_P(
         ANNNTests,
@@ -96,7 +96,7 @@ TEST_P (Opcode6XNNParameterizedTestFixture, Opcode6XNNSetsRegisterVXToNN) {
         OPCODE_TYPE opcode = gen_XYNN_opcode(0x6, reg_num, value);
         tester.set_v(reg_num, 0x0000);
         machine.decode(opcode);
-        EXPECT_EQ(machine.get_v(reg_num), value);
+        EXPECT_EQ(tester.get_v(reg_num), value);
     }
 }
 INSTANTIATE_TEST_CASE_P(
@@ -115,7 +115,7 @@ TEST_P (Opcode7XNNParameterizedTestFixture, Opcode7XNNAddsNNToRegisterVX) {
         OPCODE_TYPE opcode = gen_XYNN_opcode(0x7, reg_num, increment);
         tester.set_v(reg_num, initial);
         machine.decode(opcode);
-        EXPECT_EQ(machine.get_v(reg_num), final);
+        EXPECT_EQ(tester.get_v(reg_num), final);
     }
 }
 INSTANTIATE_TEST_CASE_P(
@@ -136,7 +136,7 @@ TEST_P (OneNNNParameterizedTestFixture, Opcode1NNNSetsPCToNNN) {
     OPCODE_TYPE opcode = GetParam();
     int value = opcode & 0x0FFF;
     machine.decode(opcode);
-    EXPECT_EQ(machine.get_pc(), value);
+    EXPECT_EQ(tester.get_pc(), value);
 }
 INSTANTIATE_TEST_CASE_P(
         OneNNNTests,
@@ -160,6 +160,8 @@ TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsCorrectNumberOfRowsToBl
     int x_offset = 2;
     int y_offset = 4;
     Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
+    Chip8MachineTester tester;
+    tester.set_machine(&machine);
 
     machine.decode(opcode);
 
@@ -168,7 +170,7 @@ TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsCorrectNumberOfRowsToBl
             EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
         }
     }
-    EXPECT_EQ(machine.get_flag(), 0);
+    EXPECT_EQ(tester.get_flag(), 0);
 }
 TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNFlipsPixelsOnCompletelyFilledScreen) {
     int x_reg = 1;
@@ -183,10 +185,12 @@ TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNFlipsPixelsOnCompletelyFille
     int x_offset = 2;
     int y_offset = 4;
     Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
+    Chip8MachineTester tester;
+    tester.set_machine(&machine);
 
     for (int y = 0; y < machine.display_height; y++) {
         for (int x = 0; x < machine.display_width; x++) {
-            machine.set_pixel(x, y, ON_PIXEL);
+            tester.set_pixel(x, y, ON_PIXEL);
         }
     }
 
@@ -197,7 +201,7 @@ TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNFlipsPixelsOnCompletelyFille
             EXPECT_EQ(machine.get_pixel(x, y), OFF_PIXEL);
         }
     }
-    EXPECT_EQ(machine.get_flag(), 1);
+    EXPECT_EQ(tester.get_flag(), 1);
 }
 TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsModuloOffsetFromRegisters) {
     int x_reg = 1;
@@ -215,8 +219,11 @@ TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsModuloOffsetFromRegiste
     // past it, so we can't set it in the factory method
     int dummy_offset = 0;
     Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, dummy_offset, dummy_offset);
-    machine.set_v(x_reg, machine.display_width + modulo_x_offset);
-    machine.set_v(y_reg, machine.display_height + modulo_y_offset);
+    Chip8MachineTester tester;
+    tester.set_machine(&machine);
+
+    tester.set_v(x_reg, machine.display_width + modulo_x_offset);
+    tester.set_v(y_reg, machine.display_height + modulo_y_offset);
 
     machine.decode(opcode);
 
@@ -225,7 +232,7 @@ TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsModuloOffsetFromRegiste
             EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
         }
     }
-    EXPECT_EQ(machine.get_flag(), 0);
+    EXPECT_EQ(tester.get_flag(), 0);
 }
 INSTANTIATE_TEST_CASE_P(
         DXYNTests,
@@ -258,6 +265,8 @@ TEST_P (DXYNRegistersParameterizedTestFixture, OpcodeDXYNDrawsToCorrectPositionB
                 x_offset_ = y_offset;
             }
             Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset_, y_offset);
+            Chip8MachineTester tester;
+            tester.set_machine(&machine);
 
             machine.decode(opcode);
 
@@ -266,7 +275,7 @@ TEST_P (DXYNRegistersParameterizedTestFixture, OpcodeDXYNDrawsToCorrectPositionB
                     EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
                 }
             }
-            EXPECT_EQ(machine.get_flag(), 0);
+            EXPECT_EQ(tester.get_flag(), 0);
         }
     }
 }
@@ -295,6 +304,8 @@ TEST_P (DXYNHorizTruncationParameterizedTestFixture, OpcodeDXYNTruncatesDrawingW
     int y_offset = std::get<1>(GetParam());
     int font_address = 0x050;
     Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
+    Chip8MachineTester tester;
+    tester.set_machine(&machine);
 
     machine.decode(opcode);
 
@@ -309,7 +320,7 @@ TEST_P (DXYNHorizTruncationParameterizedTestFixture, OpcodeDXYNTruncatesDrawingW
             EXPECT_EQ(machine.get_pixel(x, y), OFF_PIXEL);
         }
     }
-    EXPECT_EQ(machine.get_flag(), 0);
+    EXPECT_EQ(tester.get_flag(), 0);
 }
 INSTANTIATE_TEST_CASE_P(
         DXYNTests,
@@ -340,6 +351,8 @@ TEST_P (DXYNVertTruncationParameterizedTestFixture, OpcodeDXYNWrapsDrawingAround
     int x_offset = std::get<0>(GetParam());
     int y_offset = std::get<1>(GetParam());
     Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
+    Chip8MachineTester tester;
+    tester.set_machine(&machine);
 
     machine.decode(opcode);
 
@@ -351,7 +364,7 @@ TEST_P (DXYNVertTruncationParameterizedTestFixture, OpcodeDXYNWrapsDrawingAround
             EXPECT_EQ(machine.get_pixel(x, y), OFF_PIXEL);
         }
     }
-    EXPECT_EQ(machine.get_flag(), 0);
+    EXPECT_EQ(tester.get_flag(), 0);
 }
 INSTANTIATE_TEST_CASE_P(
         DXYNTests,
@@ -378,6 +391,8 @@ TEST_P (DXYNValuesParameterizedTestFixture, OpcodeDXYNDrawsFontPointedToByIRegis
     int x_offset = 2;
     int y_offset = 4;
     Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
+    Chip8MachineTester tester;
+    tester.set_machine(&machine);
 
     machine.decode(opcode);
 
@@ -385,7 +400,7 @@ TEST_P (DXYNValuesParameterizedTestFixture, OpcodeDXYNDrawsFontPointedToByIRegis
         EXPECT_EQ(machine.get_pixel(x_offset + x, y_offset), (font_value_1 >> (7-x)) & 0x01);
         EXPECT_EQ(machine.get_pixel(x_offset + x, y_offset + 1), (font_value_2 >> (7-x)) & 0x01);
     }
-    EXPECT_EQ(machine.get_flag(), 0);
+    EXPECT_EQ(tester.get_flag(), 0);
 }
 INSTANTIATE_TEST_CASE_P(
         DXYNTests,
@@ -399,9 +414,9 @@ TEST_F (Chip8MachineFixture, LoadsROMAtCorrectLocation) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
     machine.reset();
     machine.load_rom(rom);
-    int pc_start = machine.get_pc();
+    int pc_start = tester.get_pc();
     for (int i = 0; i < rom.size(); i++) {
-        EXPECT_EQ(machine.get_memory_byte(pc_start + i), rom[i]);
+        EXPECT_EQ(tester.get_memory_byte(pc_start + i), rom[i]);
     }
 }
 
@@ -417,7 +432,7 @@ TEST_P (FetchInstructionParameterizedTestFixture, FetchInstructionGrabsInstructi
     machine.reset();
     machine.load_rom(rom);
 
-    int actual = machine.fetch_instruction();
+    int actual = tester.fetch_instruction();
     EXPECT_EQ(opcode, actual);
 }
 INSTANTIATE_TEST_CASE_P(
@@ -440,9 +455,9 @@ TEST_F (Chip8MachineFixture, AdvanceIncrementsPCForNonJumpInstructions) {
     machine.reset();
     machine.load_rom(rom);
 
-    int pc_start = machine.get_pc();
+    int pc_start = tester.get_pc();
     machine.advance();
-    EXPECT_EQ(pc_start + 2, machine.get_pc());
+    EXPECT_EQ(pc_start + 2, tester.get_pc());
 }
 
 TEST_F (Chip8MachineFixture, AdvanceSetsPCExplicitlyForJumpInstructions) {
@@ -457,7 +472,7 @@ TEST_F (Chip8MachineFixture, AdvanceSetsPCExplicitlyForJumpInstructions) {
     machine.load_rom(rom);
 
     machine.advance();
-    EXPECT_EQ(jump_address, machine.get_pc());
+    EXPECT_EQ(jump_address, tester.get_pc());
 }
 
 TEST_F (Chip8MachineFixture, AdvanceExecutesInstructionPointedToByPC) {
@@ -475,5 +490,5 @@ TEST_F (Chip8MachineFixture, AdvanceExecutesInstructionPointedToByPC) {
 
     tester.set_v(reg_int, 0);
     machine.advance();
-    EXPECT_EQ(reg_value, machine.get_v(reg_int));
+    EXPECT_EQ(reg_value, tester.get_v(reg_int));
 }

@@ -2,28 +2,36 @@
 
 #include "gtest/gtest.h"
 
+#include "chip8machinetester.hpp"
+
 TEST (RetroInit, InitializesChip8InDefaultState) {
     Chip8Machine my_machine;
+    Chip8MachineTester tester;
+    tester.set_machine(&my_machine);
     chip8machine_init(my_machine);
-    int pc = my_machine.get_pc();
+    int pc = tester.get_pc();
     EXPECT_EQ( pc, 0x200 );
 }
 
 TEST (RetroInit, ReinitializesIfAlreadyInitialized) {
     Chip8Machine my_machine;
+    Chip8MachineTester tester;
+    tester.set_machine(&my_machine);
     chip8machine_init(my_machine);
-    my_machine.set_pc(0x201);
+    tester.set_pc(0x201);
     chip8machine_init(my_machine);
-    int pc = my_machine.get_pc();
+    int pc = tester.get_pc();
     EXPECT_EQ( pc, 0x200 );
 }
 
 TEST (RetroDeinit, ResetsChip8ToDefaultState) {
     Chip8Machine my_machine;
+    Chip8MachineTester tester;
+    tester.set_machine(&my_machine);
     chip8machine_init(my_machine);
-    my_machine.set_pc(0x201);
+    tester.set_pc(0x201);
     chip8machine_deinit(my_machine);
-    int pc = my_machine.get_pc();
+    int pc = tester.get_pc();
     EXPECT_EQ( pc, 0x200 );
 }
 
@@ -111,10 +119,12 @@ TEST (RetroSetControllerPortDevice, Exists) {
 
 TEST (RetroReset, ResetsStateOfEmulator) {
     Chip8Machine my_machine;
+    Chip8MachineTester tester;
+    tester.set_machine(&my_machine);
     chip8machine_init(my_machine);
-    my_machine.set_pc(0x201);
+    tester.set_pc(0x201);
     chip8machine_reset(my_machine);
-    int pc = my_machine.get_pc();
+    int pc = tester.get_pc();
     EXPECT_EQ( pc, 0x200 );
 }
 
@@ -187,12 +197,14 @@ TEST (RetroLoadGame, ReturnsTrueWhenInfoValidAndInitCalled) {
 TEST (RetroLoadGame, LoadsROMIntoMemoryWhenCallSuccessful) {
     retro_game_info *game = new retro_game_info;
     Chip8Machine my_machine;
+    Chip8MachineTester tester;
+    tester.set_machine(&my_machine);
     chip8machine_init(my_machine);
     game->size = 4;
     game->data = (void *) new unsigned char[4] {0xDE, 0xAD, 0xBE, 0xEF};
     chip8machine_load_game(game, my_machine);
     // Only grab the active portion of RAM
-    std::vector<unsigned char> ram = my_machine.get_ram(false);
+    std::vector<unsigned char> ram = tester.get_ram(false);
     for (int i = 0; i < game->size; i++) {
         EXPECT_EQ (((unsigned char *)game->data)[i], ram[i]);
     }
@@ -265,14 +277,16 @@ TEST (RetroGetMemorySize, ReturnsCorrectSize) {
 TEST (RetroRun, AdvancesOneInstruction) {
     retro_game_info *game = new retro_game_info;
     Chip8Machine my_machine;
+    Chip8MachineTester tester;
+    tester.set_machine(&my_machine);
     chip8machine_init(my_machine);
     game->size = 4;
     game->data = (void *) new unsigned char[4] {0xDE, 0xAD, 0xBE, 0xEF};
     chip8machine_load_game(game, my_machine);
     chip8machine_run(my_machine, true);
-    int pc = my_machine.get_pc();
+    int pc = tester.get_pc();
     EXPECT_EQ( pc, 0x202 );
-    EXPECT_EQ(my_machine.get_ram()[pc], 0xBE);
+    EXPECT_EQ(tester.get_ram()[pc], 0xBE);
 }
 
 int main(int argc, char* argv[]) {

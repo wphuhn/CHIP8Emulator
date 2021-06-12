@@ -6,16 +6,28 @@
 
 void Chip8MachineTester::set_machine(Chip8Machine* machine_) {machine = machine_;}
 
-void Chip8MachineTester::set_pixel(const int x, const int y, const PIXEL_TYPE value) {
-    machine->display.set_pixel(x, y, value);
+OPCODE_TYPE Chip8MachineTester::fetch_instruction() const {
+    return machine->fetch_instruction();
 }
 
-void Chip8MachineTester::set_i(const REG_TYPE new_value) {machine->i_register.set(new_value);}
-void Chip8MachineTester::set_pc(const ADDR_TYPE new_pc) {machine->pc.set(new_pc);}
-void Chip8MachineTester::set_v(const int reg_num, const REG_TYPE new_value) {
-    if (reg_num < machine->v_register.size()) {
-        machine->v_register[reg_num].set(new_value);
-        return;
-    }
-    throw std::runtime_error("Invalid register V" + std::to_string(reg_num) + " specified.");
+std::vector<MEM_TYPE> Chip8MachineTester::get_ram(bool include_start) const {
+    return machine->get_ram(include_start);
 }
+MEM_TYPE Chip8MachineTester::get_memory_byte(ADDR_TYPE address) const {
+    return machine->get_memory_byte(address);
+}
+REG_TYPE Chip8MachineTester::get_i() const {return machine->get_i();}
+REG_TYPE Chip8MachineTester::get_flag() const {return machine->get_flag();}
+REG_TYPE Chip8MachineTester::get_v(const int reg_num) const {
+    return machine->get_v(reg_num);
+}
+ADDR_TYPE Chip8MachineTester::get_pc() const {return machine->get_pc();}
+
+void Chip8MachineTester::set_pixel(const int x, const int y, const PIXEL_TYPE value) {
+    machine->set_pixel(x, y, value);
+}
+void Chip8MachineTester::set_i(const REG_TYPE new_value) {machine->set_i(new_value);}
+void Chip8MachineTester::set_v(const int reg_num, const REG_TYPE new_value) {
+    machine->set_v(reg_num, new_value);
+}
+void Chip8MachineTester::set_pc(const ADDR_TYPE new_pc) {machine->set_pc(new_pc);}
