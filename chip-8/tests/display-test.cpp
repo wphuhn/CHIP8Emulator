@@ -2,11 +2,10 @@
 
 #include "display.hpp"
 
-#define OFF_PIXEL 0
-#define ON_PIXEL 1
+#include "test-constants.hpp"
 
 static Display get_display() {
-    return Display(32, 64);
+    return Display(TEST_SCREEN_HEIGHT, TEST_SCREEN_WIDTH);
 }
 
 class DisplayFixture : public ::testing::Test {
@@ -19,7 +18,7 @@ protected:
 TEST_F (DisplayFixture, InitiallyIsClear) {
     for (int x = 0; x < display.width; x++) {
         for (int y = 0; y < display.height; y++) {
-            EXPECT_EQ(display.get_pixel(x, y), OFF_PIXEL);
+            EXPECT_EQ(display.get_pixel(x, y), TEST_OFF_PIXEL);
         }
     }
 }
@@ -27,7 +26,7 @@ TEST_F (DisplayFixture, InitiallyIsClear) {
 TEST_F (DisplayFixture, PixelCanBeChanged) {
     int x = 5;
     int y = 3;
-    int expected = ON_PIXEL;
+    int expected = TEST_ON_PIXEL;
     display.set_pixel(x, y, expected);
     int actual = display.get_pixel(x, y);
     EXPECT_EQ(expected, actual);
@@ -36,13 +35,13 @@ TEST_F (DisplayFixture, PixelCanBeChanged) {
 TEST_F (DisplayFixture, ClearClearsTheScreen) {
     for (int x = 0; x < display.width; x++) {
         for (int y = 0; y < display.height; y++) {
-            display.set_pixel(x, y, ON_PIXEL);
+            display.set_pixel(x, y, TEST_ON_PIXEL);
         }
     }
     display.clear();
     for (int x = 0; x < display.width; x++) {
         for (int y = 0; y < display.height; y++) {
-            EXPECT_EQ(display.get_pixel(x, y), OFF_PIXEL);
+            EXPECT_EQ(display.get_pixel(x, y), TEST_OFF_PIXEL);
         }
     }
 }

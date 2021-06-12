@@ -3,10 +3,8 @@
 #include "chip8machine.hpp"
 
 #include "chip8machinetester.hpp"
+#include "test-constants.hpp"
 #include "utilities.hpp"
-
-#define OFF_PIXEL 0
-#define ON_PIXEL 1
 
 class Chip8MachineFixture : public ::testing::Test {
 protected:
@@ -21,9 +19,11 @@ protected:
 TEST_F (Chip8MachineFixture, HasDefaultConstructor) {}
 
 TEST_F (Chip8MachineFixture, ResetSetsPCToPointToStartOfROM) {
-    tester.set_pc(0);
+    ADDR_TYPE start_pc = 0x201;
+    assert(start_pc != TEST_ROM_START_ADDRESS);
+    tester.set_pc(start_pc);
     machine.reset();
-    int expected = 0x200;
+    ADDR_TYPE expected = TEST_ROM_START_ADDRESS;
     EXPECT_EQ(tester.get_pc(), expected);
 }
 
@@ -45,13 +45,13 @@ TEST_F (Chip8MachineFixture, PassingUnsupportedOpcodeStopsInterpreter) {
 TEST_F (Chip8MachineFixture, ClearScreenClearsTheScreen) {
     for (int x = 0; x < machine.display_width; x++) {
         for (int y = 0; y < machine.display_height; y++) {
-            tester.set_pixel(x, y, ON_PIXEL);
+            tester.set_pixel(x, y, TEST_ON_PIXEL);
         }
     }
     machine.clear_screen();
     for (int x = 0; x < machine.display_width; x++) {
         for (int y = 0; y < machine.display_height; y++) {
-            EXPECT_EQ(machine.get_pixel(x, y), OFF_PIXEL);
+            EXPECT_EQ(machine.get_pixel(x, y), TEST_OFF_PIXEL);
         }
     }
 }
@@ -60,13 +60,13 @@ TEST_F (Chip8MachineFixture, Opcode00E0ClearsScreen) {
     OPCODE_TYPE opcode = 0x00E0;
     for (int x = 0; x < machine.display_width; x++) {
         for (int y = 0; y < machine.display_height; y++) {
-            tester.set_pixel(x, y, ON_PIXEL);
+            tester.set_pixel(x, y, TEST_ON_PIXEL);
         }
     }
     machine.decode(opcode);
     for (int x = 0; x < machine.display_width; x++) {
         for (int y = 0; y < machine.display_height; y++) {
-            EXPECT_EQ(machine.get_pixel(x, y), OFF_PIXEL);
+            EXPECT_EQ(machine.get_pixel(x, y), TEST_OFF_PIXEL);
         }
     }
 }
@@ -92,7 +92,7 @@ class Opcode6XNNParameterizedTestFixture : public Chip8MachineFixture,
                                            public ::testing::WithParamInterface<OPCODE_TYPE> {};
 TEST_P (Opcode6XNNParameterizedTestFixture, Opcode6XNNSetsRegisterVXToNN) {
     OPCODE_TYPE value = GetParam();
-    for (int reg_num = 0; reg_num <= 0xF; reg_num++) {
+    for (int reg_num = 0; reg_num < TEST_NUM_REGISTERS; reg_num++) {
         OPCODE_TYPE opcode = gen_XYNN_opcode(0x6, reg_num, value);
         tester.set_v(reg_num, 0x0000);
         machine.decode(opcode);
@@ -111,7 +111,7 @@ TEST_P (Opcode7XNNParameterizedTestFixture, Opcode7XNNAddsNNToRegisterVX) {
     OPCODE_TYPE initial = std::get<0>(GetParam());
     OPCODE_TYPE increment = std::get<1>(GetParam());
     OPCODE_TYPE final = std::get<2>(GetParam());
-    for (int reg_num = 0; reg_num <= 0xF; reg_num++) {
+    for (int reg_num = 0; reg_num < TEST_NUM_REGISTERS; reg_num++) {
         OPCODE_TYPE opcode = gen_XYNN_opcode(0x7, reg_num, increment);
         tester.set_v(reg_num, initial);
         machine.decode(opcode);
@@ -166,8 +166,8 @@ TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsCorrectNumberOfRowsToBl
     machine.decode(opcode);
 
     for (int y = y_offset; y < y_offset + n_rows; y++) {
-        for (int x = x_offset; x < x_offset + 8; x++) {
-            EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
+        for (int x = x_offset; x < x_offset + TEST_FONT_WIDTH; x++) {
+            EXPECT_EQ(machine.get_pixel(x, y), TEST_ON_PIXEL);
         }
     }
     EXPECT_EQ(tester.get_flag(), 0);
@@ -190,15 +190,15 @@ TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNFlipsPixelsOnCompletelyFille
 
     for (int y = 0; y < machine.display_height; y++) {
         for (int x = 0; x < machine.display_width; x++) {
-            tester.set_pixel(x, y, ON_PIXEL);
+            tester.set_pixel(x, y, TEST_ON_PIXEL);
         }
     }
 
     machine.decode(opcode);
 
     for (int y = y_offset; y < y_offset + n_rows; y++) {
-        for (int x = x_offset; x < x_offset + 8; x++) {
-            EXPECT_EQ(machine.get_pixel(x, y), OFF_PIXEL);
+        for (int x = x_offset; x < x_offset + TEST_FONT_WIDTH; x++) {
+            EXPECT_EQ(machine.get_pixel(x, y), TEST_OFF_PIXEL);
         }
     }
     EXPECT_EQ(tester.get_flag(), 1);
@@ -228,8 +228,8 @@ TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsModuloOffsetFromRegiste
     machine.decode(opcode);
 
     for (int y = modulo_y_offset; y < modulo_y_offset + n_rows; y++) {
-        for (int x = modulo_x_offset; x < modulo_x_offset + 8; x++) {
-            EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
+        for (int x = modulo_x_offset; x < modulo_x_offset + TEST_FONT_WIDTH; x++) {
+            EXPECT_EQ(machine.get_pixel(x, y), TEST_ON_PIXEL);
         }
     }
     EXPECT_EQ(tester.get_flag(), 0);
@@ -250,8 +250,8 @@ TEST_P (DXYNRegistersParameterizedTestFixture, OpcodeDXYNDrawsToCorrectPositionB
     int n_rows = std::get<2>(GetParam());
 
     // We omit register VF, as it is used as a flag register here
-    for (int x_reg = 0; x_reg < 0xF; x_reg++) {
-        for (int y_reg = 0; y_reg < 0xF; y_reg++) {
+    for (int x_reg = 0; x_reg < TEST_NUM_REGISTERS - 1; x_reg++) {
+        for (int y_reg = 0; y_reg < TEST_NUM_REGISTERS - 1; y_reg++) {
             OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
 
             unsigned char font_value = 0xFF;
@@ -271,8 +271,8 @@ TEST_P (DXYNRegistersParameterizedTestFixture, OpcodeDXYNDrawsToCorrectPositionB
             machine.decode(opcode);
 
             for (int y = y_offset; y < y_offset + n_rows; y++) {
-                for (int x = x_offset_; x < x_offset_ + 8; x++) {
-                    EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
+                for (int x = x_offset_; x < x_offset_ + TEST_FONT_WIDTH; x++) {
+                    EXPECT_EQ(machine.get_pixel(x, y), TEST_ON_PIXEL);
                 }
             }
             EXPECT_EQ(tester.get_flag(), 0);
@@ -314,10 +314,10 @@ TEST_P (DXYNHorizTruncationParameterizedTestFixture, OpcodeDXYNTruncatesDrawingW
     y_offset = y_offset % machine.display_height;
     for (int y = y_offset; y < y_offset + n_rows; y++) {
         for (int x = x_offset; x < machine.display_width; x++) {
-            EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
+            EXPECT_EQ(machine.get_pixel(x, y), TEST_ON_PIXEL);
         }
-        for (int x = 0; x < (x_offset + 8) - machine.display_width; x++) {
-            EXPECT_EQ(machine.get_pixel(x, y), OFF_PIXEL);
+        for (int x = 0; x < (x_offset + TEST_FONT_WIDTH) - machine.display_width; x++) {
+            EXPECT_EQ(machine.get_pixel(x, y), TEST_OFF_PIXEL);
         }
     }
     EXPECT_EQ(tester.get_flag(), 0);
@@ -356,12 +356,12 @@ TEST_P (DXYNVertTruncationParameterizedTestFixture, OpcodeDXYNWrapsDrawingAround
 
     machine.decode(opcode);
 
-    for (int x = x_offset; x < x_offset + 8; x++) {
+    for (int x = x_offset; x < x_offset + TEST_FONT_WIDTH; x++) {
         for (int y = y_offset; y < machine.display_height; y++) {
-            EXPECT_EQ(machine.get_pixel(x, y), ON_PIXEL);
+            EXPECT_EQ(machine.get_pixel(x, y), TEST_ON_PIXEL);
         }
         for (int y = 0; y < y_offset + n_rows - machine.display_height; y++) {
-            EXPECT_EQ(machine.get_pixel(x, y), OFF_PIXEL);
+            EXPECT_EQ(machine.get_pixel(x, y), TEST_OFF_PIXEL);
         }
     }
     EXPECT_EQ(tester.get_flag(), 0);
@@ -396,7 +396,7 @@ TEST_P (DXYNValuesParameterizedTestFixture, OpcodeDXYNDrawsFontPointedToByIRegis
 
     machine.decode(opcode);
 
-    for (int x = 0; x < 8; x++) {
+    for (int x = 0; x < TEST_FONT_WIDTH; x++) {
         EXPECT_EQ(machine.get_pixel(x_offset + x, y_offset), (font_value_1 >> (7-x)) & 0x01);
         EXPECT_EQ(machine.get_pixel(x_offset + x, y_offset + 1), (font_value_2 >> (7-x)) & 0x01);
     }
@@ -455,7 +455,7 @@ TEST_F (Chip8MachineFixture, AdvanceIncrementsPCForNonJumpInstructions) {
     machine.reset();
     machine.load_rom(rom);
 
-    int pc_start = tester.get_pc();
+    ADDR_TYPE pc_start = tester.get_pc();
     machine.advance();
     EXPECT_EQ(pc_start + 2, tester.get_pc());
 }

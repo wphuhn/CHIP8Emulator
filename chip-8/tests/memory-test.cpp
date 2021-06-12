@@ -2,8 +2,10 @@
 
 #include "memory.hpp"
 
+#include "test-constants.hpp"
+
 static Memory get_memory() {
-    return Memory(0x1000, 0x200);
+    return Memory(TEST_RAM_SIZE, TEST_ROM_START_ADDRESS);
 }
 
 class MemoryFixture : public ::testing::Test {
@@ -62,7 +64,7 @@ TEST (Memory, GetBitstreamFromFileGivesExpectedContent) {
 TEST (Memory, ConvertBitstreamToVectorGivesExpectedSize) {
     std::vector<unsigned char> rom_vector = {0xDE, 0xAD, 0xBE, 0xEF};
     size_t rom_size = rom_vector.size();
-    unsigned char* rom_stream = new unsigned char[rom_size];
+    auto rom_stream = new unsigned char[rom_size];
     // Make sure to copy by value
     for (int i = 0; i < rom_vector.size(); i++) {
         rom_stream[i] = rom_vector[i];
@@ -76,7 +78,7 @@ TEST (Memory, ConvertBitstreamToVectorGivesExpectedSize) {
 TEST (Memory, ConvertBitstreamToVectorGivesExpectedContent) {
     std::vector<unsigned char> rom_vector = {0xDE, 0xAD, 0xBE, 0xEF};
     size_t rom_size = rom_vector.size();
-    unsigned char* rom_stream = new unsigned char[rom_size];
+    auto rom_stream = new unsigned char[rom_size];
     // Make sure to copy by value
     for (int i = 0; i < rom_vector.size(); i++) {
         rom_stream[i] = rom_vector[i];
@@ -93,7 +95,7 @@ TEST (Memory, ConvertBitstreamToVectorGivesExpectedContent) {
 TEST_F (MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByByte) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
     ram.load_rom(rom);
-    int expected_start_address = 0x200;
+    ADDR_TYPE expected_start_address = TEST_ROM_START_ADDRESS;
     for (int i = 0; i < rom.size(); i++) {
         EXPECT_EQ(ram.get_byte(expected_start_address + i), rom[i]);
     }
@@ -107,7 +109,7 @@ TEST_F (MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetAllRAM) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
     ram.load_rom(rom);
     const std::vector<unsigned char> returned_ram = ram.get_ram();
-    int expected_start_address = 0x200;
+    ADDR_TYPE expected_start_address = TEST_ROM_START_ADDRESS;
     for (int i = 0; i < rom.size(); i++) {
         EXPECT_EQ(returned_ram[expected_start_address + i], rom[i]);
     }
