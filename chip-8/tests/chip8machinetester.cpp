@@ -1,7 +1,3 @@
-//
-// Created by will on 6/6/21.
-//
-
 #include "chip8machinetester.hpp"
 
 void Chip8MachineTester::set_machine(Chip8Machine* machine_) {machine = machine_;}

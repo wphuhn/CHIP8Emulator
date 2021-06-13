@@ -1,10 +1,11 @@
-#ifndef CHIP_8_CHIP8MACHINE_HPP_
-#define CHIP_8_CHIP8MACHINE_HPP_
+#ifndef CHIP_8_INCLUDE_CHIP8MACHINE_HPP_
+#define CHIP_8_INCLUDE_CHIP8MACHINE_HPP_
 
 #include <cstdint>
 #include <iomanip>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include "chip8constants.hpp"
 #include "chip8types.hpp"
@@ -14,13 +15,16 @@
 #include "register.hpp"
 
 class Chip8Machine {
-public:
+ public:
     Chip8Machine();
 
     friend class Chip8MachineTester;
     // Bad, but unavoidable for now
-    friend Chip8Machine create_machine_for_drawing(OPCODE_TYPE, ADDR_TYPE,
-                                            const std::vector<MEM_TYPE>&, int, int);
+    friend Chip8Machine create_machine_for_drawing(OPCODE_TYPE,
+                                                   ADDR_TYPE,
+                                                   const std::vector<MEM_TYPE>&,
+                                                   int,
+                                                   int);
 
     const int display_width;
     const int display_height;
@@ -37,7 +41,8 @@ public:
 
     std::string display_str() const;
     explicit operator std::string() const;
-private:
+
+ private:
     Display display;
     Memory ram;
     ProgramCounter pc;
@@ -61,10 +66,9 @@ private:
     void set_pc(ADDR_TYPE);
 };
 
-class OpcodeNotSupported : public std::runtime_error
-{
-public:
+class OpcodeNotSupported : public std::runtime_error {
+ public:
     explicit OpcodeNotSupported(OPCODE_TYPE);
 };
 
-#endif //CHIP_8_CHIP8MACHINE_HPP_
+#endif  // CHIP_8_INCLUDE_CHIP8MACHINE_HPP_

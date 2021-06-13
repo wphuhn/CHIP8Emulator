@@ -1,16 +1,13 @@
-//
-// Created by will on 6/6/21.
-//
+#ifndef CHIP_8_TESTS_CHIP8MACHINETESTER_HPP_
+#define CHIP_8_TESTS_CHIP8MACHINETESTER_HPP_
 
-#ifndef CHIP_8_CHIP8MACHINETESTER_HPP_
-#define CHIP_8_CHIP8MACHINETESTER_HPP_
+#include <vector>
 
 #include "chip8machine.hpp"
-
 #include "chip8types.hpp"
 
 class Chip8MachineTester {
-public:
+ public:
     void set_machine(Chip8Machine*);
 
     OPCODE_TYPE fetch_instruction() const;
@@ -26,8 +23,9 @@ public:
     void set_i(REG_TYPE);
     void set_v(int, REG_TYPE);
     void set_pc(ADDR_TYPE);
-private:
+ private:
     Chip8Machine* machine;
 };
 
-#endif //CHIP_8_CHIP8MACHINETESTER_HPP_
+#endif  // CHIP_8_TESTS_CHIP8MACHINETESTER_HPP_
+

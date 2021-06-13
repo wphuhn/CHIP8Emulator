@@ -1,5 +1,5 @@
-#ifndef CHIP_8_UPSCALER_HPP_
-#define CHIP_8_UPSCALER_HPP_
+#ifndef CHIP_8_INCLUDE_UPSCALER_HPP_
+#define CHIP_8_INCLUDE_UPSCALER_HPP_
 
 #include "chip8machine.hpp"
 
@@ -8,7 +8,7 @@
 #define Y_SCALE 8
 
 class Upscaler {
-public:
+ public:
     static const int x_scale = X_SCALE;
     static const int y_scale = Y_SCALE;
     static const int pixel_color = PIXEL_COLOR;
@@ -16,4 +16,4 @@ public:
     static void upscale(unsigned short*, int, const Chip8Machine&);
 };
 
-#endif //CHIP_8_UPSCALER_HPP_
+#endif  // CHIP_8_INCLUDE_UPSCALER_HPP_

@@ -9,13 +9,13 @@ static Display get_display() {
 }
 
 class DisplayFixture : public ::testing::Test {
-protected:
+ protected:
     DisplayFixture() : display(get_display()) {}
 
     Display display;
 };
 
-TEST_F (DisplayFixture, InitiallyIsClear) {
+TEST_F(DisplayFixture, InitiallyIsClear) {
     for (int x = 0; x < display.width; x++) {
         for (int y = 0; y < display.height; y++) {
             EXPECT_EQ(display.get_pixel(x, y), TEST_OFF_PIXEL);
@@ -23,7 +23,7 @@ TEST_F (DisplayFixture, InitiallyIsClear) {
     }
 }
 
-TEST_F (DisplayFixture, PixelCanBeChanged) {
+TEST_F(DisplayFixture, PixelCanBeChanged) {
     int x = 5;
     int y = 3;
     int expected = TEST_ON_PIXEL;
@@ -32,7 +32,7 @@ TEST_F (DisplayFixture, PixelCanBeChanged) {
     EXPECT_EQ(expected, actual);
 }
 
-TEST_F (DisplayFixture, ClearClearsTheScreen) {
+TEST_F(DisplayFixture, ClearClearsTheScreen) {
     for (int x = 0; x < display.width; x++) {
         for (int y = 0; y < display.height; y++) {
             display.set_pixel(x, y, TEST_ON_PIXEL);

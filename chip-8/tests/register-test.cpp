@@ -2,6 +2,6 @@
 
 #include "register.hpp"
 
-TEST (Register, HasDefaultConstructor) {
+TEST(Register, HasDefaultConstructor) {
     Register the_register;
 }

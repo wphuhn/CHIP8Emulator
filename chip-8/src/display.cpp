@@ -2,7 +2,9 @@
 
 Display::Display(int height_, int width_, PIXEL_TYPE off_pixel_)
         : height(height_), width(width_), off_pixel(off_pixel_) {
-    screen = std::vector< std::vector<PIXEL_TYPE> >(height, std::vector<PIXEL_TYPE>(width));
+    screen = std::vector< std::vector<PIXEL_TYPE> >(
+        height,
+        std::vector<PIXEL_TYPE>(width));
     clear();
 }
 

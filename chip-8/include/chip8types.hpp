@@ -1,5 +1,5 @@
-#ifndef CHIP_8_CHIP8TYPES_HPP_
-#define CHIP_8_CHIP8TYPES_HPP_
+#ifndef CHIP_8_INCLUDE_CHIP8TYPES_HPP_
+#define CHIP_8_INCLUDE_CHIP8TYPES_HPP_
 
 #include <cstddef>
 #include <cstdint>
@@ -17,4 +17,4 @@
 // Registers
 #define REG_TYPE uint16_t
 
-#endif //CHIP_8_CHIP8TYPES_HPP_
+#endif  // CHIP_8_INCLUDE_CHIP8TYPES_HPP_

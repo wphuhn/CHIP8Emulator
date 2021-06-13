@@ -1,7 +1,8 @@
 #include "chip8machine.hpp"
 
 Chip8Machine::Chip8Machine()
-    : display_height(MAX_HEIGHT), display_width(MAX_WIDTH), memory_size(RAM_SIZE),
+    : display_height(MAX_HEIGHT),
+      display_width(MAX_WIDTH), memory_size(RAM_SIZE),
       ram(RAM_SIZE, ROM_START_ADDRESS), display(MAX_HEIGHT, MAX_WIDTH) {}
 
 void Chip8Machine::decode(const OPCODE_TYPE opcode) {
@@ -118,7 +119,8 @@ void Chip8Machine::advance() {
 REG_TYPE Chip8Machine::get_i() const {return i_register.get();}
 REG_TYPE Chip8Machine::get_v(const int reg_num) const {
     if (reg_num < v_register.size()) return v_register[reg_num].get();
-    throw std::runtime_error("Invalid register V" + std::to_string(reg_num) + " specified.");
+    throw std::runtime_error(
+        "Invalid register V" + std::to_string(reg_num) + " specified.");
 }
 REG_TYPE Chip8Machine::get_flag() const {return v_register[0xF].get();}
 
@@ -128,7 +130,8 @@ void Chip8Machine::set_v(const int reg_num, const REG_TYPE new_value) {
         v_register[reg_num].set(new_value);
         return;
     }
-    throw std::runtime_error("Invalid register V" + std::to_string(reg_num) + " specified.");
+    throw std::runtime_error(
+        "Invalid register V" + std::to_string(reg_num) + " specified.");
 }
 void Chip8Machine::set_flag(const REG_TYPE new_value) {set_v(0xF, new_value);}
 
@@ -147,7 +150,8 @@ Chip8Machine::operator std::string() const {
     stream << "Opcode: " << opcode_to_hex_str(fetch_instruction()) << std::endl;
     stream <<  "- V[0]: " << opcode_to_hex_str(v_register[0].get());
     for (int n = 1; n < NUM_V_REGS - 1; n++) {
-        stream << " , V[" << n << "]: " << opcode_to_hex_str(v_register[n].get());
+        stream << " , V[" << n << "]: "
+               << opcode_to_hex_str(v_register[n].get());
     }
     return stream.str();
 }
@@ -161,4 +165,5 @@ std::string Chip8Machine::display_str() const {
 }
 
 OpcodeNotSupported::OpcodeNotSupported(const OPCODE_TYPE opcode)
-    : std::runtime_error("Opcode " + opcode_to_hex_str(opcode) + " not supported") {}
+    : std::runtime_error(
+        "Opcode " + opcode_to_hex_str(opcode) + " not supported") {}

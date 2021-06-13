@@ -4,7 +4,7 @@
 
 class ProgramCounterParameterizedTestFixture
     : public ::testing::TestWithParam< std::tuple<int, int, int> > {};
-TEST_P (ProgramCounterParameterizedTestFixture, AddInstructionAddsValueToCurrentValue) {
+TEST_P(ProgramCounterParameterizedTestFixture, AddInstructionAddsValueToCurrentValue) {
     int initial = std::get<0>(GetParam());
     int increment = std::get<1>(GetParam());
     int expected = std::get<2>(GetParam());

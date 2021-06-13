@@ -5,7 +5,7 @@
 
 class GenXYNNParameterizedTestFixture
     : public ::testing::TestWithParam<std::tuple<int, int, int, OPCODE_TYPE> >{};
-TEST_P (GenXYNNParameterizedTestFixture, GenAXNNGeneratesExpectedCode) {
+TEST_P(GenXYNNParameterizedTestFixture, GenAXNNGeneratesExpectedCode) {
     int A = std::get<0>(GetParam());
     int X = std::get<1>(GetParam());
     int NN = std::get<2>(GetParam());
@@ -27,7 +27,7 @@ INSTANTIATE_TEST_CASE_P(
 
 class GenWXYZParameterizedTestFixture
         : public ::testing::TestWithParam<std::tuple<int, int, int, int, OPCODE_TYPE> >{};
-TEST_P (GenWXYZParameterizedTestFixture, GenAXNNGeneratesExpectedCode) {
+TEST_P(GenWXYZParameterizedTestFixture, GenAXNNGeneratesExpectedCode) {
     int W = std::get<0>(GetParam());
     int X = std::get<1>(GetParam());
     int Y = std::get<2>(GetParam());

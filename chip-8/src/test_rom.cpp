@@ -10,19 +10,32 @@
 
 #define SLEEP_MS 500
 
-void output_stats(const std::map<std::string, int> & counter, const unsigned int n_total) {
+void output_stats(
+    const std::map<std::string, int> & counter, const unsigned int n_total) {
     int n_ops = 0;
     for (const auto & pair : counter) {
         n_ops += pair.second;
     }
 
-    std::cout << "Number of instructions in set: " << n_ops << " (" << 100.0 * n_ops / (float)n_total << "%)" << std::endl;
+    std::cout << "Number of instructions in set: "
+              << n_ops
+              << " ("
+              << 100.0 * n_ops / static_cast<float>(n_total)
+              << "%)"
+              << std::endl;
     for (const auto & pair : counter) {
-        std::cout << pair.first << " " << pair.second << " (" << 100.0 * pair.second / (float)n_total <<  "%)" << std::endl;
+        std::cout << pair.first
+                  << " "
+                  << pair.second
+                  << " ("
+                  << 100.0 * pair.second / static_cast<float>(n_total)
+                  <<  "%)"
+                  << std::endl;
     }
 }
 
-OPCODE_TYPE extract_big_endian_opcode(const std::vector<MEM_TYPE> & rom, const ADDR_TYPE pc) {
+OPCODE_TYPE extract_big_endian_opcode(
+    const std::vector<MEM_TYPE> & rom, const ADDR_TYPE pc) {
     OPCODE_TYPE opcode = 0;
 
     for (int i = 0; i < N_BYTES_IN_OP; i++) {
@@ -36,7 +49,11 @@ OPCODE_TYPE extract_big_endian_opcode(const std::vector<MEM_TYPE> & rom, const A
 
 std::string convert_opcode_to_str(const OPCODE_TYPE opcode) {
     std::stringstream stream;
-    stream << "0x" << std::hex << std::setw(2*N_BYTES_IN_OP) << std::setfill('0') << opcode;
+    stream << "0x"
+           << std::hex
+           << std::setw(2*N_BYTES_IN_OP)
+           << std::setfill('0')
+           << opcode;
     return stream.str();
 }
 
@@ -44,9 +61,12 @@ void check_implemented_instructions(const std::vector<MEM_TYPE> & rom) {
     Chip8Machine machine;
     OPCODE_TYPE opcode;
 
-    std::cout << "Parsing ROM to check for unimplemented instructions" << std::endl;
-    std::cout << "Note: we are assuming that the data stream is little-endian" << std::endl;
-    std::cout << "      (i.e. Linux on x86) and are converting to big-endian." << std::endl;
+    std::cout << "Parsing ROM to check for unimplemented instructions"
+              << std::endl;
+    std::cout << "Note: we are assuming that the data stream is little-endian"
+              << std::endl;
+    std::cout << "      (i.e. Linux on x86) and are converting to big-endian."
+              << std::endl;
 
     std::map<std::string, int> implemented;
     std::map<std::string, int> unimplemented;
@@ -78,7 +98,8 @@ void check_implemented_instructions(const std::vector<MEM_TYPE> & rom) {
             }
         }
         catch (...) {
-            throw std::runtime_error("Unknown error encountered when parsing " + opcode_str);
+            throw std::runtime_error(
+                "Unknown error encountered when parsing " + opcode_str);
         }
         pc += N_BYTES_IN_OP;
     }
@@ -98,7 +119,9 @@ void check_implemented_instructions(const std::vector<MEM_TYPE> & rom) {
     output_stats(unimplemented, n_total);
 
     std::cout <<  std::endl;
-    std::cout << "First unimplemented opcode encountered: " << first_unimplemented << std::endl;
+    std::cout << "First unimplemented opcode encountered: "
+              << first_unimplemented
+              << std::endl;
 }
 
 [[noreturn]] void run_rom(const std::vector<MEM_TYPE> & rom) {
@@ -118,7 +141,7 @@ void check_implemented_instructions(const std::vector<MEM_TYPE> & rom) {
     }
 }
 
-int main (int argc, char** argv) {
+int main(int argc, char** argv) {
   if (argc < 2) {
     std::cout << "Please specify a file as an argument" << std::endl;
     exit(1);

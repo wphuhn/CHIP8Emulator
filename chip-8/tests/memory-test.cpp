@@ -9,13 +9,13 @@ static Memory get_memory() {
 }
 
 class MemoryFixture : public ::testing::Test {
-protected:
+ protected:
     MemoryFixture() : ram(get_memory()) {}
 
     Memory ram;
 };
 
-TEST (Memory, GetBitstreamFromFileThrowsExceptionIfFileNotFound) {
+TEST(Memory, GetBitstreamFromFileThrowsExceptionIfFileNotFound) {
     void* dummy;
     size_t dummy_s;
     std::string bad_path = "dummy.CH8";
@@ -24,14 +24,14 @@ TEST (Memory, GetBitstreamFromFileThrowsExceptionIfFileNotFound) {
         FAIL() << "Expected ifstream::failure exception to be thrown for bad path, none were thrown";
     }
     catch (const std::ifstream::failure& err) {
-        EXPECT_EQ(err.what(),std::string("Path 'dummy.CH8' could not be loaded: iostream error"));
+        EXPECT_EQ(err.what(), std::string("Path 'dummy.CH8' could not be loaded: iostream error"));
     }
     catch (...) {
         FAIL() << "Expected ifstream::failure exception to be thrown for bad path, another exception was thrown";
     }
 }
 
-TEST (Memory, GetBitstreamFromFileGivesExpectedSize) {
+TEST(Memory, GetBitstreamFromFileGivesExpectedSize) {
     std::string rom_path = "./beefcake.ch8";
     std::vector<unsigned char> rom_contents = {0xBE, 0xEF, 0xCA, 0xCE};
 
@@ -45,7 +45,7 @@ TEST (Memory, GetBitstreamFromFileGivesExpectedSize) {
     EXPECT_EQ(size, rom_contents.size());
 }
 
-TEST (Memory, GetBitstreamFromFileGivesExpectedContent) {
+TEST(Memory, GetBitstreamFromFileGivesExpectedContent) {
     std::string rom_path = "./beefcake.ch8";
     std::vector<unsigned char> rom_contents = {0xBE, 0xEF, 0xCA, 0xCE};
 
@@ -61,7 +61,7 @@ TEST (Memory, GetBitstreamFromFileGivesExpectedContent) {
     }
 }
 
-TEST (Memory, ConvertBitstreamToVectorGivesExpectedSize) {
+TEST(Memory, ConvertBitstreamToVectorGivesExpectedSize) {
     std::vector<unsigned char> rom_vector = {0xDE, 0xAD, 0xBE, 0xEF};
     size_t rom_size = rom_vector.size();
     auto rom_stream = new unsigned char[rom_size];
@@ -75,7 +75,7 @@ TEST (Memory, ConvertBitstreamToVectorGivesExpectedSize) {
     EXPECT_EQ(converted_stream.size(), rom_size);
 }
 
-TEST (Memory, ConvertBitstreamToVectorGivesExpectedContent) {
+TEST(Memory, ConvertBitstreamToVectorGivesExpectedContent) {
     std::vector<unsigned char> rom_vector = {0xDE, 0xAD, 0xBE, 0xEF};
     size_t rom_size = rom_vector.size();
     auto rom_stream = new unsigned char[rom_size];
@@ -91,8 +91,8 @@ TEST (Memory, ConvertBitstreamToVectorGivesExpectedContent) {
     }
 }
 
-// TODO:  Just remove this test?
-TEST_F (MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByByte) {
+// TODO(WPH):  Just remove this test?
+TEST_F(MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByByte) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
     ram.load_rom(rom);
     ADDR_TYPE expected_start_address = TEST_ROM_START_ADDRESS;
@@ -105,7 +105,7 @@ TEST_F (MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByByte) {
 // is properly set up, which the AccessByByte variant does not (it's possible
 // to write past the boundaries of the original STL container and then access
 // memory beyond the boundary of the original STL container)
-TEST_F (MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetAllRAM) {
+TEST_F(MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetAllRAM) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
     ram.load_rom(rom);
     const std::vector<unsigned char> returned_ram = ram.get_ram();
@@ -115,7 +115,7 @@ TEST_F (MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetAllRAM) {
     }
 }
 
-TEST_F (MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetActivePortion) {
+TEST_F(MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetActivePortion) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
     ram.load_rom(rom);
     const std::vector<unsigned char> returned_ram = ram.get_ram(false);

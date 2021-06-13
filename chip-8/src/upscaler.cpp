@@ -1,6 +1,7 @@
 #include "upscaler.hpp"
 
-void Upscaler::upscale(unsigned short* frame_buffer, int width, const Chip8Machine &my_machine) {
+void Upscaler::upscale(
+    unsigned short* frame_buffer, int width, const Chip8Machine &my_machine) {
     for (int y_machine = 0; y_machine < my_machine.display_height; y_machine++) {
         for (int x_machine = 0; x_machine < my_machine.display_width; x_machine++) {
             unsigned short pixel = my_machine.get_pixel(x_machine, y_machine);

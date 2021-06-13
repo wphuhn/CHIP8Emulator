@@ -7,7 +7,7 @@
 #include "utilities.hpp"
 
 class Chip8MachineFixture : public ::testing::Test {
-protected:
+ protected:
     Chip8MachineFixture() {
         tester.set_machine(&machine);
     }
@@ -16,9 +16,9 @@ protected:
     Chip8MachineTester tester;
 };
 
-TEST_F (Chip8MachineFixture, HasDefaultConstructor) {}
+TEST_F(Chip8MachineFixture, HasDefaultConstructor) {}
 
-TEST_F (Chip8MachineFixture, ResetSetsPCToPointToStartOfROM) {
+TEST_F(Chip8MachineFixture, ResetSetsPCToPointToStartOfROM) {
     ADDR_TYPE start_pc = 0x201;
     assert(start_pc != TEST_ROM_START_ADDRESS);
     tester.set_pc(start_pc);
@@ -27,7 +27,7 @@ TEST_F (Chip8MachineFixture, ResetSetsPCToPointToStartOfROM) {
     EXPECT_EQ(tester.get_pc(), expected);
 }
 
-TEST_F (Chip8MachineFixture, PassingUnsupportedOpcodeStopsInterpreter) {
+TEST_F(Chip8MachineFixture, PassingUnsupportedOpcodeStopsInterpreter) {
     // 0x9000 was chosen because it's not part of CHIP-8 instruction set
     OPCODE_TYPE bad_opcode = 0x9000;
     try {
@@ -35,14 +35,14 @@ TEST_F (Chip8MachineFixture, PassingUnsupportedOpcodeStopsInterpreter) {
         FAIL() << "Expected OpcodeNotSupported exception to be thrown for unsupported opcode, none were thrown";
     }
     catch (const OpcodeNotSupported& err) {
-        EXPECT_EQ(err.what(),std::string("Opcode 0x9000 not supported"));
+        EXPECT_EQ(err.what(), std::string("Opcode 0x9000 not supported"));
     }
     catch (...) {
         FAIL() << "Expected OpcodeNotSupported exception to be thrown for unsupported opcode, another exception was thrown";
     }
 }
 
-TEST_F (Chip8MachineFixture, ClearScreenClearsTheScreen) {
+TEST_F(Chip8MachineFixture, ClearScreenClearsTheScreen) {
     for (int x = 0; x < machine.display_width; x++) {
         for (int y = 0; y < machine.display_height; y++) {
             tester.set_pixel(x, y, TEST_ON_PIXEL);
@@ -56,7 +56,7 @@ TEST_F (Chip8MachineFixture, ClearScreenClearsTheScreen) {
     }
 }
 
-TEST_F (Chip8MachineFixture, Opcode00E0ClearsScreen) {
+TEST_F(Chip8MachineFixture, Opcode00E0ClearsScreen) {
     OPCODE_TYPE opcode = 0x00E0;
     for (int x = 0; x < machine.display_width; x++) {
         for (int y = 0; y < machine.display_height; y++) {
@@ -73,7 +73,7 @@ TEST_F (Chip8MachineFixture, Opcode00E0ClearsScreen) {
 
 class ANNNParameterizedTestFixture : public Chip8MachineFixture,
                                      public ::testing::WithParamInterface<OPCODE_TYPE> {};
-TEST_P (ANNNParameterizedTestFixture, OpcodeANNNSetsIRegisterToNNN) {
+TEST_P(ANNNParameterizedTestFixture, OpcodeANNNSetsIRegisterToNNN) {
     OPCODE_TYPE opcode = GetParam();
     int value = opcode & 0x0FFF;
     tester.set_i(0x0000);
@@ -83,14 +83,11 @@ TEST_P (ANNNParameterizedTestFixture, OpcodeANNNSetsIRegisterToNNN) {
 INSTANTIATE_TEST_CASE_P(
         ANNNTests,
         ANNNParameterizedTestFixture,
-        ::testing::Values(
-                0xA000, 0xABFA, 0xA212, 0xAFFF
-                )
-        );
+        ::testing::Values(0xA000, 0xABFA, 0xA212, 0xAFFF));
 
 class Opcode6XNNParameterizedTestFixture : public Chip8MachineFixture,
                                            public ::testing::WithParamInterface<OPCODE_TYPE> {};
-TEST_P (Opcode6XNNParameterizedTestFixture, Opcode6XNNSetsRegisterVXToNN) {
+TEST_P(Opcode6XNNParameterizedTestFixture, Opcode6XNNSetsRegisterVXToNN) {
     OPCODE_TYPE value = GetParam();
     for (int reg_num = 0; reg_num < TEST_NUM_REGISTERS; reg_num++) {
         OPCODE_TYPE opcode = gen_XYNN_opcode(0x6, reg_num, value);
@@ -107,7 +104,7 @@ INSTANTIATE_TEST_CASE_P(
 
 class Opcode7XNNParameterizedTestFixture : public Chip8MachineFixture,
         public ::testing::WithParamInterface<std::tuple<OPCODE_TYPE, OPCODE_TYPE, OPCODE_TYPE>> {};
-TEST_P (Opcode7XNNParameterizedTestFixture, Opcode7XNNAddsNNToRegisterVX) {
+TEST_P(Opcode7XNNParameterizedTestFixture, Opcode7XNNAddsNNToRegisterVX) {
     OPCODE_TYPE initial = std::get<0>(GetParam());
     OPCODE_TYPE increment = std::get<1>(GetParam());
     OPCODE_TYPE final = std::get<2>(GetParam());
@@ -132,7 +129,7 @@ INSTANTIATE_TEST_CASE_P(
 
 class OneNNNParameterizedTestFixture : public Chip8MachineFixture,
         public ::testing::WithParamInterface<OPCODE_TYPE> {};
-TEST_P (OneNNNParameterizedTestFixture, Opcode1NNNSetsPCToNNN) {
+TEST_P(OneNNNParameterizedTestFixture, Opcode1NNNSetsPCToNNN) {
     OPCODE_TYPE opcode = GetParam();
     int value = opcode & 0x0FFF;
     machine.decode(opcode);
@@ -147,7 +144,7 @@ INSTANTIATE_TEST_CASE_P(
 );
 
 class DXYNRowsParameterizedTestFixture : public ::testing::TestWithParam<int> {};
-TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsCorrectNumberOfRowsToBlankScreen) {
+TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsCorrectNumberOfRowsToBlankScreen) {
     int x_reg = 1;
     int y_reg = 3;
     int n_rows = GetParam();
@@ -172,7 +169,7 @@ TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsCorrectNumberOfRowsToBl
     }
     EXPECT_EQ(tester.get_flag(), 0);
 }
-TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNFlipsPixelsOnCompletelyFilledScreen) {
+TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNFlipsPixelsOnCompletelyFilledScreen) {
     int x_reg = 1;
     int y_reg = 3;
     int n_rows = GetParam();
@@ -203,7 +200,7 @@ TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNFlipsPixelsOnCompletelyFille
     }
     EXPECT_EQ(tester.get_flag(), 1);
 }
-TEST_P (DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsModuloOffsetFromRegisters) {
+TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsModuloOffsetFromRegisters) {
     int x_reg = 1;
     int y_reg = 2;
     int n_rows = GetParam();
@@ -244,7 +241,7 @@ INSTANTIATE_TEST_CASE_P(
 
 class DXYNRegistersParameterizedTestFixture
     : public ::testing::TestWithParam<std::tuple<int, int, int> > {};
-TEST_P (DXYNRegistersParameterizedTestFixture, OpcodeDXYNDrawsToCorrectPositionBasedOnRegisterValues) {
+TEST_P(DXYNRegistersParameterizedTestFixture, OpcodeDXYNDrawsToCorrectPositionBasedOnRegisterValues) {
     int x_offset = std::get<0>(GetParam());
     int y_offset = std::get<1>(GetParam());
     int n_rows = std::get<2>(GetParam());
@@ -291,7 +288,7 @@ INSTANTIATE_TEST_CASE_P(
 
 class DXYNHorizTruncationParameterizedTestFixture
         : public ::testing::TestWithParam<std::tuple<int, int, int> > {};
-TEST_P (DXYNHorizTruncationParameterizedTestFixture, OpcodeDXYNTruncatesDrawingWhenReachesHorizontalEdgeOfScreen) {
+TEST_P(DXYNHorizTruncationParameterizedTestFixture, OpcodeDXYNTruncatesDrawingWhenReachesHorizontalEdgeOfScreen) {
     int x_reg = 1;
     int y_reg = 2;
     int n_rows = std::get<2>(GetParam());
@@ -338,7 +335,7 @@ INSTANTIATE_TEST_CASE_P(
 
 class DXYNVertTruncationParameterizedTestFixture
         : public ::testing::TestWithParam<std::tuple<int, int, int> > {};
-TEST_P (DXYNVertTruncationParameterizedTestFixture, OpcodeDXYNWrapsDrawingAroundWhenReachesVerticalEdgeOfScreen) {
+TEST_P(DXYNVertTruncationParameterizedTestFixture, OpcodeDXYNWrapsDrawingAroundWhenReachesVerticalEdgeOfScreen) {
     int x_reg = 0xB;
     int y_reg = 0xD;
     int n_rows = std::get<2>(GetParam());
@@ -377,7 +374,7 @@ INSTANTIATE_TEST_CASE_P(
 
 class DXYNValuesParameterizedTestFixture
         : public ::testing::TestWithParam<std::tuple<unsigned char, unsigned char> > {};
-TEST_P (DXYNValuesParameterizedTestFixture, OpcodeDXYNDrawsFontPointedToByIRegister) {
+TEST_P(DXYNValuesParameterizedTestFixture, OpcodeDXYNDrawsFontPointedToByIRegister) {
     int x_reg = 1;
     int y_reg = 2;
     int n_rows = 2;
@@ -410,7 +407,7 @@ INSTANTIATE_TEST_CASE_P(
         )
 );
 
-TEST_F (Chip8MachineFixture, LoadsROMAtCorrectLocation) {
+TEST_F(Chip8MachineFixture, LoadsROMAtCorrectLocation) {
     const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
     machine.reset();
     machine.load_rom(rom);
@@ -422,7 +419,7 @@ TEST_F (Chip8MachineFixture, LoadsROMAtCorrectLocation) {
 
 class FetchInstructionParameterizedTestFixture : public Chip8MachineFixture,
         public ::testing::WithParamInterface<OPCODE_TYPE> {};
-TEST_P (FetchInstructionParameterizedTestFixture, FetchInstructionGrabsInstructionAtPCFromMemory) {
+TEST_P(FetchInstructionParameterizedTestFixture, FetchInstructionGrabsInstructionAtPCFromMemory) {
     int opcode = GetParam();
 
     unsigned char byte_one = (opcode >> 8) & 0x00FF;
@@ -443,7 +440,7 @@ INSTANTIATE_TEST_CASE_P(
         )
 );
 
-TEST_F (Chip8MachineFixture, AdvanceIncrementsPCForNonJumpInstructions) {
+TEST_F(Chip8MachineFixture, AdvanceIncrementsPCForNonJumpInstructions) {
     int reg_int = 1;
     int reg_value = 63;
     OPCODE_TYPE opcode = gen_XYNN_opcode(0x6, reg_int, reg_value);
@@ -460,7 +457,7 @@ TEST_F (Chip8MachineFixture, AdvanceIncrementsPCForNonJumpInstructions) {
     EXPECT_EQ(pc_start + 2, tester.get_pc());
 }
 
-TEST_F (Chip8MachineFixture, AdvanceSetsPCExplicitlyForJumpInstructions) {
+TEST_F(Chip8MachineFixture, AdvanceSetsPCExplicitlyForJumpInstructions) {
     int jump_address = 0x227;
     OPCODE_TYPE opcode = 0x1000 + jump_address;
 
@@ -475,7 +472,7 @@ TEST_F (Chip8MachineFixture, AdvanceSetsPCExplicitlyForJumpInstructions) {
     EXPECT_EQ(jump_address, tester.get_pc());
 }
 
-TEST_F (Chip8MachineFixture, AdvanceExecutesInstructionPointedToByPC) {
+TEST_F(Chip8MachineFixture, AdvanceExecutesInstructionPointedToByPC) {
     // Chose a simple instruction (set register to NN) for this
     int reg_int = 1;
     int reg_value = 63;
