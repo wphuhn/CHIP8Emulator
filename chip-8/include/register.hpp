@@ -8,12 +8,12 @@
 // the same underlying type
 class Register {
  public:
-    Register();
+  Register();
 
-    REG_TYPE get() const;
-    void set(REG_TYPE);
+  REG_TYPE get() const;
+  void set(REG_TYPE);
  private:
-    REG_TYPE value_{};
+  REG_TYPE value_{};
 };
 
 #endif  // CHIP_8_INCLUDE_REGISTER_HPP_

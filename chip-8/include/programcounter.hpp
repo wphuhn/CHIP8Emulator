@@ -3,15 +3,15 @@
 
 #include "chip8types.hpp"
 
-class ProgramCounter{
+class ProgramCounter {
  public:
-    ProgramCounter();
+  ProgramCounter();
 
-    ADDR_TYPE get() const;
-    void set(ADDR_TYPE);
+  ADDR_TYPE get() const;
+  void set(ADDR_TYPE);
 
-    void add(ADDR_TYPE);
+  void add(ADDR_TYPE);
  private:
-    ADDR_TYPE value_;
+  ADDR_TYPE value_;
 };
 #endif  // CHIP_8_INCLUDE_PROGRAMCOUNTER_HPP_

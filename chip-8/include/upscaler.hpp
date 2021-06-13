@@ -9,11 +9,11 @@
 
 class Upscaler {
  public:
-    static const int x_scale = X_SCALE;
-    static const int y_scale = Y_SCALE;
-    static const int pixel_color = PIXEL_COLOR;
+  static const int x_scale = X_SCALE;
+  static const int y_scale = Y_SCALE;
+  static const int pixel_color = PIXEL_COLOR;
 
-    static void upscale(unsigned short*, int, const Chip8Machine&);
+  static void upscale(unsigned short *, int, const Chip8Machine &);
 };
 
 #endif  // CHIP_8_INCLUDE_UPSCALER_HPP_

@@ -3,5 +3,5 @@
 #include "register.hpp"
 
 TEST(Register, HasDefaultConstructor) {
-    Register the_register;
+  Register the_register;
 }
