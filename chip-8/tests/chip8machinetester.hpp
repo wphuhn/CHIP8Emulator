@@ -16,7 +16,7 @@ class Chip8MachineTester {
   MEM_TYPE get_memory_byte(ADDR_TYPE) const;
   REG_TYPE get_i() const;
   REG_TYPE get_flag() const;
-  REG_TYPE get_v(const int reg_num) const;
+  REG_TYPE get_v(int) const;
   ADDR_TYPE get_pc() const;
 
   void set_pixel(int, int, PIXEL_TYPE);

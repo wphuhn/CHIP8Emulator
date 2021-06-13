@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cert-err58-cpp"
 #include "../include/libretro.h"
 
 #include "gtest/gtest.h"
@@ -261,7 +263,7 @@ TEST_F(RetroFixture, RetroGetMemorySizeReturnsCorrectSize) {
 TEST_F(RetroFixture, RetroRunAdvancesOneInstruction) {
   auto game = new retro_game_info;
   game->size = 4;
-  game->data = (void *) new unsigned char[4]{0xDE, 0xAD, 0xBE, 0xEF};
+  game->data = static_cast<void *>(new unsigned char[4]{0xDE, 0xAD, 0xBE, 0xEF});
   chip8machine_load_game(game, my_machine);
   chip8machine_run(my_machine, true);
   ADDR_TYPE pc = tester.get_pc();
@@ -273,3 +275,7 @@ int main(int argc, char *argv[]) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
+
+#ifndef __CLION_IDE_
+#pragma clang diagnostic pop
+#endif

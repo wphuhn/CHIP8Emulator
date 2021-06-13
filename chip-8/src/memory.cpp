@@ -30,7 +30,7 @@ std::vector<MEM_TYPE> Memory::get_ram(bool include_start) const {
 }
 
 void *Memory::get_pointer_to_ram_start() const {
-  return (void *) &ram[0];
+  return const_cast<unsigned char *>(&ram[0]);
 }
 
 MEM_TYPE Memory::get_byte(const ADDR_TYPE offset) const {

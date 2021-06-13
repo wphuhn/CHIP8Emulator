@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cert-err58-cpp"
 #include "gtest/gtest.h"
 
 #include "chip8machine.hpp"
@@ -510,3 +512,7 @@ TEST_F(Chip8MachineFixture, AdvanceExecutesInstructionPointedToByPC) {
   machine.advance();
   EXPECT_EQ(reg_value, tester.get_v(reg_int));
 }
+
+#ifndef __CLION_IDE_
+#pragma clang diagnostic pop
+#endif

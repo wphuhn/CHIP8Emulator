@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cert-err58-cpp"
 #include "gtest/gtest.h"
 
 #include "memory.hpp"
@@ -36,7 +38,7 @@ TEST(Memory, GetBitstreamFromFileGivesExpectedSize) {
   std::vector<unsigned char> rom_contents = {0xBE, 0xEF, 0xCA, 0xCE};
 
   std::ofstream file(rom_path.c_str(), std::ifstream::binary);
-  file.write((char *) &rom_contents[0], rom_contents.size());
+  file.write(reinterpret_cast<char *>(&rom_contents[0]), rom_contents.size());
   file.close();
 
   void *dummy;
@@ -50,7 +52,7 @@ TEST(Memory, GetBitstreamFromFileGivesExpectedContent) {
   std::vector<unsigned char> rom_contents = {0xBE, 0xEF, 0xCA, 0xCE};
 
   std::ofstream file(rom_path.c_str(), std::ifstream::binary);
-  file.write((char *) &rom_contents[0], rom_contents.size());
+  file.write(reinterpret_cast<char *>(&rom_contents[0]), rom_contents.size());
   file.close();
 
   void *content;
@@ -123,3 +125,7 @@ TEST_F(MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetActivePort
     EXPECT_EQ(returned_ram[i], rom[i]);
   }
 }
+
+#ifndef __CLION_IDE_
+#pragma clang diagnostic pop
+#endif

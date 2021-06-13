@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cert-err58-cpp"
 #include "gtest/gtest.h"
 
 #include "programcounter.hpp"
@@ -28,3 +30,7 @@ INSTANTIATE_TEST_CASE_P
         std::make_tuple(0xF58A, 0x619B, 0x5725)
     )
 );
+
+#ifndef __CLION_IDE_
+#pragma clang diagnostic pop
+#endif

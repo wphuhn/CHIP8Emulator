@@ -4,7 +4,10 @@
 # and what few online comments I could find about this check laid out a convincing argument that this
 # is contrary to the spirit of modern C++ (forcing you to use pointers when you don't have to.)
 
+# Excluding legal/copyright from all tests, because this is something to worry about later.
+
 # Excluding whitespace/line_length from the tests, because my experience is that restricting line
 # length in tests makes them less legible, not more
-cpplint --recursive --exclude ../include/libretro.h --exclude ../tests/ --filter=-runtime/int,-runtime/references ..
-cpplint --recursive --filter=-whitespace/line_length,-runtime/int,-runtime/references ../tests/
+
+cpplint --recursive --exclude ../include/libretro.h --exclude ../tests/ --filter=-runtime/int,-runtime/references,-legal/copyright ..
+cpplint --recursive --filter=-whitespace/line_length,-runtime/int,-runtime/references,-legal/copyright ../tests/
