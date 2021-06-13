@@ -10,7 +10,7 @@
 
 class Chip8MachineFixture : public ::testing::Test {
  protected:
-  Chip8MachineFixture() {
+  Chip8MachineFixture() : tester(Chip8MachineTester()) {
     tester.set_machine(&machine);
   }
 
@@ -83,7 +83,7 @@ TEST_P(ANNNParameterizedTestFixture, OpcodeANNNSetsIRegisterToNNN) {
   machine.decode(opcode);
   EXPECT_EQ(tester.get_i(), value);
 }
-INSTANTIATE_TEST_CASE_P
+INSTANTIATE_TEST_SUITE_P
 (
     ANNNTests,
     ANNNParameterizedTestFixture,
@@ -101,7 +101,7 @@ TEST_P(Opcode6XNNParameterizedTestFixture, Opcode6XNNSetsRegisterVXToNN) {
     EXPECT_EQ(tester.get_v(reg_num), value);
   }
 }
-INSTANTIATE_TEST_CASE_P
+INSTANTIATE_TEST_SUITE_P
 (
     Opcode6XNNTests,
     Opcode6XNNParameterizedTestFixture,
@@ -124,7 +124,7 @@ TEST_P(Opcode7XNNParameterizedTestFixture, Opcode7XNNAddsNNToRegisterVX) {
     EXPECT_EQ(tester.get_v(reg_num), final);
   }
 }
-INSTANTIATE_TEST_CASE_P
+INSTANTIATE_TEST_SUITE_P
 (
     Opcode7XNNTests,
     Opcode7XNNParameterizedTestFixture,
@@ -146,7 +146,7 @@ TEST_P(OneNNNParameterizedTestFixture, Opcode1NNNSetsPCToNNN) {
   machine.decode(opcode);
   EXPECT_EQ(tester.get_pc(), value);
 }
-INSTANTIATE_TEST_CASE_P
+INSTANTIATE_TEST_SUITE_P
 (
     OneNNNTests,
     OneNNNParameterizedTestFixture,
@@ -169,7 +169,7 @@ TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsCorrectNumberOfRowsToBla
   int x_offset = 2;
   int y_offset = 4;
   Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
-  Chip8MachineTester tester;
+  Chip8MachineTester tester = Chip8MachineTester();
   tester.set_machine(&machine);
 
   machine.decode(opcode);
@@ -194,7 +194,7 @@ TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNFlipsPixelsOnCompletelyFilled
   int x_offset = 2;
   int y_offset = 4;
   Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
-  Chip8MachineTester tester;
+  Chip8MachineTester tester = Chip8MachineTester();
   tester.set_machine(&machine);
 
   for (int y = 0; y < machine.display_height; y++) {
@@ -228,7 +228,7 @@ TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsModuloOffsetFromRegister
   // past it, so we can't set it in the factory method
   int dummy_offset = 0;
   Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, dummy_offset, dummy_offset);
-  Chip8MachineTester tester;
+  Chip8MachineTester tester = Chip8MachineTester();
   tester.set_machine(&machine);
 
   tester.set_v(x_reg, machine.display_width + modulo_x_offset);
@@ -243,7 +243,7 @@ TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsModuloOffsetFromRegister
   }
   EXPECT_EQ(tester.get_flag(), 0);
 }
-INSTANTIATE_TEST_CASE_P
+INSTANTIATE_TEST_SUITE_P
 (
     DXYNTests,
     DXYNRowsParameterizedTestFixture,
@@ -276,7 +276,7 @@ TEST_P(DXYNRegistersParameterizedTestFixture, OpcodeDXYNDrawsToCorrectPositionBa
         x_offset_ = y_offset;
       }
       Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset_, y_offset);
-      Chip8MachineTester tester;
+      Chip8MachineTester tester = Chip8MachineTester();
       tester.set_machine(&machine);
 
       machine.decode(opcode);
@@ -290,7 +290,7 @@ TEST_P(DXYNRegistersParameterizedTestFixture, OpcodeDXYNDrawsToCorrectPositionBa
     }
   }
 }
-INSTANTIATE_TEST_CASE_P
+INSTANTIATE_TEST_SUITE_P
 (
     DXYNTests,
     DXYNRegistersParameterizedTestFixture,
@@ -317,7 +317,7 @@ TEST_P(DXYNHorizTruncationParameterizedTestFixture, OpcodeDXYNTruncatesDrawingWh
   int y_offset = std::get<1>(GetParam());
   int font_address = 0x050;
   Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
-  Chip8MachineTester tester;
+  Chip8MachineTester tester = Chip8MachineTester();
   tester.set_machine(&machine);
 
   machine.decode(opcode);
@@ -335,7 +335,7 @@ TEST_P(DXYNHorizTruncationParameterizedTestFixture, OpcodeDXYNTruncatesDrawingWh
   }
   EXPECT_EQ(tester.get_flag(), 0);
 }
-INSTANTIATE_TEST_CASE_P
+INSTANTIATE_TEST_SUITE_P
 (
     DXYNTests,
     DXYNHorizTruncationParameterizedTestFixture,
@@ -366,7 +366,7 @@ TEST_P(DXYNVertTruncationParameterizedTestFixture, OpcodeDXYNWrapsDrawingAroundW
   int x_offset = std::get<0>(GetParam());
   int y_offset = std::get<1>(GetParam());
   Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
-  Chip8MachineTester tester;
+  Chip8MachineTester tester = Chip8MachineTester();
   tester.set_machine(&machine);
 
   machine.decode(opcode);
@@ -381,7 +381,7 @@ TEST_P(DXYNVertTruncationParameterizedTestFixture, OpcodeDXYNWrapsDrawingAroundW
   }
   EXPECT_EQ(tester.get_flag(), 0);
 }
-INSTANTIATE_TEST_CASE_P
+INSTANTIATE_TEST_SUITE_P
 (
     DXYNTests,
     DXYNVertTruncationParameterizedTestFixture,
@@ -408,7 +408,7 @@ TEST_P(DXYNValuesParameterizedTestFixture, OpcodeDXYNDrawsFontPointedToByIRegist
   int x_offset = 2;
   int y_offset = 4;
   Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
-  Chip8MachineTester tester;
+  Chip8MachineTester tester = Chip8MachineTester();
   tester.set_machine(&machine);
 
   machine.decode(opcode);
@@ -419,7 +419,7 @@ TEST_P(DXYNValuesParameterizedTestFixture, OpcodeDXYNDrawsFontPointedToByIRegist
   }
   EXPECT_EQ(tester.get_flag(), 0);
 }
-INSTANTIATE_TEST_CASE_P
+INSTANTIATE_TEST_SUITE_P
 (
     DXYNTests,
     DXYNValuesParameterizedTestFixture,
@@ -432,7 +432,7 @@ TEST_F(Chip8MachineFixture, LoadsROMAtCorrectLocation) {
   const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
   machine.reset();
   machine.load_rom(rom);
-  int pc_start = tester.get_pc();
+  ADDR_TYPE pc_start = tester.get_pc();
   for (int i = 0; i < rom.size(); i++) {
     EXPECT_EQ(tester.get_memory_byte(pc_start + i), rom[i]);
   }
@@ -454,7 +454,7 @@ TEST_P(FetchInstructionParameterizedTestFixture, FetchInstructionGrabsInstructio
   int actual = tester.fetch_instruction();
   EXPECT_EQ(opcode, actual);
 }
-INSTANTIATE_TEST_CASE_P
+INSTANTIATE_TEST_SUITE_P
 (
     FetchInstrutionTests,
     FetchInstructionParameterizedTestFixture,

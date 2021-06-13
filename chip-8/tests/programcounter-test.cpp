@@ -18,7 +18,7 @@ TEST_P(ProgramCounterParameterizedTestFixture, AddInstructionAddsValueToCurrentV
   pc.add(increment);
   EXPECT_EQ(pc.get(), expected);
 }
-INSTANTIATE_TEST_CASE_P
+INSTANTIATE_TEST_SUITE_P
 (
     ProgramCounterTests,
     ProgramCounterParameterizedTestFixture,

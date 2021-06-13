@@ -16,7 +16,7 @@ TEST_P(GenXYNNParameterizedTestFixture, GenAXNNGeneratesExpectedCode) {
   OPCODE_TYPE actual = gen_XYNN_opcode(A, X, NN);
   EXPECT_EQ(expected, actual);
 }
-INSTANTIATE_TEST_CASE_P
+INSTANTIATE_TEST_SUITE_P
 (
     GenXYNNTests,
     GenXYNNParameterizedTestFixture,
@@ -41,7 +41,7 @@ TEST_P(GenWXYZParameterizedTestFixture, GenAXNNGeneratesExpectedCode) {
   OPCODE_TYPE actual = gen_WXYZ_opcode(W, X, Y, Z);
   EXPECT_EQ(expected, actual);
 }
-INSTANTIATE_TEST_CASE_P
+INSTANTIATE_TEST_SUITE_P
 (
     GenWXYZTests,
     GenWXYZParameterizedTestFixture,

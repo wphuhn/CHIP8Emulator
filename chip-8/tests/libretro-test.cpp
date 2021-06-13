@@ -9,7 +9,7 @@
 
 class RetroFixture : public ::testing::Test {
  protected:
-  RetroFixture() {
+  RetroFixture() : tester(Chip8MachineTester()) {
     tester.set_machine(&my_machine);
     chip8machine_init(my_machine);
   }
