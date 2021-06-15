@@ -9,6 +9,8 @@
 
 #include "chip8types.hpp"
 
+namespace Emulator {
+
 class Memory {
  public:
   Memory(ADDR_TYPE, ADDR_TYPE);
@@ -28,5 +30,7 @@ class Memory {
  private:
   std::vector<MEM_TYPE> ram;
 };
+
+}  // namespace Emulator
 
 #endif  // CHIP_8_INCLUDE_MEMORY_HPP_

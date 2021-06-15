@@ -6,15 +6,15 @@
 
 #include "test-constants.hpp"
 
-static Memory get_memory() {
-  return Memory(TEST_RAM_SIZE, TEST_ROM_START_ADDRESS);
+static Emulator::Memory get_memory() {
+  return Emulator::Memory(TEST_RAM_SIZE, TEST_ROM_START_ADDRESS);
 }
 
 class MemoryFixture : public ::testing::Test {
  protected:
   MemoryFixture() : ram(get_memory()) {}
 
-  Memory ram;
+  Emulator::Memory ram;
 };
 
 TEST(Memory, GetBitstreamFromFileThrowsExceptionIfFileNotFound) {
@@ -22,7 +22,7 @@ TEST(Memory, GetBitstreamFromFileThrowsExceptionIfFileNotFound) {
   size_t dummy_s;
   std::string bad_path = "dummy.CH8";
   try {
-    std::tie(dummy, dummy_s) = Memory::get_bitstream_from_file(bad_path);
+    std::tie(dummy, dummy_s) = Emulator::Memory::get_bitstream_from_file(bad_path);
     FAIL() << "Expected ifstream::failure exception to be thrown for bad path, none were thrown";
   }
   catch (const std::ifstream::failure &err) {
@@ -43,7 +43,7 @@ TEST(Memory, GetBitstreamFromFileGivesExpectedSize) {
 
   void *dummy;
   size_t size;
-  std::tie(dummy, size) = Memory::get_bitstream_from_file(rom_path);
+  std::tie(dummy, size) = Emulator::Memory::get_bitstream_from_file(rom_path);
   EXPECT_EQ(size, rom_contents.size());
 }
 
@@ -57,7 +57,7 @@ TEST(Memory, GetBitstreamFromFileGivesExpectedContent) {
 
   void *content;
   size_t size;
-  std::tie(content, size) = Memory::get_bitstream_from_file(rom_path);
+  std::tie(content, size) = Emulator::Memory::get_bitstream_from_file(rom_path);
   for (int i = 0; i < rom_contents.size(); i++) {
     EXPECT_EQ(((unsigned char *) content)[i], rom_contents[i]);
   }
@@ -73,7 +73,7 @@ TEST(Memory, ConvertBitstreamToVectorGivesExpectedSize) {
   }
 
   std::vector<unsigned char> converted_stream;
-  converted_stream = Memory::convert_bitstream_to_vector(rom_stream, rom_size);
+  converted_stream = Emulator::Memory::convert_bitstream_to_vector(rom_stream, rom_size);
   EXPECT_EQ(converted_stream.size(), rom_size);
 }
 
@@ -87,7 +87,7 @@ TEST(Memory, ConvertBitstreamToVectorGivesExpectedContent) {
   }
 
   std::vector<unsigned char> converted_stream;
-  converted_stream = Memory::convert_bitstream_to_vector(rom_stream, rom_size);
+  converted_stream = Emulator::Memory::convert_bitstream_to_vector(rom_stream, rom_size);
   for (int i = 0; i < rom_size; i++) {
     EXPECT_EQ(rom_stream[i], converted_stream[i]);
   }

@@ -6,15 +6,15 @@
 
 #include "test-constants.hpp"
 
-static Display get_display() {
-  return Display(TEST_SCREEN_HEIGHT, TEST_SCREEN_WIDTH);
+static Emulator::Display get_display() {
+  return Emulator::Display(TEST_SCREEN_HEIGHT, TEST_SCREEN_WIDTH);
 }
 
 class DisplayFixture : public ::testing::Test {
  protected:
   DisplayFixture() : display(get_display()) {}
 
-  Display display;
+  Emulator::Display display;
 };
 
 TEST_F(DisplayFixture, InitiallyIsClear) {

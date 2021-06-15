@@ -12,7 +12,7 @@ TEST_P(ProgramCounterParameterizedTestFixture, AddInstructionAddsValueToCurrentV
   int increment = std::get<1>(GetParam());
   int expected = std::get<2>(GetParam());
 
-  ProgramCounter pc;
+  Emulator::ProgramCounter pc;
   pc.set(initial);
 
   pc.add(increment);

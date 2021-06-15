@@ -13,7 +13,7 @@ TEST_P(GenXYNNParameterizedTestFixture, GenAXNNGeneratesExpectedCode) {
   int X = std::get<1>(GetParam());
   int NN = std::get<2>(GetParam());
   OPCODE_TYPE expected = std::get<3>(GetParam());
-  OPCODE_TYPE actual = gen_XYNN_opcode(A, X, NN);
+  OPCODE_TYPE actual = Emulator::gen_XYNN_opcode(A, X, NN);
   EXPECT_EQ(expected, actual);
 }
 INSTANTIATE_TEST_SUITE_P
@@ -38,7 +38,7 @@ TEST_P(GenWXYZParameterizedTestFixture, GenAXNNGeneratesExpectedCode) {
   int Y = std::get<2>(GetParam());
   int Z = std::get<3>(GetParam());
   OPCODE_TYPE expected = std::get<4>(GetParam());
-  OPCODE_TYPE actual = gen_WXYZ_opcode(W, X, Y, Z);
+  OPCODE_TYPE actual = Emulator::gen_WXYZ_opcode(W, X, Y, Z);
   EXPECT_EQ(expected, actual);
 }
 INSTANTIATE_TEST_SUITE_P

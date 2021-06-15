@@ -9,18 +9,18 @@ static retro_audio_sample_t audio_cb;
 
 // Creation of a singleton for libretro purposes, but allowing for a
 // backend that's TDD friendly
-static Chip8Machine &get_instance() {
-  static Chip8Machine instance;
+static Emulator::Chip8Machine &get_instance() {
+  static Emulator::Chip8Machine instance;
   return instance;
 }
 
 RETRO_API void retro_init(void) {
-  Chip8Machine *instance = &get_instance();
+  Emulator::Chip8Machine *instance = &get_instance();
   chip8machine_init(*instance);
 }
 
 RETRO_API void retro_deinit(void) {
-  Chip8Machine *instance = &get_instance();
+  Emulator::Chip8Machine *instance = &get_instance();
   chip8machine_deinit(*instance);
 }
 
@@ -36,7 +36,7 @@ RETRO_API void retro_get_system_info(struct retro_system_info *info) {
 }
 
 RETRO_API void retro_get_system_av_info(struct retro_system_av_info *info) {
-  Chip8Machine *instance = &get_instance();
+  Emulator::Chip8Machine *instance = &get_instance();
   chip8machine_get_system_av_info(info, *instance);
 }
 
@@ -141,12 +141,12 @@ void sine_wave(retro_audio_sample_t my_audio_cb) {
 }
 
 RETRO_API void retro_reset(void) {
-  Chip8Machine *instance = &get_instance();
+  Emulator::Chip8Machine *instance = &get_instance();
   chip8machine_reset(*instance);
 }
 
 RETRO_API void retro_run(void) {
-  Chip8Machine *instance = &get_instance();
+  Emulator::Chip8Machine *instance = &get_instance();
   chip8machine_run(*instance);
 }
 
@@ -165,7 +165,7 @@ RETRO_API void retro_cheat_set(unsigned index, bool enabled, const char *code) {
 }
 
 RETRO_API bool retro_load_game(const struct retro_game_info *game) {
-  Chip8Machine *instance = &get_instance();
+  Emulator::Chip8Machine *instance = &get_instance();
   return chip8machine_load_game(game, *instance);
 }
 RETRO_API bool retro_load_game_special(unsigned game_type,
@@ -178,14 +178,17 @@ RETRO_API void retro_unload_game(void) {}
 RETRO_API unsigned retro_get_region(void) { return 0; }
 
 RETRO_API void *retro_get_memory_data(unsigned id) {
-  Chip8Machine *instance = &get_instance();
+  Emulator::Chip8Machine *instance = &get_instance();
   return chip8machine_get_memory_data(id, *instance);
 }
 
 RETRO_API size_t retro_get_memory_size(unsigned int id) {
-  Chip8Machine *instance = &get_instance();
+  Emulator::Chip8Machine *instance = &get_instance();
   return chip8machine_get_memory_size(id, *instance);
 }
+
+namespace Emulator {
+
 RETRO_API void chip8machine_init(Chip8Machine &my_machine) {
   my_machine.reset();
 }
@@ -255,6 +258,8 @@ RETRO_API size_t chip8machine_get_memory_size(unsigned int id,
   return 0;
   // return my_machine.memory_size;
 }
+
+}  // namespace Emulator
 
 // CLion has a long-standing bug (3 years old...) about this being incorrectly
 // identified as having no associated push statement, so remove it only for the

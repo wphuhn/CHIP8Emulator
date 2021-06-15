@@ -1,5 +1,7 @@
 #include "chip8machine.hpp"
 
+namespace Emulator {
+
 Chip8Machine::Chip8Machine()
     : display_height(MAX_HEIGHT),
       display_width(MAX_WIDTH), memory_size(RAM_SIZE),
@@ -169,3 +171,5 @@ std::string Chip8Machine::display_str() const {
 OpcodeNotSupported::OpcodeNotSupported(const OPCODE_TYPE opcode)
     : std::runtime_error(
     "Opcode " + opcode_to_hex_str(opcode) + " not supported") {}
+
+}  // namespace Emulator

@@ -14,6 +14,8 @@
 #include "programcounter.hpp"
 #include "register.hpp"
 
+namespace Emulator {
+
 class Chip8Machine {
  public:
   Chip8Machine();
@@ -21,7 +23,7 @@ class Chip8Machine {
   friend class Chip8MachineTester;
   // Bad, but unavoidable for now
   friend Chip8Machine create_machine_for_drawing(OPCODE_TYPE, ADDR_TYPE,
-                                                 const std::vector<MEM_TYPE>&,
+                                                 const std::vector<MEM_TYPE> &,
                                                  int, int);
 
   const int display_width;
@@ -68,5 +70,7 @@ class OpcodeNotSupported : public std::runtime_error {
  public:
   explicit OpcodeNotSupported(OPCODE_TYPE);
 };
+
+}  // namespace Emulator
 
 #endif  // CHIP_8_INCLUDE_CHIP8MACHINE_HPP_

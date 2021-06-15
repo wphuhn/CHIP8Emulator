@@ -1,5 +1,7 @@
 #include "display.hpp"
 
+namespace Emulator {
+
 Display::Display(int height_, int width_, PIXEL_TYPE off_pixel_)
     : height(height_), width(width_), off_pixel(off_pixel_) {
   screen = std::vector<std::vector<PIXEL_TYPE> >(
@@ -38,3 +40,5 @@ Display::operator std::string() const {
   }
   return stream.str();
 }
+
+}  // namespace Emulator

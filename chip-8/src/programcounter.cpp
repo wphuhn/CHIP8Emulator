@@ -1,5 +1,7 @@
 #include "programcounter.hpp"
 
+namespace Emulator {
+
 ProgramCounter::ProgramCounter() : value_(0) {}
 
 ADDR_TYPE ProgramCounter::get() const {
@@ -14,3 +16,5 @@ void ProgramCounter::add(const ADDR_TYPE increment) {
   value_ += increment;
   value_ &= 0xFFFF;
 }
+
+}  // namespace Emulator

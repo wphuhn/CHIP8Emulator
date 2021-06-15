@@ -1,5 +1,7 @@
 #include "memory.hpp"
 
+namespace Emulator {
+
 Memory::Memory(ADDR_TYPE size_, ADDR_TYPE rom_start_address_)
     : size(size_), rom_start_address(rom_start_address_) {
   ram.resize(size);
@@ -85,3 +87,5 @@ std::vector<MEM_TYPE> Memory::convert_bitstream_to_vector(
 
   return rom_vec;
 }
+
+}  // namespace Emulator

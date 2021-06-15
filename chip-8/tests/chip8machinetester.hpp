@@ -6,6 +6,8 @@
 #include "chip8machine.hpp"
 #include "chip8types.hpp"
 
+namespace Emulator {
+
 class Chip8MachineTester {
  public:
   void set_machine(Chip8Machine *);
@@ -27,5 +29,6 @@ class Chip8MachineTester {
   Chip8Machine *machine;
 };
 
-#endif  // CHIP_8_TESTS_CHIP8MACHINETESTER_HPP_
+}  // namespace Emulator
 
+#endif  // CHIP_8_TESTS_CHIP8MACHINETESTER_HPP_

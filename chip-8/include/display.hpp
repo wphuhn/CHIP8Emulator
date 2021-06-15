@@ -7,6 +7,8 @@
 
 #include "chip8types.hpp"
 
+namespace Emulator {
+
 class Display {
  public:
   Display(int, int, PIXEL_TYPE = 0);
@@ -22,5 +24,7 @@ class Display {
  private:
   std::vector<std::vector<PIXEL_TYPE> > screen;
 };
+
+}  // namespace Emulator
 
 #endif  // CHIP_8_INCLUDE_DISPLAY_HPP_

@@ -58,7 +58,7 @@ std::string convert_opcode_to_str(const OPCODE_TYPE opcode) {
 }
 
 void check_implemented_instructions(const std::vector<MEM_TYPE> &rom) {
-  Chip8Machine machine;
+  Emulator::Chip8Machine machine;
   OPCODE_TYPE opcode;
 
   std::cout << "Parsing ROM to check for unimplemented instructions"
@@ -86,7 +86,7 @@ void check_implemented_instructions(const std::vector<MEM_TYPE> &rom) {
       }
       implemented[opcode_str] += 1;
     }
-    catch (OpcodeNotSupported &) {
+    catch (Emulator::OpcodeNotSupported &) {
       if (unimplemented.count(opcode_str) == 0) {
         unimplemented[opcode_str] = 0;
       }
@@ -125,7 +125,7 @@ void check_implemented_instructions(const std::vector<MEM_TYPE> &rom) {
 }
 
 [[noreturn]] void run_rom(const std::vector<MEM_TYPE> &rom) {
-  Chip8Machine machine;
+  Emulator::Chip8Machine machine;
 
   std::cout << std::endl;
   std::cout << "Running ROM" << std::endl;
@@ -149,8 +149,10 @@ int main(int argc, char **argv) {
 
   void *data;
   size_t size;
-  std::tie(data, size) = Memory::get_bitstream_from_file(std::string(argv[1]));
-  std::vector<MEM_TYPE> rom = Memory::convert_bitstream_to_vector(data, size);
+  std::tie(data, size) =
+      Emulator::Memory::get_bitstream_from_file(std::string(argv[1]));
+  std::vector<MEM_TYPE> rom =
+      Emulator::Memory::convert_bitstream_to_vector(data, size);
 
   check_implemented_instructions(rom);
   run_rom(rom);

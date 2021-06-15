@@ -3,6 +3,8 @@
 
 #include "chip8machine.hpp"
 
+namespace Emulator {
+
 #define PIXEL_COLOR 0xFFFF
 #define X_SCALE 8
 #define Y_SCALE 8
@@ -15,5 +17,7 @@ class Upscaler {
 
   static void upscale(unsigned short *, int, const Chip8Machine &);
 };
+
+}  // namespace Emulator
 
 #endif  // CHIP_8_INCLUDE_UPSCALER_HPP_

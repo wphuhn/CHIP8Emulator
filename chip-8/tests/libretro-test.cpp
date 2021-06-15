@@ -9,13 +9,13 @@
 
 class RetroFixture : public ::testing::Test {
  protected:
-  RetroFixture() : tester(Chip8MachineTester()) {
+  RetroFixture() : tester(Emulator::Chip8MachineTester()) {
     tester.set_machine(&my_machine);
     chip8machine_init(my_machine);
   }
 
-  Chip8Machine my_machine;
-  Chip8MachineTester tester;
+  Emulator::Chip8Machine my_machine;
+  Emulator::Chip8MachineTester tester;
 };
 
 TEST_F(RetroFixture, RetroInitInitializesChip8InDefaultState) {
@@ -62,8 +62,8 @@ TEST_F(RetroFixture, RetroGetSystemAvInfoSetsProperVariables) {
   chip8machine_get_system_av_info(info, my_machine);
   int height = my_machine.display_height;
   int width = my_machine.display_width;
-  int x_scale = Upscaler::x_scale;
-  int y_scale = Upscaler::y_scale;
+  int x_scale = Emulator::Upscaler::x_scale;
+  int y_scale = Emulator::Upscaler::y_scale;
 
   EXPECT_FLOAT_EQ(info->geometry.aspect_ratio, -1.0);
   EXPECT_EQ(info->geometry.base_height, y_scale * height);

@@ -10,12 +10,12 @@
 
 class Chip8MachineFixture : public ::testing::Test {
  protected:
-  Chip8MachineFixture() : tester(Chip8MachineTester()) {
+  Chip8MachineFixture() : tester(Emulator::Chip8MachineTester()) {
     tester.set_machine(&machine);
   }
 
-  Chip8Machine machine;
-  Chip8MachineTester tester;
+  Emulator::Chip8Machine machine;
+  Emulator::Chip8MachineTester tester;
 };
 
 TEST_F(Chip8MachineFixture, HasDefaultConstructor) {}
@@ -36,7 +36,7 @@ TEST_F(Chip8MachineFixture, PassingUnsupportedOpcodeStopsInterpreter) {
     machine.decode(bad_opcode);
     FAIL() << "Expected OpcodeNotSupported exception to be thrown for unsupported opcode, none were thrown";
   }
-  catch (const OpcodeNotSupported &err) {
+  catch (const Emulator::OpcodeNotSupported &err) {
     EXPECT_EQ(err.what(), std::string("Opcode 0x9000 not supported"));
   }
   catch (...) {
@@ -95,7 +95,7 @@ class Opcode6XNNParameterizedTestFixture : public Chip8MachineFixture,
 TEST_P(Opcode6XNNParameterizedTestFixture, Opcode6XNNSetsRegisterVXToNN) {
   OPCODE_TYPE value = GetParam();
   for (int reg_num = 0; reg_num < TEST_NUM_REGISTERS; reg_num++) {
-    OPCODE_TYPE opcode = gen_XYNN_opcode(0x6, reg_num, value);
+    OPCODE_TYPE opcode = Emulator::gen_XYNN_opcode(0x6, reg_num, value);
     tester.set_v(reg_num, 0x0000);
     machine.decode(opcode);
     EXPECT_EQ(tester.get_v(reg_num), value);
@@ -118,7 +118,7 @@ TEST_P(Opcode7XNNParameterizedTestFixture, Opcode7XNNAddsNNToRegisterVX) {
   OPCODE_TYPE increment = std::get<1>(GetParam());
   OPCODE_TYPE final = std::get<2>(GetParam());
   for (int reg_num = 0; reg_num < TEST_NUM_REGISTERS; reg_num++) {
-    OPCODE_TYPE opcode = gen_XYNN_opcode(0x7, reg_num, increment);
+    OPCODE_TYPE opcode = Emulator::gen_XYNN_opcode(0x7, reg_num, increment);
     tester.set_v(reg_num, initial);
     machine.decode(opcode);
     EXPECT_EQ(tester.get_v(reg_num), final);
@@ -160,7 +160,7 @@ TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsCorrectNumberOfRowsToBla
   int x_reg = 1;
   int y_reg = 3;
   int n_rows = GetParam();
-  OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+  OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
 
   unsigned char font_value = 0xFF;
   std::vector<unsigned char> font(n_rows, font_value);
@@ -168,8 +168,8 @@ TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsCorrectNumberOfRowsToBla
   int font_address = 0x050;
   int x_offset = 2;
   int y_offset = 4;
-  Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
-  Chip8MachineTester tester = Chip8MachineTester();
+  Emulator::Chip8Machine machine = Emulator::create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
+  Emulator::Chip8MachineTester tester = Emulator::Chip8MachineTester();
   tester.set_machine(&machine);
 
   machine.decode(opcode);
@@ -185,7 +185,7 @@ TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNFlipsPixelsOnCompletelyFilled
   int x_reg = 1;
   int y_reg = 3;
   int n_rows = GetParam();
-  OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+  OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
 
   unsigned char font_value = 0xFF;
   std::vector<unsigned char> font(n_rows, font_value);
@@ -193,8 +193,8 @@ TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNFlipsPixelsOnCompletelyFilled
   int font_address = 0x050;
   int x_offset = 2;
   int y_offset = 4;
-  Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
-  Chip8MachineTester tester = Chip8MachineTester();
+  Emulator::Chip8Machine machine = Emulator::create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
+  Emulator::Chip8MachineTester tester = Emulator::Chip8MachineTester();
   tester.set_machine(&machine);
 
   for (int y = 0; y < machine.display_height; y++) {
@@ -216,7 +216,7 @@ TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsModuloOffsetFromRegister
   int x_reg = 1;
   int y_reg = 2;
   int n_rows = GetParam();
-  OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+  OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
 
   unsigned char font_value = 0xFF;
   std::vector<unsigned char> font(n_rows, font_value);
@@ -227,8 +227,8 @@ TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsModuloOffsetFromRegister
   // We need to know the machine's width/height to be able to set the offset
   // past it, so we can't set it in the factory method
   int dummy_offset = 0;
-  Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, dummy_offset, dummy_offset);
-  Chip8MachineTester tester = Chip8MachineTester();
+  Emulator::Chip8Machine machine = Emulator::create_machine_for_drawing(opcode, font_address, font, dummy_offset, dummy_offset);
+  Emulator::Chip8MachineTester tester = Emulator::Chip8MachineTester();
   tester.set_machine(&machine);
 
   tester.set_v(x_reg, machine.display_width + modulo_x_offset);
@@ -263,7 +263,7 @@ TEST_P(DXYNRegistersParameterizedTestFixture, OpcodeDXYNDrawsToCorrectPositionBa
   // We omit register VF, as it is used as a flag register here
   for (int x_reg = 0; x_reg < TEST_NUM_REGISTERS - 1; x_reg++) {
     for (int y_reg = 0; y_reg < TEST_NUM_REGISTERS - 1; y_reg++) {
-      OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+      OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
 
       unsigned char font_value = 0xFF;
       std::vector<unsigned char> font(n_rows, font_value);
@@ -275,8 +275,8 @@ TEST_P(DXYNRegistersParameterizedTestFixture, OpcodeDXYNDrawsToCorrectPositionBa
         // x_offset and y_offset are the same, so pick y_offset
         x_offset_ = y_offset;
       }
-      Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset_, y_offset);
-      Chip8MachineTester tester = Chip8MachineTester();
+      Emulator::Chip8Machine machine = Emulator::create_machine_for_drawing(opcode, font_address, font, x_offset_, y_offset);
+      Emulator::Chip8MachineTester tester = Emulator::Chip8MachineTester();
       tester.set_machine(&machine);
 
       machine.decode(opcode);
@@ -308,7 +308,7 @@ TEST_P(DXYNHorizTruncationParameterizedTestFixture, OpcodeDXYNTruncatesDrawingWh
   int x_reg = 1;
   int y_reg = 2;
   int n_rows = std::get<2>(GetParam());
-  OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+  OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
 
   unsigned char font_value = 0xFF;
   std::vector<unsigned char> font(n_rows, font_value);
@@ -316,8 +316,8 @@ TEST_P(DXYNHorizTruncationParameterizedTestFixture, OpcodeDXYNTruncatesDrawingWh
   int x_offset = std::get<0>(GetParam());
   int y_offset = std::get<1>(GetParam());
   int font_address = 0x050;
-  Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
-  Chip8MachineTester tester = Chip8MachineTester();
+  Emulator::Chip8Machine machine = Emulator::create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
+  Emulator::Chip8MachineTester tester = Emulator::Chip8MachineTester();
   tester.set_machine(&machine);
 
   machine.decode(opcode);
@@ -357,7 +357,7 @@ TEST_P(DXYNVertTruncationParameterizedTestFixture, OpcodeDXYNWrapsDrawingAroundW
   int x_reg = 0xB;
   int y_reg = 0xD;
   int n_rows = std::get<2>(GetParam());
-  OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+  OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
 
   unsigned char font_value = 0xFF;
   std::vector<unsigned char> font(n_rows, font_value);
@@ -365,8 +365,8 @@ TEST_P(DXYNVertTruncationParameterizedTestFixture, OpcodeDXYNWrapsDrawingAroundW
   int font_address = 0x050;
   int x_offset = std::get<0>(GetParam());
   int y_offset = std::get<1>(GetParam());
-  Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
-  Chip8MachineTester tester = Chip8MachineTester();
+  Emulator::Chip8Machine machine = Emulator::create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
+  Emulator::Chip8MachineTester tester = Emulator::Chip8MachineTester();
   tester.set_machine(&machine);
 
   machine.decode(opcode);
@@ -398,7 +398,7 @@ TEST_P(DXYNValuesParameterizedTestFixture, OpcodeDXYNDrawsFontPointedToByIRegist
   int x_reg = 1;
   int y_reg = 2;
   int n_rows = 2;
-  OPCODE_TYPE opcode = gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+  OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
 
   unsigned char font_value_1 = std::get<0>(GetParam());
   unsigned char font_value_2 = std::get<1>(GetParam());
@@ -407,8 +407,8 @@ TEST_P(DXYNValuesParameterizedTestFixture, OpcodeDXYNDrawsFontPointedToByIRegist
   int font_address = 0x050;
   int x_offset = 2;
   int y_offset = 4;
-  Chip8Machine machine = create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
-  Chip8MachineTester tester = Chip8MachineTester();
+  Emulator::Chip8Machine machine = Emulator::create_machine_for_drawing(opcode, font_address, font, x_offset, y_offset);
+  Emulator::Chip8MachineTester tester = Emulator::Chip8MachineTester();
   tester.set_machine(&machine);
 
   machine.decode(opcode);
@@ -466,7 +466,7 @@ INSTANTIATE_TEST_SUITE_P
 TEST_F(Chip8MachineFixture, AdvanceIncrementsPCForNonJumpInstructions) {
   int reg_int = 1;
   int reg_value = 63;
-  OPCODE_TYPE opcode = gen_XYNN_opcode(0x6, reg_int, reg_value);
+  OPCODE_TYPE opcode = Emulator::gen_XYNN_opcode(0x6, reg_int, reg_value);
 
   unsigned char byte_one = (opcode >> 8) & 0x00FF;
   unsigned char byte_two = opcode & 0x00FF;
@@ -499,7 +499,7 @@ TEST_F(Chip8MachineFixture, AdvanceExecutesInstructionPointedToByPC) {
   // Chose a simple instruction (set register to NN) for this
   int reg_int = 1;
   int reg_value = 63;
-  OPCODE_TYPE opcode = gen_XYNN_opcode(0x6, reg_int, reg_value);
+  OPCODE_TYPE opcode = Emulator::gen_XYNN_opcode(0x6, reg_int, reg_value);
 
   unsigned char byte_one = (opcode >> 8) & 0x00FF;
   unsigned char byte_two = opcode & 0x00FF;

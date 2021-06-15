@@ -1,5 +1,7 @@
 #include "upscaler.hpp"
 
+namespace Emulator {
+
 void Upscaler::upscale(unsigned short *frame_buffer, int width,
                        const Chip8Machine &my_machine) {
   for (int y_machine = 0; y_machine < my_machine.display_height; y_machine++) {
@@ -18,3 +20,5 @@ void Upscaler::upscale(unsigned short *frame_buffer, int width,
     }
   }
 }
+
+}  //  namespace Emulator

@@ -3,6 +3,8 @@
 
 #include "chip8types.hpp"
 
+namespace Emulator {
+
 class ProgramCounter {
  public:
   ProgramCounter();
@@ -14,4 +16,7 @@ class ProgramCounter {
  private:
   ADDR_TYPE value_;
 };
+
+}  // namespace Emulator
+
 #endif  // CHIP_8_INCLUDE_PROGRAMCOUNTER_HPP_

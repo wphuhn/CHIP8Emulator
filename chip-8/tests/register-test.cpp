@@ -5,7 +5,7 @@
 #include "register.hpp"
 
 TEST(Register, HasDefaultConstructor) {
-  Register the_register;
+  Emulator::Register the_register;
 }
 
 #ifndef __CLION_IDE_

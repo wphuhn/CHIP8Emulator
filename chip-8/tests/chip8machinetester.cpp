@@ -1,5 +1,7 @@
 #include "chip8machinetester.hpp"
 
+namespace Emulator {
+
 void Chip8MachineTester::set_machine(Chip8Machine *machine_) { machine = machine_; }
 
 OPCODE_TYPE Chip8MachineTester::fetch_instruction() const {
@@ -27,3 +29,5 @@ void Chip8MachineTester::set_v(const int reg_num, const REG_TYPE new_value) {
   machine->set_v(reg_num, new_value);
 }
 void Chip8MachineTester::set_pc(const ADDR_TYPE new_pc) { machine->set_pc(new_pc); }
+
+}  // namespace Emulator
