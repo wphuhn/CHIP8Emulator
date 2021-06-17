@@ -1,3 +1,6 @@
+/// \file upscaler.hpp
+/// \brief Upscaler to convert machine display to user-specified resolution
+
 #ifndef CHIP_8_INCLUDE_UPSCALER_HPP_
 #define CHIP_8_INCLUDE_UPSCALER_HPP_
 
@@ -5,17 +8,24 @@
 
 namespace Emulator {
 
-#define PIXEL_COLOR 0xFFFF
-#define X_SCALE 8
-#define Y_SCALE 8
-
+/// \class Upscaler
+/// \brief Upscaler to convert machine display to user-specified resolution
 class Upscaler {
  public:
-  static const int x_scale = X_SCALE;
-  static const int y_scale = Y_SCALE;
-  static const int pixel_color = PIXEL_COLOR;
+  Upscaler();
 
-  static void upscale(unsigned short *, int, const Chip8Machine &);
+  void upscale(unsigned short *, int, const Chip8Machine &) const;
+
+  /// \var x_scale
+  /// \brief Scaling factor for width of display
+  const int x_scale;
+
+  /// \var y_scale
+  /// \brief Scaling factor for height of display
+  const int y_scale;
+
+ private:
+  const int pixel_color;
 };
 
 }  // namespace Emulator

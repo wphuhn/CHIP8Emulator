@@ -1,3 +1,6 @@
+/// \file chip8machine.hpp
+/// \brief Main object for running CHIP-8 emulation
+
 #ifndef CHIP_8_INCLUDE_CHIP8MACHINE_HPP_
 #define CHIP_8_INCLUDE_CHIP8MACHINE_HPP_
 
@@ -14,8 +17,12 @@
 #include "programcounter.hpp"
 #include "register.hpp"
 
+/// \namespace Emulator
+/// \brief Contains all Emulator definitions
 namespace Emulator {
 
+/// \class Chip8Machine
+/// \brief Main object for running CHIP-8 emulation
 class Chip8Machine {
  public:
   Chip8Machine();
@@ -26,11 +33,20 @@ class Chip8Machine {
                                                  const std::vector<MEM_TYPE> &,
                                                  int, int);
 
+  /// \var display_width
+  /// \brief Width of screen (in number of pixels)
   const int display_width;
+
+  /// \var display_height
+  /// \brief Height of screen (in number of pixels)
   const int display_height;
+
+  /// \var memory_size
+  /// \brief Total number of bytes in RAM
   const ADDR_TYPE memory_size;
 
   const PIXEL_TYPE &get_pixel(int, int) const;
+
   void *get_pointer_to_ram_start() const;
 
   void clear_screen();
@@ -66,6 +82,8 @@ class Chip8Machine {
   void set_pc(ADDR_TYPE);
 };
 
+/// \class OpcodeNotSupported
+/// \brief Thrown when invalid instruction decoded by machine
 class OpcodeNotSupported : public std::runtime_error {
  public:
   explicit OpcodeNotSupported(OPCODE_TYPE);

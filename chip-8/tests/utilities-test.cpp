@@ -6,14 +6,14 @@
 #include "utilities.hpp"
 
 class GenXYNNParameterizedTestFixture
-    : public ::testing::TestWithParam<std::tuple<int, int, int, OPCODE_TYPE> > {
+    : public ::testing::TestWithParam<std::tuple<int, int, int, Emulator::OPCODE_TYPE> > {
 };
 TEST_P(GenXYNNParameterizedTestFixture, GenAXNNGeneratesExpectedCode) {
   int A = std::get<0>(GetParam());
   int X = std::get<1>(GetParam());
   int NN = std::get<2>(GetParam());
-  OPCODE_TYPE expected = std::get<3>(GetParam());
-  OPCODE_TYPE actual = Emulator::gen_XYNN_opcode(A, X, NN);
+  Emulator::OPCODE_TYPE expected = std::get<3>(GetParam());
+  Emulator::OPCODE_TYPE actual = Emulator::gen_XYNN_opcode(A, X, NN);
   EXPECT_EQ(expected, actual);
 }
 INSTANTIATE_TEST_SUITE_P
@@ -30,15 +30,15 @@ INSTANTIATE_TEST_SUITE_P
 );
 
 class GenWXYZParameterizedTestFixture
-    : public ::testing::TestWithParam<std::tuple<int, int, int, int, OPCODE_TYPE> > {
+    : public ::testing::TestWithParam<std::tuple<int, int, int, int, Emulator::OPCODE_TYPE> > {
 };
 TEST_P(GenWXYZParameterizedTestFixture, GenAXNNGeneratesExpectedCode) {
   int W = std::get<0>(GetParam());
   int X = std::get<1>(GetParam());
   int Y = std::get<2>(GetParam());
   int Z = std::get<3>(GetParam());
-  OPCODE_TYPE expected = std::get<4>(GetParam());
-  OPCODE_TYPE actual = Emulator::gen_WXYZ_opcode(W, X, Y, Z);
+  Emulator::OPCODE_TYPE expected = std::get<4>(GetParam());
+  Emulator::OPCODE_TYPE actual = Emulator::gen_WXYZ_opcode(W, X, Y, Z);
   EXPECT_EQ(expected, actual);
 }
 INSTANTIATE_TEST_SUITE_P

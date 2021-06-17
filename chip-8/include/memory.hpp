@@ -1,3 +1,6 @@
+/// \file memory.hpp
+/// \brief Memory space for machine
+
 #ifndef CHIP_8_INCLUDE_MEMORY_HPP_
 #define CHIP_8_INCLUDE_MEMORY_HPP_
 
@@ -11,6 +14,8 @@
 
 namespace Emulator {
 
+/// \class Memory
+/// \brief Memory space for machine
 class Memory {
  public:
   Memory(ADDR_TYPE, ADDR_TYPE);

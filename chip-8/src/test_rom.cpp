@@ -1,14 +1,13 @@
 #include <chrono>  // NOLINT [build/c++11]
-#include <cstdint>
 #include <iostream>
 #include <map>
 #include <thread>  // NOLINT [build/c++11]
 
 #include "chip8machine.hpp"
 
-#define N_BYTES_IN_OP sizeof(OPCODE_TYPE)
+const int N_BYTES_IN_OP = sizeof(Emulator::OPCODE_TYPE);
 
-#define SLEEP_MS 500
+const int SLEEP_MS = 500;
 
 void output_stats(const std::map<std::string, int> &counter,
                   const unsigned int n_total) {
@@ -34,9 +33,10 @@ void output_stats(const std::map<std::string, int> &counter,
   }
 }
 
-OPCODE_TYPE extract_big_endian_opcode(const std::vector<MEM_TYPE> &rom,
-                                      const ADDR_TYPE pc) {
-  OPCODE_TYPE opcode = 0;
+Emulator::OPCODE_TYPE extract_big_endian_opcode(
+    const std::vector<Emulator::MEM_TYPE> &rom,
+    const Emulator::ADDR_TYPE pc) {
+  Emulator::OPCODE_TYPE opcode = 0;
 
   for (int i = 0; i < N_BYTES_IN_OP; i++) {
     // opcode = (rom[pc] << 8) | (rom[pc+1] << 0);
@@ -47,7 +47,7 @@ OPCODE_TYPE extract_big_endian_opcode(const std::vector<MEM_TYPE> &rom,
   return opcode;
 }
 
-std::string convert_opcode_to_str(const OPCODE_TYPE opcode) {
+std::string convert_opcode_to_str(const Emulator::OPCODE_TYPE opcode) {
   std::stringstream stream;
   stream << "0x"
          << std::hex
@@ -57,9 +57,10 @@ std::string convert_opcode_to_str(const OPCODE_TYPE opcode) {
   return stream.str();
 }
 
-void check_implemented_instructions(const std::vector<MEM_TYPE> &rom) {
+void check_implemented_instructions(
+    const std::vector<Emulator::MEM_TYPE> &rom) {
   Emulator::Chip8Machine machine;
-  OPCODE_TYPE opcode;
+  Emulator::OPCODE_TYPE opcode;
 
   std::cout << "Parsing ROM to check for unimplemented instructions"
             << std::endl;
@@ -124,7 +125,7 @@ void check_implemented_instructions(const std::vector<MEM_TYPE> &rom) {
             << std::endl;
 }
 
-[[noreturn]] void run_rom(const std::vector<MEM_TYPE> &rom) {
+[[noreturn]] void run_rom(const std::vector<Emulator::MEM_TYPE> &rom) {
   Emulator::Chip8Machine machine;
 
   std::cout << std::endl;
@@ -151,7 +152,7 @@ int main(int argc, char **argv) {
   size_t size;
   std::tie(data, size) =
       Emulator::Memory::get_bitstream_from_file(std::string(argv[1]));
-  std::vector<MEM_TYPE> rom =
+  std::vector<Emulator::MEM_TYPE> rom =
       Emulator::Memory::convert_bitstream_to_vector(data, size);
 
   check_implemented_instructions(rom);

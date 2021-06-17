@@ -97,7 +97,7 @@ TEST(Memory, ConvertBitstreamToVectorGivesExpectedContent) {
 TEST_F(MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByByte) {
   const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
   ram.load_rom(rom);
-  ADDR_TYPE expected_start_address = TEST_ROM_START_ADDRESS;
+  Emulator::ADDR_TYPE expected_start_address = TEST_ROM_START_ADDRESS;
   for (int i = 0; i < rom.size(); i++) {
     EXPECT_EQ(ram.get_byte(expected_start_address + i), rom[i]);
   }
@@ -111,7 +111,7 @@ TEST_F(MemoryFixture, LoadROMLoadsROMAtCorrectLocation_AccessByRam_GetAllRAM) {
   const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
   ram.load_rom(rom);
   const std::vector<unsigned char> returned_ram = ram.get_ram();
-  ADDR_TYPE expected_start_address = TEST_ROM_START_ADDRESS;
+  Emulator::ADDR_TYPE expected_start_address = TEST_ROM_START_ADDRESS;
   for (int i = 0; i < rom.size(); i++) {
     EXPECT_EQ(returned_ram[expected_start_address + i], rom[i]);
   }

@@ -21,17 +21,17 @@ class Chip8MachineFixture : public ::testing::Test {
 TEST_F(Chip8MachineFixture, HasDefaultConstructor) {}
 
 TEST_F(Chip8MachineFixture, ResetSetsPCToPointToStartOfROM) {
-  ADDR_TYPE start_pc = 0x201;
+  Emulator::ADDR_TYPE start_pc = 0x201;
   assert(start_pc != TEST_ROM_START_ADDRESS);
   tester.set_pc(start_pc);
   machine.reset();
-  ADDR_TYPE expected = TEST_ROM_START_ADDRESS;
+  Emulator::ADDR_TYPE expected = TEST_ROM_START_ADDRESS;
   EXPECT_EQ(tester.get_pc(), expected);
 }
 
 TEST_F(Chip8MachineFixture, PassingUnsupportedOpcodeStopsInterpreter) {
   // 0x9000 was chosen because it's not part of CHIP-8 instruction set
-  OPCODE_TYPE bad_opcode = 0x9000;
+  Emulator::OPCODE_TYPE bad_opcode = 0x9000;
   try {
     machine.decode(bad_opcode);
     FAIL() << "Expected OpcodeNotSupported exception to be thrown for unsupported opcode, none were thrown";
@@ -59,7 +59,7 @@ TEST_F(Chip8MachineFixture, ClearScreenClearsTheScreen) {
 }
 
 TEST_F(Chip8MachineFixture, Opcode00E0ClearsScreen) {
-  OPCODE_TYPE opcode = 0x00E0;
+  Emulator::OPCODE_TYPE opcode = 0x00E0;
   for (int x = 0; x < machine.display_width; x++) {
     for (int y = 0; y < machine.display_height; y++) {
       tester.set_pixel(x, y, TEST_ON_PIXEL);
@@ -74,10 +74,10 @@ TEST_F(Chip8MachineFixture, Opcode00E0ClearsScreen) {
 }
 
 class ANNNParameterizedTestFixture : public Chip8MachineFixture,
-                                     public ::testing::WithParamInterface<OPCODE_TYPE> {
+                                     public ::testing::WithParamInterface<Emulator::OPCODE_TYPE> {
 };
 TEST_P(ANNNParameterizedTestFixture, OpcodeANNNSetsIRegisterToNNN) {
-  OPCODE_TYPE opcode = GetParam();
+  Emulator::OPCODE_TYPE opcode = GetParam();
   int value = opcode & 0x0FFF;
   tester.set_i(0x0000);
   machine.decode(opcode);
@@ -90,12 +90,12 @@ INSTANTIATE_TEST_SUITE_P
     ::testing::Values(0xA000, 0xABFA, 0xA212, 0xAFFF));
 
 class Opcode6XNNParameterizedTestFixture : public Chip8MachineFixture,
-                                           public ::testing::WithParamInterface<OPCODE_TYPE> {
+                                           public ::testing::WithParamInterface<Emulator::OPCODE_TYPE> {
 };
 TEST_P(Opcode6XNNParameterizedTestFixture, Opcode6XNNSetsRegisterVXToNN) {
-  OPCODE_TYPE value = GetParam();
+  Emulator::OPCODE_TYPE value = GetParam();
   for (int reg_num = 0; reg_num < TEST_NUM_REGISTERS; reg_num++) {
-    OPCODE_TYPE opcode = Emulator::gen_XYNN_opcode(0x6, reg_num, value);
+    Emulator::OPCODE_TYPE opcode = Emulator::gen_XYNN_opcode(0x6, reg_num, value);
     tester.set_v(reg_num, 0x0000);
     machine.decode(opcode);
     EXPECT_EQ(tester.get_v(reg_num), value);
@@ -109,16 +109,16 @@ INSTANTIATE_TEST_SUITE_P
 );
 
 class Opcode7XNNParameterizedTestFixture : public Chip8MachineFixture,
-                                           public ::testing::WithParamInterface<std::tuple<OPCODE_TYPE,
-                                                                                           OPCODE_TYPE,
-                                                                                           OPCODE_TYPE>> {
+                                           public ::testing::WithParamInterface<std::tuple<Emulator::OPCODE_TYPE,
+                                                                                           Emulator::OPCODE_TYPE,
+                                                                                           Emulator::OPCODE_TYPE>> {
 };
 TEST_P(Opcode7XNNParameterizedTestFixture, Opcode7XNNAddsNNToRegisterVX) {
-  OPCODE_TYPE initial = std::get<0>(GetParam());
-  OPCODE_TYPE increment = std::get<1>(GetParam());
-  OPCODE_TYPE final = std::get<2>(GetParam());
+  Emulator::OPCODE_TYPE initial = std::get<0>(GetParam());
+  Emulator::OPCODE_TYPE increment = std::get<1>(GetParam());
+  Emulator::OPCODE_TYPE final = std::get<2>(GetParam());
   for (int reg_num = 0; reg_num < TEST_NUM_REGISTERS; reg_num++) {
-    OPCODE_TYPE opcode = Emulator::gen_XYNN_opcode(0x7, reg_num, increment);
+    Emulator::OPCODE_TYPE opcode = Emulator::gen_XYNN_opcode(0x7, reg_num, increment);
     tester.set_v(reg_num, initial);
     machine.decode(opcode);
     EXPECT_EQ(tester.get_v(reg_num), final);
@@ -138,10 +138,10 @@ INSTANTIATE_TEST_SUITE_P
 );
 
 class OneNNNParameterizedTestFixture : public Chip8MachineFixture,
-                                       public ::testing::WithParamInterface<OPCODE_TYPE> {
+                                       public ::testing::WithParamInterface<Emulator::OPCODE_TYPE> {
 };
 TEST_P(OneNNNParameterizedTestFixture, Opcode1NNNSetsPCToNNN) {
-  OPCODE_TYPE opcode = GetParam();
+  Emulator::OPCODE_TYPE opcode = GetParam();
   int value = opcode & 0x0FFF;
   machine.decode(opcode);
   EXPECT_EQ(tester.get_pc(), value);
@@ -160,7 +160,7 @@ TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsCorrectNumberOfRowsToBla
   int x_reg = 1;
   int y_reg = 3;
   int n_rows = GetParam();
-  OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+  Emulator::OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
 
   unsigned char font_value = 0xFF;
   std::vector<unsigned char> font(n_rows, font_value);
@@ -185,7 +185,7 @@ TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNFlipsPixelsOnCompletelyFilled
   int x_reg = 1;
   int y_reg = 3;
   int n_rows = GetParam();
-  OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+  Emulator::OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
 
   unsigned char font_value = 0xFF;
   std::vector<unsigned char> font(n_rows, font_value);
@@ -216,7 +216,7 @@ TEST_P(DXYNRowsParameterizedTestFixture, OpcodeDXYNDrawsModuloOffsetFromRegister
   int x_reg = 1;
   int y_reg = 2;
   int n_rows = GetParam();
-  OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+  Emulator::OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
 
   unsigned char font_value = 0xFF;
   std::vector<unsigned char> font(n_rows, font_value);
@@ -263,7 +263,7 @@ TEST_P(DXYNRegistersParameterizedTestFixture, OpcodeDXYNDrawsToCorrectPositionBa
   // We omit register VF, as it is used as a flag register here
   for (int x_reg = 0; x_reg < TEST_NUM_REGISTERS - 1; x_reg++) {
     for (int y_reg = 0; y_reg < TEST_NUM_REGISTERS - 1; y_reg++) {
-      OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+      Emulator::OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
 
       unsigned char font_value = 0xFF;
       std::vector<unsigned char> font(n_rows, font_value);
@@ -308,7 +308,7 @@ TEST_P(DXYNHorizTruncationParameterizedTestFixture, OpcodeDXYNTruncatesDrawingWh
   int x_reg = 1;
   int y_reg = 2;
   int n_rows = std::get<2>(GetParam());
-  OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+  Emulator::OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
 
   unsigned char font_value = 0xFF;
   std::vector<unsigned char> font(n_rows, font_value);
@@ -357,7 +357,7 @@ TEST_P(DXYNVertTruncationParameterizedTestFixture, OpcodeDXYNWrapsDrawingAroundW
   int x_reg = 0xB;
   int y_reg = 0xD;
   int n_rows = std::get<2>(GetParam());
-  OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+  Emulator::OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
 
   unsigned char font_value = 0xFF;
   std::vector<unsigned char> font(n_rows, font_value);
@@ -398,7 +398,7 @@ TEST_P(DXYNValuesParameterizedTestFixture, OpcodeDXYNDrawsFontPointedToByIRegist
   int x_reg = 1;
   int y_reg = 2;
   int n_rows = 2;
-  OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
+  Emulator::OPCODE_TYPE opcode = Emulator::gen_WXYZ_opcode(0xD, x_reg, y_reg, n_rows);
 
   unsigned char font_value_1 = std::get<0>(GetParam());
   unsigned char font_value_2 = std::get<1>(GetParam());
@@ -432,14 +432,14 @@ TEST_F(Chip8MachineFixture, LoadsROMAtCorrectLocation) {
   const std::vector<unsigned char> rom = {0xBE, 0xEF, 0xCA, 0xCE};
   machine.reset();
   machine.load_rom(rom);
-  ADDR_TYPE pc_start = tester.get_pc();
+  Emulator::ADDR_TYPE pc_start = tester.get_pc();
   for (int i = 0; i < rom.size(); i++) {
     EXPECT_EQ(tester.get_memory_byte(pc_start + i), rom[i]);
   }
 }
 
 class FetchInstructionParameterizedTestFixture : public Chip8MachineFixture,
-                                                 public ::testing::WithParamInterface<OPCODE_TYPE> {
+                                                 public ::testing::WithParamInterface<Emulator::OPCODE_TYPE> {
 };
 TEST_P(FetchInstructionParameterizedTestFixture, FetchInstructionGrabsInstructionAtPCFromMemory) {
   int opcode = GetParam();
@@ -466,7 +466,7 @@ INSTANTIATE_TEST_SUITE_P
 TEST_F(Chip8MachineFixture, AdvanceIncrementsPCForNonJumpInstructions) {
   int reg_int = 1;
   int reg_value = 63;
-  OPCODE_TYPE opcode = Emulator::gen_XYNN_opcode(0x6, reg_int, reg_value);
+  Emulator::OPCODE_TYPE opcode = Emulator::gen_XYNN_opcode(0x6, reg_int, reg_value);
 
   unsigned char byte_one = (opcode >> 8) & 0x00FF;
   unsigned char byte_two = opcode & 0x00FF;
@@ -475,14 +475,14 @@ TEST_F(Chip8MachineFixture, AdvanceIncrementsPCForNonJumpInstructions) {
   machine.reset();
   machine.load_rom(rom);
 
-  ADDR_TYPE pc_start = tester.get_pc();
+  Emulator::ADDR_TYPE pc_start = tester.get_pc();
   machine.advance();
   EXPECT_EQ(pc_start + 2, tester.get_pc());
 }
 
 TEST_F(Chip8MachineFixture, AdvanceSetsPCExplicitlyForJumpInstructions) {
   int jump_address = 0x227;
-  OPCODE_TYPE opcode = 0x1000 + jump_address;
+  Emulator::OPCODE_TYPE opcode = 0x1000 + jump_address;
 
   unsigned char byte_one = (opcode >> 8) & 0x00FF;
   unsigned char byte_two = opcode & 0x00FF;
@@ -499,7 +499,7 @@ TEST_F(Chip8MachineFixture, AdvanceExecutesInstructionPointedToByPC) {
   // Chose a simple instruction (set register to NN) for this
   int reg_int = 1;
   int reg_value = 63;
-  OPCODE_TYPE opcode = Emulator::gen_XYNN_opcode(0x6, reg_int, reg_value);
+  Emulator::OPCODE_TYPE opcode = Emulator::gen_XYNN_opcode(0x6, reg_int, reg_value);
 
   unsigned char byte_one = (opcode >> 8) & 0x00FF;
   unsigned char byte_two = opcode & 0x00FF;

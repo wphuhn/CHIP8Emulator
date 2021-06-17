@@ -19,25 +19,25 @@ class RetroFixture : public ::testing::Test {
 };
 
 TEST_F(RetroFixture, RetroInitInitializesChip8InDefaultState) {
-  ADDR_TYPE pc = tester.get_pc();
+  Emulator::ADDR_TYPE pc = tester.get_pc();
   EXPECT_EQ(pc, TEST_ROM_START_ADDRESS);
 }
 
 TEST_F(RetroFixture, RetroInitReinitializesIfAlreadyInitialized) {
-  ADDR_TYPE start_pc = 0x201;
+  Emulator::ADDR_TYPE start_pc = 0x201;
   assert(start_pc != TEST_ROM_START_ADDRESS);
   tester.set_pc(start_pc);
   chip8machine_init(my_machine);
-  ADDR_TYPE pc = tester.get_pc();
+  Emulator::ADDR_TYPE pc = tester.get_pc();
   EXPECT_EQ(pc, TEST_ROM_START_ADDRESS);
 }
 
 TEST_F(RetroFixture, RetroDeinitResetsChip8ToDefaultState) {
-  ADDR_TYPE start_pc = 0x201;
+  Emulator::ADDR_TYPE start_pc = 0x201;
   assert(start_pc != TEST_ROM_START_ADDRESS);
   tester.set_pc(start_pc);
   chip8machine_deinit(my_machine);
-  ADDR_TYPE pc = tester.get_pc();
+  Emulator::ADDR_TYPE pc = tester.get_pc();
   EXPECT_EQ(pc, TEST_ROM_START_ADDRESS);
 }
 
@@ -62,8 +62,9 @@ TEST_F(RetroFixture, RetroGetSystemAvInfoSetsProperVariables) {
   chip8machine_get_system_av_info(info, my_machine);
   int height = my_machine.display_height;
   int width = my_machine.display_width;
-  int x_scale = Emulator::Upscaler::x_scale;
-  int y_scale = Emulator::Upscaler::y_scale;
+  Emulator::Upscaler upscaler;
+  int x_scale = upscaler.x_scale;
+  int y_scale = upscaler.y_scale;
 
   EXPECT_FLOAT_EQ(info->geometry.aspect_ratio, -1.0);
   EXPECT_EQ(info->geometry.base_height, y_scale * height);
@@ -120,11 +121,11 @@ TEST(RetroSetControllerPortDevice, Exists) {
 }
 
 TEST_F(RetroFixture, RetroResetResetsStateOfEmulator) {
-  ADDR_TYPE start_pc = 0x201;
+  Emulator::ADDR_TYPE start_pc = 0x201;
   assert(start_pc != TEST_ROM_START_ADDRESS);
   tester.set_pc(start_pc);
   chip8machine_reset(my_machine);
-  ADDR_TYPE pc = tester.get_pc();
+  Emulator::ADDR_TYPE pc = tester.get_pc();
   EXPECT_EQ(pc, TEST_ROM_START_ADDRESS);
 }
 
@@ -266,7 +267,7 @@ TEST_F(RetroFixture, RetroRunAdvancesOneInstruction) {
   game->data = static_cast<void *>(new unsigned char[4]{0xDE, 0xAD, 0xBE, 0xEF});
   chip8machine_load_game(game, my_machine);
   chip8machine_run(my_machine, true);
-  ADDR_TYPE pc = tester.get_pc();
+  Emulator::ADDR_TYPE pc = tester.get_pc();
   EXPECT_EQ(pc, 0x202);
   EXPECT_EQ(tester.get_ram()[pc], 0xBE);
 }

@@ -203,8 +203,9 @@ RETRO_API void chip8machine_get_system_av_info(
   memset(info, 0, sizeof(*info));
   int height = my_machine.display_height;
   int width = my_machine.display_width;
-  int x_scale = Upscaler::x_scale;
-  int y_scale = Upscaler::y_scale;
+  Upscaler upscaler;
+  int x_scale = upscaler.x_scale;
+  int y_scale = upscaler.y_scale;
 
   info->geometry.aspect_ratio = -1.0;  // Use default
   info->geometry.base_height = y_scale * height;
@@ -222,15 +223,16 @@ RETRO_API void chip8machine_reset(Chip8Machine &my_machine) {
 RETRO_API void chip8machine_run(Chip8Machine &my_machine, bool run_silent) {
   // TODO(WPH):  Strong suspicion this will break the moment users try
   //  to resize screen
-  int width = Upscaler::x_scale * my_machine.display_width;
-  int height = Upscaler::y_scale * my_machine.display_height;
+  Upscaler upscaler;
+  int width = upscaler.x_scale * my_machine.display_width;
+  int height = upscaler.y_scale * my_machine.display_height;
 
   // TODO(WPH):  For now, each frame is one instruction
   my_machine.advance();
 
   unsigned short frame_buffer[height * width];
 
-  Upscaler::upscale(frame_buffer, width, my_machine);
+  upscaler.upscale(frame_buffer, width, my_machine);
 
   if (!run_silent) {
     video_cb(frame_buffer, width, height, sizeof(unsigned short) * width);

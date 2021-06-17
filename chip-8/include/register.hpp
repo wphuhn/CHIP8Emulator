@@ -1,3 +1,6 @@
+/// \file register.hpp
+/// \brief General-purpose register
+
 #ifndef CHIP_8_INCLUDE_REGISTER_HPP_
 #define CHIP_8_INCLUDE_REGISTER_HPP_
 
@@ -8,6 +11,8 @@ namespace Emulator {
 // For advanced architectures, this is a candidate for templating
 // For now, I'm going to keep it simple and assume that all registers have
 // the same underlying type
+/// \class Register
+/// \brief General-purpose register
 class Register {
  public:
   Register();

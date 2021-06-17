@@ -1,3 +1,6 @@
+/// \file display.hpp
+/// \brief Representation of the display by the machine (no upscaling!)
+
 #ifndef CHIP_8_INCLUDE_DISPLAY_HPP_
 #define CHIP_8_INCLUDE_DISPLAY_HPP_
 
@@ -9,6 +12,8 @@
 
 namespace Emulator {
 
+/// \class Display
+/// \brief Representation of the display by the machine (no upscaling!)
 class Display {
  public:
   Display(int, int, PIXEL_TYPE = 0);

@@ -2,8 +2,17 @@
 
 namespace Emulator {
 
+namespace {
+const int PIXEL_COLOR = 0xFFFF;
+const int X_SCALE = 8;
+const int Y_SCALE = 8;
+}  // namespace
+
+Upscaler::Upscaler()
+    : pixel_color(PIXEL_COLOR), x_scale(X_SCALE), y_scale(Y_SCALE) {}
+
 void Upscaler::upscale(unsigned short *frame_buffer, int width,
-                       const Chip8Machine &my_machine) {
+                       const Chip8Machine &my_machine) const {
   for (int y_machine = 0; y_machine < my_machine.display_height; y_machine++) {
     for (int x_machine = 0; x_machine < my_machine.display_width; x_machine++) {
       unsigned short pixel = my_machine.get_pixel(x_machine, y_machine);

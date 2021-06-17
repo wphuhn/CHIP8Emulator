@@ -1,3 +1,6 @@
+/// \file programcounter.hpp
+/// \brief Program counter for machine
+
 #ifndef CHIP_8_INCLUDE_PROGRAMCOUNTER_HPP_
 #define CHIP_8_INCLUDE_PROGRAMCOUNTER_HPP_
 
@@ -5,6 +8,8 @@
 
 namespace Emulator {
 
+/// \class ProgramCounter
+/// \brief Program counter for machine
 class ProgramCounter {
  public:
   ProgramCounter();
