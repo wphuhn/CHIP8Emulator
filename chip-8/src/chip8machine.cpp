@@ -7,6 +7,13 @@ Chip8Machine::Chip8Machine()
       display_width(MAX_WIDTH), memory_size(RAM_SIZE),
       ram(RAM_SIZE, ROM_START_ADDRESS), display(MAX_HEIGHT, MAX_WIDTH) {}
 
+/// \brief Executes an instruction for the current machine state
+///
+/// This subroutine assumes the program counter has already been incremented
+/// for the current instruction cycle;  may have unintended consequences when
+/// decoding instructions that modify the program counter!
+///
+/// \param opcode Instruction to execute
 void Chip8Machine::decode(const OPCODE_TYPE opcode) {
   // Are ya coding, son?
   if (opcode == 0x00E0) {
@@ -65,6 +72,10 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
   throw OpcodeNotSupported(opcode);
 }
 
+/// \brief Return the value of the pixel located at (x, y) position
+/// \param x Horizontal position of pixel, where 0 corresponds to left edge
+/// \param y Vertical position of pixel, where 0 corresponds to upper edge
+/// \return the value of the pixel
 const PIXEL_TYPE &Chip8Machine::get_pixel(const int x, const int y) const {
   return display.get_pixel(x, y);
 }
@@ -81,6 +92,11 @@ std::vector<MEM_TYPE> Chip8Machine::get_ram(bool include_start) const {
   return ram.get_ram(include_start);
 }
 
+/// \brief Return pointer to first address in system RAM
+///
+/// This subroutine is intended only for use with LibRetro
+///
+/// \return Pointer to first address in system RAM
 void *Chip8Machine::get_pointer_to_ram_start() const {
   return ram.get_pointer_to_ram_start();
 }
@@ -89,6 +105,7 @@ void Chip8Machine::set_pc(const ADDR_TYPE new_pc) {
   pc.set(new_pc);
 }
 
+/// \brief Reset the screen to its default state
 void Chip8Machine::clear_screen() {
   display.clear();
 }
@@ -101,6 +118,8 @@ MEM_TYPE Chip8Machine::get_memory_byte(ADDR_TYPE address) const {
   return ram.get_byte(address);
 }
 
+/// \brief Load ROM into system RAM
+/// \param rom ROM to load into system RAM
 void Chip8Machine::load_rom(const std::vector<MEM_TYPE> &rom) {
   ram.load_rom(rom);
 }
@@ -112,6 +131,7 @@ OPCODE_TYPE Chip8Machine::fetch_instruction() const {
   return (byte_one << 8) + byte_two;
 }
 
+/// \brief Perform one iteration of the instruction cycle
 void Chip8Machine::advance() {
   OPCODE_TYPE opcode = fetch_instruction();
   pc.add(INSTRUCTION_LENGTH);
@@ -145,6 +165,8 @@ static std::string opcode_to_hex_str(const OPCODE_TYPE value) {
   return stream.str();
 }
 
+/// \brief Output the internal state of the machine as a string
+/// \return Text representation of the internal state of the machine
 Chip8Machine::operator std::string() const {
   std::stringstream stream;
   stream << "Current status of Chip8Machine:" << std::endl;
@@ -160,14 +182,22 @@ Chip8Machine::operator std::string() const {
   return stream.str();
 }
 
+/// \brief Reset the machine to its default state.
+///
+/// Does not unload the currently-loaded ROM, may have unintended consequences
+/// for self-modifying code.
 void Chip8Machine::reset() {
   pc.set(ROM_START_ADDRESS);
 }
 
+/// \brief Return the contents of the display as an ASCII representation
+/// \return Contents of the display as an ASCII representation
 std::string Chip8Machine::display_str() const {
   return std::string(display);
 }
 
+/// \brief Report that an unimplemented opcode was parsed
+/// \param opcode Unimplemented opcode
 OpcodeNotSupported::OpcodeNotSupported(const OPCODE_TYPE opcode)
     : std::runtime_error(
     "Opcode " + opcode_to_hex_str(opcode) + " not supported") {}

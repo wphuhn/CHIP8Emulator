@@ -19,6 +19,16 @@ OPCODE_TYPE gen_WXYZ_opcode(const int W, const int X, const int Y, const int Z) 
   return (W_ << 12) + (X_ << 8) + (Y_ << 4) + Z_;
 }
 
+/// \brief Set up a Chip8Machine suited for testing drawing instructions
+///
+/// The opcode is used to set the appropriate registers for the offset.
+///
+/// \param opcode Opcode which will be tested
+/// \param font_address Starting address for font data to be drawn
+/// \param font Font data to be drawn
+/// \param x_offset X location where font will be drawn
+/// \param y_offset Y location where font will be drawn
+/// \return Chip8Machine ready for usage in drawing tests
 Emulator::Chip8Machine create_machine_for_drawing(const OPCODE_TYPE opcode,
                                                   const ADDR_TYPE font_address,
                                                   const std::vector<MEM_TYPE> &font,

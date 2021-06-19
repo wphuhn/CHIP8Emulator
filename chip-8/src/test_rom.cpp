@@ -151,9 +151,9 @@ int main(int argc, char **argv) {
   void *data;
   size_t size;
   std::tie(data, size) =
-      Emulator::Memory::get_bitstream_from_file(std::string(argv[1]));
+      Emulator::Memory::get_bytestream_from_file(std::string(argv[1]));
   std::vector<Emulator::MEM_TYPE> rom =
-      Emulator::Memory::convert_bitstream_to_vector(data, size);
+      Emulator::Memory::convert_bytestream_to_vector(data, size);
 
   check_implemented_instructions(rom);
   run_rom(rom);

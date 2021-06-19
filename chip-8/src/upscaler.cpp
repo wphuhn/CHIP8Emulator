@@ -11,6 +11,10 @@ const int Y_SCALE = 8;
 Upscaler::Upscaler()
     : pixel_color(PIXEL_COLOR), x_scale(X_SCALE), y_scale(Y_SCALE) {}
 
+/// \brief Upscale a frame buffer to machine resolution to user-specified value
+/// \param frame_buffer Frame buffer, already allocated to upscaled size
+/// \param width Width of upscaled screen, in number of bytes
+/// \param my_machine Machine whose display will be upscaled
 void Upscaler::upscale(unsigned short *frame_buffer, int width,
                        const Chip8Machine &my_machine) const {
   for (int y_machine = 0; y_machine < my_machine.display_height; y_machine++) {

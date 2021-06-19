@@ -245,7 +245,7 @@ RETRO_API bool chip8machine_load_game(const struct retro_game_info *game,
   if (game->size == 0) return false;
   if (game->data == nullptr) return false;
   std::vector<unsigned char> rom =
-      Memory::convert_bitstream_to_vector(game->data, game->size);
+      Memory::convert_bytestream_to_vector(game->data, game->size);
   my_machine.load_rom(rom);
   return true;
 }

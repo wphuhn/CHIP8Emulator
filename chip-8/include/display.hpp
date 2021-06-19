@@ -18,8 +18,16 @@ class Display {
  public:
   Display(int, int, PIXEL_TYPE = 0);
 
+  /// \var width
+  /// \brief Width of screen (in number of pixels)
   const int width;
+
+  /// \var height
+  /// \brief Width of display (in number of pixels)
   const int height;
+
+  /// \var off_pixel
+  /// \brief Value for pixel when "off"; all other values assumed "on"
   const PIXEL_TYPE off_pixel;
 
   const PIXEL_TYPE &get_pixel(int, int) const;
