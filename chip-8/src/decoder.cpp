@@ -26,6 +26,14 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
     pc.set(value);
     return;
   }
+  if ((opcode & 0xF000) == 0x3000) {
+    int reg_num = (opcode & 0x0F00) >> 8;
+    int value = opcode & 0x00FF;
+    if (get_v(reg_num) == value) {
+      pc.add(INSTRUCTION_LENGTH);
+    }
+    return;
+  }
   if ((opcode & 0xF000) == 0x6000) {
     int reg_num = (opcode & 0x0F00) >> 8;
     // In principle, the else condition should never trigger, since there
