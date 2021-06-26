@@ -83,6 +83,7 @@ class Chip8Machine {
   void set_v(int, REG_TYPE);
   void set_flag(REG_TYPE);
   void set_pc(ADDR_TYPE);
+  void add_to_stack(ADDR_TYPE);
 };
 
 /// \class OpcodeNotSupported

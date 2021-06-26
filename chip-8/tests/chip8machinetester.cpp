@@ -32,5 +32,8 @@ void Chip8MachineTester::set_v(const int reg_num, const REG_TYPE new_value) {
   machine->set_v(reg_num, new_value);
 }
 void Chip8MachineTester::set_pc(const ADDR_TYPE new_pc) { machine->set_pc(new_pc); }
+void Chip8MachineTester::add_to_stack(const ADDR_TYPE new_stack_top) {
+  machine->add_to_stack(new_stack_top);
+}
 
 }  // namespace Emulator

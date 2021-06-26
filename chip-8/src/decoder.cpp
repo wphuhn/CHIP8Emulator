@@ -15,6 +15,12 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
     display.clear();
     return;
   }
+  if (opcode == 0x00EE) {
+    ADDR_TYPE new_addr = call_stack.top();
+    call_stack.pop();
+    pc.set(new_addr);
+    return;
+  }
   if ((opcode & 0xF000) == 0x1000) {
     int value = opcode & 0x0FFF;
     pc.set(value);

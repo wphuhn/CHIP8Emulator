@@ -49,6 +49,38 @@ INSTANTIATE_TEST_SUITE_P
     ANNNParameterizedTestFixture,
     ::testing::Values(0xA000, 0xABFA, 0xA212, 0xAFFF));
 
+class Opcode00EEParameterizedTestFixture : public Chip8MachineFixture,
+                                           public ::testing::WithParamInterface< std::tuple<Emulator::ADDR_TYPE, Emulator::OPCODE_TYPE> > {
+};
+TEST_P(Opcode00EEParameterizedTestFixture, Opcode00EEPopsTopOfStack) {
+  auto stack_top = std::get<1>(GetParam());
+  Emulator::OPCODE_TYPE opcode = 0x00EE;
+  Emulator::ADDR_TYPE padding = 0x0000;
+  tester.add_to_stack(padding);
+  tester.add_to_stack(stack_top);
+  EXPECT_EQ(tester.get_top_of_stack(), stack_top);
+  machine.decode(opcode);
+  EXPECT_EQ(tester.get_top_of_stack(), padding);
+}
+TEST_P(Opcode00EEParameterizedTestFixture, Opcode00EESetsPCToValue) {
+  auto new_addr = std::get<0>(GetParam());
+  Emulator::OPCODE_TYPE opcode = 0x00EE;
+  Emulator::ADDR_TYPE old_addr = 0x0000;
+  tester.set_pc(old_addr);
+  tester.add_to_stack(new_addr);
+  machine.decode(opcode);
+  EXPECT_EQ(tester.get_pc(), new_addr);
+}
+INSTANTIATE_TEST_SUITE_P
+(
+    Opcode00EETests,
+    Opcode00EEParameterizedTestFixture,
+    ::testing::Values(std::make_tuple(0x24DC, 0x2383),
+                      std::make_tuple(0x2678, 0x2536),
+                      std::make_tuple(0x2C62, 0x2752),
+                      std::make_tuple(0x2D8E, 0x289F))
+);
+
 class Opcode2NNNParameterizedTestFixture : public Chip8MachineFixture,
  public ::testing::WithParamInterface< std::tuple<Emulator::ADDR_TYPE, Emulator::OPCODE_TYPE> > {
 };

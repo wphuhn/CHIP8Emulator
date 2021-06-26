@@ -74,12 +74,14 @@ void Chip8Machine::advance() {
 }
 
 REG_TYPE Chip8Machine::get_i() const { return i_register.get(); }
+
 REG_TYPE Chip8Machine::get_v(const int reg_num) const {
   if (reg_num < v_register.size()) return v_register[reg_num].get();
   throw std::runtime_error(
       "Invalid register V" + std::to_string(reg_num) + " specified.");
 }
 REG_TYPE Chip8Machine::get_flag() const { return v_register[0xF].get(); }
+
 ADDR_TYPE Chip8Machine::get_top_of_stack() const {
   return call_stack.top();
 }
@@ -96,6 +98,8 @@ void Chip8Machine::set_v(const int reg_num, const REG_TYPE new_value) {
       "Invalid register V" + std::to_string(reg_num) + " specified.");
 }
 void Chip8Machine::set_flag(const REG_TYPE new_value) { set_v(0xF, new_value); }
+
+void Chip8Machine::add_to_stack(const ADDR_TYPE new_top) { call_stack.push(new_top); }
 
 static std::string opcode_to_hex_str(const OPCODE_TYPE value) {
   std::stringstream stream;
