@@ -84,6 +84,19 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
     }
     return;
   }
+  if ((opcode & 0xF0FF) == 0xF033) {
+    int reg_num = (opcode & 0x0F00) >> 8;
+    int value = get_v(reg_num);
+    int decimal_one = value % 10;
+    int decimal_ten = (value / 10) % 10;
+    int decimal_hundred = (value / 100) % 10;
+
+    ADDR_TYPE addr = get_i();
+    set_memory_byte(addr, decimal_hundred);
+    set_memory_byte(addr+1, decimal_ten);
+    set_memory_byte(addr+2, decimal_one);
+    return;
+  }
   throw OpcodeNotSupported(opcode);
 }
 
