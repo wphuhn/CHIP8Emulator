@@ -20,6 +20,9 @@ REG_TYPE Chip8MachineTester::get_v(const int reg_num) const {
   return machine->get_v(reg_num);
 }
 ADDR_TYPE Chip8MachineTester::get_pc() const { return machine->get_pc(); }
+ADDR_TYPE Chip8MachineTester::get_top_of_stack() const {
+  return machine->get_top_of_stack();
+}
 
 void Chip8MachineTester::set_pixel(const int x, const int y, const PIXEL_TYPE value) {
   machine->set_pixel(x, y, value);

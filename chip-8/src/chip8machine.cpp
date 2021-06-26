@@ -25,6 +25,12 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
     pc.set(value);
     return;
   }
+  if ((opcode & 0xF000) == 0x2000) {
+    int value = opcode & 0x0FFF;
+    call_stack.push(get_pc());
+    pc.set(value);
+    return;
+  }
   if ((opcode & 0xF000) == 0x6000) {
     int reg_num = (opcode & 0x0F00) >> 8;
     // In principle, the else condition should never trigger, since there
@@ -145,6 +151,9 @@ REG_TYPE Chip8Machine::get_v(const int reg_num) const {
       "Invalid register V" + std::to_string(reg_num) + " specified.");
 }
 REG_TYPE Chip8Machine::get_flag() const { return v_register[0xF].get(); }
+ADDR_TYPE Chip8Machine::get_top_of_stack() const {
+  return call_stack.top();
+}
 
 void Chip8Machine::set_i(const REG_TYPE new_value) {
   i_register.set(new_value);

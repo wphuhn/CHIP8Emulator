@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <iomanip>
+#include <stack>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -64,6 +65,7 @@ class Chip8Machine {
   ProgramCounter pc;
   Register i_register;
   std::array<Register, NUM_V_REGS> v_register;
+  std::stack<ADDR_TYPE> call_stack;
 
   OPCODE_TYPE fetch_instruction() const;
 
@@ -73,6 +75,7 @@ class Chip8Machine {
   REG_TYPE get_v(int) const;
   REG_TYPE get_flag() const;
   ADDR_TYPE get_pc() const;
+  ADDR_TYPE get_top_of_stack() const;
 
   void set_pixel(int, int, PIXEL_TYPE);
   void set_memory_byte(ADDR_TYPE, MEM_TYPE);

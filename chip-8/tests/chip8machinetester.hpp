@@ -20,6 +20,7 @@ class Chip8MachineTester {
   REG_TYPE get_flag() const;
   REG_TYPE get_v(int) const;
   ADDR_TYPE get_pc() const;
+  ADDR_TYPE get_top_of_stack() const;
 
   void set_pixel(int, int, PIXEL_TYPE);
   void set_i(REG_TYPE);

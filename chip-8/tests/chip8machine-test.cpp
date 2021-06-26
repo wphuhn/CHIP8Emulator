@@ -89,6 +89,34 @@ INSTANTIATE_TEST_SUITE_P
     ANNNParameterizedTestFixture,
     ::testing::Values(0xA000, 0xABFA, 0xA212, 0xAFFF));
 
+class Opcode2NNNParameterizedTestFixture : public Chip8MachineFixture,
+ public ::testing::WithParamInterface< std::tuple<Emulator::ADDR_TYPE, Emulator::OPCODE_TYPE> > {
+};
+TEST_P(Opcode2NNNParameterizedTestFixture, Opcode2NNNPutsCurrentAddressOnStack) {
+  auto pc = std::get<0>(GetParam());
+  auto opcode = std::get<1>(GetParam());
+  tester.set_pc(pc);
+  machine.decode(opcode);
+  EXPECT_EQ(tester.get_top_of_stack(), pc);
+}
+TEST_P(Opcode2NNNParameterizedTestFixture, Opcode2NNNSetsPCToCorrectValue) {
+  auto pc = std::get<0>(GetParam());
+  auto opcode = std::get<1>(GetParam());
+  int value = opcode & 0x0FFF;
+  tester.set_pc(pc);
+  machine.decode(opcode);
+  EXPECT_EQ(tester.get_pc(), value);
+}
+INSTANTIATE_TEST_SUITE_P
+(
+    Opcode2NNNTests,
+    Opcode2NNNParameterizedTestFixture,
+    ::testing::Values(std::make_tuple(0x2537, 0x2000),
+                      std::make_tuple(0x2C14, 0x2BFA),
+                      std::make_tuple(0x28DB, 0x2212),
+                      std::make_tuple(0x2F94, 0x2FFF))
+);
+
 class Opcode6XNNParameterizedTestFixture : public Chip8MachineFixture,
                                            public ::testing::WithParamInterface<Emulator::OPCODE_TYPE> {
 };
