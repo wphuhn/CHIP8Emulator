@@ -516,6 +516,39 @@ INSTANTIATE_TEST_SUITE_P
                       std::make_tuple(255, 0x24AA, 0xF933))
 );
 
+class OpcodeFX65ParameterizedTestFixture : public Chip8MachineFixture,
+ public ::testing::WithParamInterface< std::tuple<Emulator::OPCODE_TYPE, Emulator::ADDR_TYPE> > {
+};
+TEST_P(OpcodeFX65ParameterizedTestFixture, OpcodeFX65SetsRegistersFromMemory {
+  auto opcode = std::get<0>(GetParam());
+  auto i_addr = std::get<1>(GetParam());
+
+  int v_num = (opcode & 0x0F00) >> 8;
+
+  tester.set_i(i_addr);
+  for (int i = 0; i <= v_num; i++) {
+    tester.set_v(i, 0);
+    tester.set_memory_byte(i_addr + i, i + 1);
+  }
+
+  machine.decode(opcode);
+  for (int i = 0; i <= v_num; i++) {
+    EXPECT_EQ(tester.get_v(i), i + 1);
+  }
+  for (int i = v_num + 1; i <= 0xF; i++) {
+    EXPECT_EQ(tester.get_v(i), 0);
+  }
+}
+INSTANTIATE_TEST_SUITE_P
+(
+    OpcodeFX65Tests,
+    OpcodeFX65ParameterizedTestFixture,
+    ::testing::Values(std::make_tuple(0xF065, 0x20D2),
+                      std::make_tuple(0xFC65, 0x22CD),
+                      std::make_tuple(0xF565, 0x27D3),
+                      std::make_tuple(0xFF65, 0x2BDD))
+);
+
 #ifndef __CLION_IDE_
 #pragma clang diagnostic pop
 #endif

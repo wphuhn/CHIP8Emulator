@@ -84,6 +84,16 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
     }
     return;
   }
+  if ((opcode & 0xF0FF) == 0xF065) {
+    // TODO(WPH):  The behavior where the I register is left alone is
+    //             implemented, add support for incrementing I register
+    int reg_num = (opcode & 0x0F00) >> 8;
+    ADDR_TYPE addr = get_i();
+    for (int i = 0; i <= reg_num; i++) {
+      set_v(i, get_memory_byte(addr + i));
+    }
+    return;
+  }
   if ((opcode & 0xF0FF) == 0xF033) {
     int reg_num = (opcode & 0x0F00) >> 8;
     int value = get_v(reg_num);
