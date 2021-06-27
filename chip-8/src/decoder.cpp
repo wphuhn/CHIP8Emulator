@@ -84,14 +84,15 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
     }
     return;
   }
-  if ((opcode & 0xF0FF) == 0xF065) {
-    // TODO(WPH):  The behavior where the I register is left alone is
-    //             implemented, add support for incrementing I register
+  if ((opcode & 0xF0FF) == 0XF029) {
+    // TODO(WPH):  Based on my reading of this instruction and my
+    //             hand disassembly of the PONG2 ROM, this
+    //             instruction should just be "load contents of VX
+    //             into I register"
+    //             The way that all the online sources reference it,
+    //             though, I'm not sure if I'm doing something wrong...
     int reg_num = (opcode & 0x0F00) >> 8;
-    ADDR_TYPE addr = get_i();
-    for (int i = 0; i <= reg_num; i++) {
-      set_v(i, get_memory_byte(addr + i));
-    }
+    set_i(get_v(reg_num));
     return;
   }
   if ((opcode & 0xF0FF) == 0xF033) {
@@ -105,6 +106,16 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
     set_memory_byte(addr, decimal_hundred);
     set_memory_byte(addr+1, decimal_ten);
     set_memory_byte(addr+2, decimal_one);
+    return;
+  }
+  if ((opcode & 0xF0FF) == 0xF065) {
+    // TODO(WPH):  The behavior where the I register is left alone is
+    //             implemented, add support for incrementing I register
+    int reg_num = (opcode & 0x0F00) >> 8;
+    ADDR_TYPE addr = get_i();
+    for (int i = 0; i <= reg_num; i++) {
+      set_v(i, get_memory_byte(addr + i));
+    }
     return;
   }
   throw OpcodeNotSupported(opcode);

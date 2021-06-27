@@ -485,6 +485,31 @@ INSTANTIATE_TEST_SUITE_P
     )
 );
 
+class OpcodeFX29ParameterizedTestFixture : public Chip8MachineFixture,
+    public ::testing::WithParamInterface< std::tuple<Emulator::OPCODE_TYPE, Emulator::ADDR_TYPE> > {
+};
+TEST_P(OpcodeFX29ParameterizedTestFixture, OpcodeFX29SetsIRegisterToAddressInVRegister) {
+  auto opcode = std::get<0>(GetParam());
+  auto addr = std::get<1>(GetParam());
+
+  int v_num = (opcode & 0x0F00) >> 8;
+
+  tester.set_i(0);
+  tester.set_v(v_num, addr);
+
+  machine.decode(opcode);
+  EXPECT_EQ(tester.get_i(), addr);
+}
+INSTANTIATE_TEST_SUITE_P
+(
+    OpcodeFX29Tests,
+    OpcodeFX29ParameterizedTestFixture,
+    ::testing::Values(std::make_tuple(0xF029, 0x2E12),
+                      std::make_tuple(0xF929, 0x27AE),
+                      std::make_tuple(0xF429, 0x27E7),
+                      std::make_tuple(0xFF29, 0x22BE))
+);
+
 class OpcodeFX33ParameterizedTestFixture : public Chip8MachineFixture,
  public ::testing::WithParamInterface< std::tuple<int, Emulator::ADDR_TYPE, Emulator::OPCODE_TYPE> > {
 };
@@ -519,7 +544,7 @@ INSTANTIATE_TEST_SUITE_P
 class OpcodeFX65ParameterizedTestFixture : public Chip8MachineFixture,
  public ::testing::WithParamInterface< std::tuple<Emulator::OPCODE_TYPE, Emulator::ADDR_TYPE> > {
 };
-TEST_P(OpcodeFX65ParameterizedTestFixture, OpcodeFX65SetsRegistersFromMemory {
+TEST_P(OpcodeFX65ParameterizedTestFixture, OpcodeFX65SetsRegistersFromMemory) {
   auto opcode = std::get<0>(GetParam());
   auto i_addr = std::get<1>(GetParam());
 
