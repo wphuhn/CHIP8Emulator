@@ -27,6 +27,10 @@ ADDR_TYPE Chip8MachineTester::get_top_of_stack() const {
   return machine->get_top_of_stack();
 }
 
+REG_TYPE Chip8MachineTester::get_delay_timer() const {
+  return machine->get_delay_timer();
+}
+
 void Chip8MachineTester::set_memory_byte(const ADDR_TYPE address, unsigned char value) {
   machine->set_memory_byte(address, value);
 };
@@ -43,6 +47,10 @@ void Chip8MachineTester::set_pc(const ADDR_TYPE new_pc) { machine->set_pc(new_pc
 
 void Chip8MachineTester::add_to_stack(const ADDR_TYPE new_stack_top) {
   machine->add_to_stack(new_stack_top);
+}
+
+void Chip8MachineTester::set_delay_timer(const REG_TYPE new_delay) {
+  machine->set_delay_timer(new_delay);
 }
 
 }  // namespace Emulator

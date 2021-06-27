@@ -485,6 +485,56 @@ INSTANTIATE_TEST_SUITE_P
     )
 );
 
+class OpcodeFX15ParameterizedTestFixture : public Chip8MachineFixture,
+                                           public ::testing::WithParamInterface< std::tuple<Emulator::OPCODE_TYPE, Emulator::ADDR_TYPE> > {
+};
+TEST_P(OpcodeFX15ParameterizedTestFixture, OpcodeFX15SetsDelayTimerToValueInInVRegister) {
+  auto opcode = std::get<0>(GetParam());
+  auto value = std::get<1>(GetParam());
+
+  int v_num = (opcode & 0x0F00) >> 8;
+
+  tester.set_delay_timer(0);
+  tester.set_v(v_num, value);
+
+  machine.decode(opcode);
+  EXPECT_EQ(tester.get_delay_timer(), value);
+}
+INSTANTIATE_TEST_SUITE_P
+(
+    OpcodeFX15Tests,
+    OpcodeFX15ParameterizedTestFixture,
+    ::testing::Values(std::make_tuple(0xF015, 0xFB),
+                      std::make_tuple(0xF215, 0x86),
+                      std::make_tuple(0xF615, 0xC5),
+                      std::make_tuple(0xFF15, 0xFA))
+);
+
+class OpcodeFX07ParameterizedTestFixture : public Chip8MachineFixture,
+                                           public ::testing::WithParamInterface< std::tuple<Emulator::OPCODE_TYPE, Emulator::ADDR_TYPE> > {
+};
+TEST_P(OpcodeFX07ParameterizedTestFixture, OpcodeFX07SetsVRegisterToValueInDelayTimer) {
+  auto opcode = std::get<0>(GetParam());
+  auto value = std::get<1>(GetParam());
+
+  int v_num = (opcode & 0x0F00) >> 8;
+
+  tester.set_delay_timer(value);
+  tester.set_v(v_num, 0);
+
+  machine.decode(opcode);
+  EXPECT_EQ(tester.get_v(v_num), value);
+}
+INSTANTIATE_TEST_SUITE_P
+(
+    OpcodeFX07Tests,
+    OpcodeFX07ParameterizedTestFixture,
+    ::testing::Values(std::make_tuple(0xF007, 0x10),
+                      std::make_tuple(0xFE07, 0xDF),
+                      std::make_tuple(0xF407, 0x81),
+                      std::make_tuple(0xFF07, 0x89))
+);
+
 class OpcodeFX29ParameterizedTestFixture : public Chip8MachineFixture,
     public ::testing::WithParamInterface< std::tuple<Emulator::OPCODE_TYPE, Emulator::ADDR_TYPE> > {
 };

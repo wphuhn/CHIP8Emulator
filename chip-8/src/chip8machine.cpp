@@ -86,6 +86,10 @@ ADDR_TYPE Chip8Machine::get_top_of_stack() const {
   return call_stack.top();
 }
 
+REG_TYPE Chip8Machine::get_delay_timer() const {
+  return delay_timer;
+}
+
 void Chip8Machine::set_i(const REG_TYPE new_value) {
   i_register.set(new_value);
 }
@@ -100,6 +104,8 @@ void Chip8Machine::set_v(const int reg_num, const REG_TYPE new_value) {
 void Chip8Machine::set_flag(const REG_TYPE new_value) { set_v(0xF, new_value); }
 
 void Chip8Machine::add_to_stack(const ADDR_TYPE new_top) { call_stack.push(new_top); }
+
+void Chip8Machine::set_delay_timer(const REG_TYPE new_delay) { delay_timer = new_delay; }
 
 static std::string opcode_to_hex_str(const OPCODE_TYPE value) {
   std::stringstream stream;

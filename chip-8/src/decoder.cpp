@@ -84,7 +84,17 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
     }
     return;
   }
-  if ((opcode & 0xF0FF) == 0XF029) {
+  if ((opcode & 0xF0FF) == 0xF015) {
+    int reg_num = (opcode & 0x0F00) >> 8;
+    set_delay_timer(get_v(reg_num));
+    return;
+  }
+  if ((opcode & 0xF0FF) == 0xF007) {
+    int reg_num = (opcode & 0x0F00) >> 8;
+    set_v(reg_num, get_delay_timer());
+    return;
+  }
+  if ((opcode & 0xF0FF) == 0xF029) {
     // TODO(WPH):  Based on my reading of this instruction and my
     //             hand disassembly of the PONG2 ROM, this
     //             instruction should just be "load contents of VX

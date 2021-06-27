@@ -21,6 +21,7 @@ class Chip8MachineTester {
   REG_TYPE get_v(int) const;
   ADDR_TYPE get_pc() const;
   ADDR_TYPE get_top_of_stack() const;
+  REG_TYPE get_delay_timer() const;
 
   void set_memory_byte(ADDR_TYPE, unsigned char);
   void set_pixel(int, int, PIXEL_TYPE);
@@ -28,6 +29,7 @@ class Chip8MachineTester {
   void set_v(int, REG_TYPE);
   void set_pc(ADDR_TYPE);
   void add_to_stack(ADDR_TYPE);
+  void set_delay_timer(REG_TYPE);
  private:
   Chip8Machine *machine;
 };

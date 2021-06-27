@@ -66,6 +66,7 @@ class Chip8Machine {
   Register i_register;
   std::array<Register, NUM_V_REGS> v_register;
   std::stack<ADDR_TYPE> call_stack;
+  unsigned char delay_timer;
 
   OPCODE_TYPE fetch_instruction() const;
 
@@ -76,6 +77,7 @@ class Chip8Machine {
   REG_TYPE get_flag() const;
   ADDR_TYPE get_pc() const;
   ADDR_TYPE get_top_of_stack() const;
+  REG_TYPE get_delay_timer() const;
 
   void set_pixel(int, int, PIXEL_TYPE);
   void set_memory_byte(ADDR_TYPE, MEM_TYPE);
@@ -84,6 +86,7 @@ class Chip8Machine {
   void set_flag(REG_TYPE);
   void set_pc(ADDR_TYPE);
   void add_to_stack(ADDR_TYPE);
+  void set_delay_timer(REG_TYPE);
 };
 
 /// \class OpcodeNotSupported
