@@ -134,6 +134,7 @@ void check_implemented_instructions(
 
   machine.reset();
   machine.load_rom(rom);
+  machine.start_timers();
   while (true) {
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_MS));
     std::cout << std::string(machine) << std::endl;

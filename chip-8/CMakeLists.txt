@@ -17,7 +17,7 @@ install(TARGETS chip-8-libretro
         PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 add_executable(test-rom src/test_rom.cpp)
-target_link_libraries(test-rom chip-8)
+target_link_libraries(test-rom chip-8 Threads::Threads)
 install(TARGETS test-rom
 		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 

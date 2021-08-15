@@ -17,6 +17,7 @@ static Emulator::Chip8Machine &get_instance() {
 RETRO_API void retro_init(void) {
   Emulator::Chip8Machine *instance = &get_instance();
   chip8machine_init(*instance);
+  instance->start_timers();
 }
 
 RETRO_API void retro_deinit(void) {
@@ -143,6 +144,7 @@ void sine_wave(retro_audio_sample_t my_audio_cb) {
 RETRO_API void retro_reset(void) {
   Emulator::Chip8Machine *instance = &get_instance();
   chip8machine_reset(*instance);
+  instance->kill_timers();
 }
 
 RETRO_API void retro_run(void) {

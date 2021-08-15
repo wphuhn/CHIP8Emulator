@@ -33,7 +33,7 @@ REG_TYPE Chip8MachineTester::get_delay_timer() const {
 
 void Chip8MachineTester::set_memory_byte(const ADDR_TYPE address, unsigned char value) {
   machine->set_memory_byte(address, value);
-};
+}
 
 void Chip8MachineTester::set_pixel(const int x, const int y, const PIXEL_TYPE value) {
   machine->set_pixel(x, y, value);

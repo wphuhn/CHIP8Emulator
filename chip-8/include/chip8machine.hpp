@@ -4,11 +4,13 @@
 #ifndef CHIP_8_INCLUDE_CHIP8MACHINE_HPP_
 #define CHIP_8_INCLUDE_CHIP8MACHINE_HPP_
 
+#include <chrono>  // NOLINT
 #include <cstdint>
 #include <iomanip>
 #include <stack>
 #include <stdexcept>
 #include <string>
+#include <thread>  // NOLINT
 #include <vector>
 
 #include "chip8constants.hpp"
@@ -55,9 +57,17 @@ class Chip8Machine {
   void decode(OPCODE_TYPE);
   void advance();
   void reset();
+  void trigger_delay_timer();
+  // Note:  the following two subroutines are not unit tested, since they deal
+  //        with threads
+  void start_timers();
+  void kill_timers();
 
   std::string display_str() const;
   explicit operator std::string() const;
+
+  bool kill_threads;
+  bool timers_started;
 
  private:
   Display display;
@@ -67,6 +77,7 @@ class Chip8Machine {
   std::array<Register, NUM_V_REGS> v_register;
   std::stack<ADDR_TYPE> call_stack;
   unsigned char delay_timer;
+  std::vector<std::thread> threads;
 
   OPCODE_TYPE fetch_instruction() const;
 

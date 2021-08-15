@@ -5,7 +5,8 @@ namespace Emulator {
 Chip8Machine::Chip8Machine()
     : display_height(MAX_HEIGHT),
       display_width(MAX_WIDTH), memory_size(RAM_SIZE),
-      ram(RAM_SIZE, ROM_START_ADDRESS), display(MAX_HEIGHT, MAX_WIDTH) {}
+      ram(RAM_SIZE, ROM_START_ADDRESS), display(MAX_HEIGHT, MAX_WIDTH),
+      kill_threads(false), timers_started(false), delay_timer(0) {}
 
 /// \brief Return the value of the pixel located at (x, y) position
 /// \param x Horizontal position of pixel, where 0 corresponds to left edge
@@ -101,11 +102,17 @@ void Chip8Machine::set_v(const int reg_num, const REG_TYPE new_value) {
   throw std::runtime_error(
       "Invalid register V" + std::to_string(reg_num) + " specified.");
 }
-void Chip8Machine::set_flag(const REG_TYPE new_value) { set_v(0xF, new_value); }
+void Chip8Machine::set_flag(const REG_TYPE new_value) {
+  set_v(0xF, new_value);
+}
 
-void Chip8Machine::add_to_stack(const ADDR_TYPE new_top) { call_stack.push(new_top); }
+void Chip8Machine::add_to_stack(const ADDR_TYPE new_top) {
+  call_stack.push(new_top);
+}
 
-void Chip8Machine::set_delay_timer(const REG_TYPE new_delay) { delay_timer = new_delay; }
+void Chip8Machine::set_delay_timer(const REG_TYPE new_delay) {
+  delay_timer = new_delay;
+}
 
 static std::string opcode_to_hex_str(const OPCODE_TYPE value) {
   std::stringstream stream;
@@ -136,6 +143,41 @@ Chip8Machine::operator std::string() const {
 /// for self-modifying code.
 void Chip8Machine::reset() {
   pc.set(ROM_START_ADDRESS);
+}
+
+/// \brief Trigger the delay timer, decrementing it if it's greater than zero
+void Chip8Machine::trigger_delay_timer() {
+  if (delay_timer == 0) return;
+  delay_timer -= 1;
+}
+
+namespace {
+  void delay_timer_coroutine(Chip8Machine* machine) {
+    while (!machine->kill_threads) {
+      std::this_thread::sleep_for(std::chrono::microseconds(16667) );
+//      std::this_thread::sleep_for(
+//          std::chrono::duration<int, std::ratio<60, 1>>
+//      );
+      machine->trigger_delay_timer();
+    }
+  }
+}  // namespace
+
+void Chip8Machine::start_timers() {
+  kill_threads = false;
+  threads.emplace_back(delay_timer_coroutine, this);
+  timers_started = true;
+}
+
+void Chip8Machine::kill_timers() {
+  if (!timers_started) return;
+
+  kill_threads = true;
+  for (auto &thread : threads) {
+    thread.join();
+  }
+  kill_threads = false;
+  timers_started = false;
 }
 
 /// \brief Return the contents of the display as an ASCII representation

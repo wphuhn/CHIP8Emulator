@@ -10,4 +10,7 @@ add_subdirectory(googletest)
 include_directories(googletest/googletest/include/)
 enable_testing()
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 add_subdirectory(chip-8)

@@ -143,6 +143,19 @@ TEST_F(Chip8MachineFixture, AdvanceExecutesInstructionPointedToByPC) {
   EXPECT_EQ(reg_value, tester.get_v(reg_int));
 }
 
+TEST_F(Chip8MachineFixture, TriggerDelayTimerDoesNothingWhenTimerIsZero) {
+  tester.set_delay_timer(0);
+  machine.trigger_delay_timer();
+  EXPECT_EQ(0, tester.get_delay_timer());
+}
+
+TEST_F(Chip8MachineFixture, TriggerDelayTimerDecrementsTimerWhenTimerGreaterThanZero) {
+  Emulator::REG_TYPE some_value = 10;
+  tester.set_delay_timer(some_value);
+  machine.trigger_delay_timer();
+  EXPECT_EQ(some_value - 1, tester.get_delay_timer());
+}
+
 #ifndef __CLION_IDE_
 #pragma clang diagnostic pop
 #endif
