@@ -26,6 +26,7 @@ class Chip8MachineTester {
   void set_memory_byte(ADDR_TYPE, unsigned char);
   void set_pixel(int, int, PIXEL_TYPE);
   void set_i(REG_TYPE);
+  void set_flag(REG_TYPE);
   void set_v(int, REG_TYPE);
   void set_pc(ADDR_TYPE);
   void add_to_stack(ADDR_TYPE);

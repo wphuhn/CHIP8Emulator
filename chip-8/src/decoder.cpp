@@ -67,6 +67,14 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
       v_register[reg_num_x].set(value_x & value_y);
       return;
     }
+    if ((opcode & 0x000F) == 4) {
+      REG_TYPE flag = 0;
+      if (value_x + value_y > 0xFF)  flag = 1;
+      REG_TYPE result = (value_x + value_y) & 0xFF;
+      v_register[reg_num_x].set(result);
+      v_register[0xF].set(flag);
+      return;
+    }
   }
   if ((opcode & 0xF000) == 0xA000) {
     i_register.set(opcode & 0x0FFF);

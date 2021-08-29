@@ -194,36 +194,37 @@ INSTANTIATE_TEST_SUITE_P
     )
 );
 
-class Opcode8XY2ParameterizedTestFixture : public Chip8MachineFixture,
+class Opcode8XYZNoCarryParameterizedTestFixture : public Chip8MachineFixture,
     public ::testing::WithParamInterface<std::tuple<Emulator::OPCODE_TYPE,
     Emulator::REG_TYPE,
     Emulator::REG_TYPE,
     Emulator::REG_TYPE>> {
 };
-TEST_P(Opcode8XY2ParameterizedTestFixture, Opcode8XY2StoresANDIntoVXAndLeaveVYUnchanged) {
-  Emulator::OPCODE_TYPE opcode = std::get<0>(GetParam());
-  Emulator::REG_TYPE value_x = std::get<1>(GetParam());
-  Emulator::REG_TYPE value_y = std::get<2>(GetParam());
-  Emulator::OPCODE_TYPE result = std::get<3>(GetParam());
-  int reg_num_x = (opcode & 0x0F00) >> 8;
-  int reg_num_y = (opcode & 0x00F0) >> 4;
-  // Sanity check for tests
-  if ((reg_num_x == reg_num_y) && (value_x != value_y)) {
-    ASSERT_EQ(0, 1);
-  }
-  tester.set_v(reg_num_x, value_x);
-  tester.set_v(reg_num_y, value_y);
-  machine.decode(opcode);
-  int actual_x = tester.get_v(reg_num_x);
-  int actual_y = tester.get_v(reg_num_y);
-  ASSERT_EQ(result, actual_x);
-  ASSERT_EQ(value_y, actual_y);
+TEST_P(Opcode8XYZNoCarryParameterizedTestFixture, Opcode8XYZStoresResultIntoVXAndLeaveVYUnchanged) {
+    Emulator::OPCODE_TYPE opcode = std::get<0>(GetParam());
+    Emulator::REG_TYPE value_x = std::get<1>(GetParam());
+    Emulator::REG_TYPE value_y = std::get<2>(GetParam());
+    Emulator::REG_TYPE result = std::get<3>(GetParam());
+    int reg_num_x = (opcode & 0x0f00) >> 8;
+    int reg_num_y = (opcode & 0x00f0) >> 4;
+    // sanity check for tests
+    if ((reg_num_x == reg_num_y) && (value_x != value_y)) {
+      ASSERT_EQ(0, 1);
+    }
+    tester.set_v(reg_num_x, value_x);
+    tester.set_v(reg_num_y, value_y);
+    machine.decode(opcode);
+    int actual_x = tester.get_v(reg_num_x);
+    int actual_y = tester.get_v(reg_num_y);
+    ASSERT_EQ(result, actual_x);
+    if (reg_num_x != reg_num_y) ASSERT_EQ(value_y, actual_y);
 }
 INSTANTIATE_TEST_SUITE_P
 (
-    Opcode8XY2Tests,
-    Opcode8XY2ParameterizedTestFixture,
+    Opcode8XYZNoCarryTests,
+    Opcode8XYZNoCarryParameterizedTestFixture,
     ::testing::Values(
+        // AND
         std::make_tuple(0x8002, 0x00, 0x00, 0x00),
         std::make_tuple(0x8002, 0xFF, 0xFF, 0xFF),
         std::make_tuple(0x8012, 0x00, 0xFF, 0x00),
@@ -234,6 +235,55 @@ INSTANTIATE_TEST_SUITE_P
         std::make_tuple(0x8342, 0xD7, 0x59, 0x51),
         std::make_tuple(0x8722, 0x56, 0x57, 0x56),
         std::make_tuple(0x8B12, 0x70, 0x4F, 0x40)
+    )
+);
+
+class Opcode8XYZCarryParameterizedTestFixture : public Chip8MachineFixture,
+    public ::testing::WithParamInterface<std::tuple<Emulator::OPCODE_TYPE,
+    Emulator::REG_TYPE,
+    Emulator::REG_TYPE,
+    Emulator::REG_TYPE,
+    Emulator::REG_TYPE>> {
+};
+TEST_P(Opcode8XYZCarryParameterizedTestFixture, Opcode8XYZStoresResultIntoVXLeavesVYUnchangedAndModifiesCarry) {
+  Emulator::OPCODE_TYPE opcode = std::get<0>(GetParam());
+  Emulator::REG_TYPE value_x = std::get<1>(GetParam());
+  Emulator::REG_TYPE value_y = std::get<2>(GetParam());
+  Emulator::REG_TYPE result = std::get<3>(GetParam());
+  Emulator::REG_TYPE flag = std::get<4>(GetParam());
+  int reg_num_x = (opcode & 0x0f00) >> 8;
+  int reg_num_y = (opcode & 0x00f0) >> 4;
+  // sanity check for tests
+  if ((reg_num_x == reg_num_y) && (value_x != value_y)) {
+    ASSERT_EQ(0, 1);
+  }
+  tester.set_v(reg_num_x, value_x);
+  tester.set_v(reg_num_y, value_y);
+  tester.set_flag(0xFF);
+  machine.decode(opcode);
+  int actual_x = tester.get_v(reg_num_x);
+  int actual_y = tester.get_v(reg_num_y);
+  int actual_flag = tester.get_flag();
+  ASSERT_EQ(result, actual_x);
+  if (reg_num_x != reg_num_y) ASSERT_EQ(value_y, actual_y);
+  ASSERT_EQ(flag, actual_flag);
+}
+INSTANTIATE_TEST_SUITE_P
+(
+    Opcode8XYZCarryTests,
+    Opcode8XYZCarryParameterizedTestFixture,
+    ::testing::Values(
+        // ADD
+        std::make_tuple(0x8004, 0x00, 0x00, 0x00, 0),
+        std::make_tuple(0x8004, 0xFF, 0xFF, 0xFE, 1),
+        std::make_tuple(0x8014, 0x00, 0xFF, 0xFF, 0),
+        std::make_tuple(0x8014, 0xFF, 0x00, 0xFF, 0),
+        std::make_tuple(0x8014, 0xFF, 0xFF, 0xFE, 1),
+        std::make_tuple(0x89D4, 0xB2, 0x05, 0xB7, 0),
+        std::make_tuple(0x8874, 0x10, 0x1E, 0x2E, 0),
+        std::make_tuple(0x8BC4, 0xBB, 0x4D, 0x08, 1),
+        std::make_tuple(0x8A44, 0xD4, 0xEB, 0xBF, 1),
+        std::make_tuple(0x8554, 0x06, 0x06, 0x0C, 0)
     )
 );
 

@@ -40,6 +40,8 @@ void Chip8MachineTester::set_pixel(const int x, const int y, const PIXEL_TYPE va
 }
 void Chip8MachineTester::set_i(const REG_TYPE new_value) { machine->set_i(new_value); }
 
+void Chip8MachineTester::set_flag(const REG_TYPE new_value) { machine->set_flag(new_value); }
+
 void Chip8MachineTester::set_v(const int reg_num, const REG_TYPE new_value) {
   machine->set_v(reg_num, new_value);
 }
