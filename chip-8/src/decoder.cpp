@@ -91,6 +91,12 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
     }
     return;
   }
+  if ((opcode & 0xF0FF) == 0xE0A1) {
+    std::cout << "Opcode 0xEXA1 not yet implemented!  Assuming button not pressed!" << std::endl;
+    // TODO(WPH):  Even this is not tested yet!
+    pc.add(INSTRUCTION_LENGTH);
+    return;
+  }
   if ((opcode & 0xF0FF) == 0xF015) {
     int reg_num = (opcode & 0x0F00) >> 8;
     set_delay_timer(get_v(reg_num));
