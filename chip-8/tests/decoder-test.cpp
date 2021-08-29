@@ -194,6 +194,49 @@ INSTANTIATE_TEST_SUITE_P
     )
 );
 
+class Opcode8XY2ParameterizedTestFixture : public Chip8MachineFixture,
+    public ::testing::WithParamInterface<std::tuple<Emulator::OPCODE_TYPE,
+    Emulator::REG_TYPE,
+    Emulator::REG_TYPE,
+    Emulator::REG_TYPE>> {
+};
+TEST_P(Opcode8XY2ParameterizedTestFixture, Opcode8XY2StoresANDIntoVXAndLeaveVYUnchanged) {
+  Emulator::OPCODE_TYPE opcode = std::get<0>(GetParam());
+  Emulator::REG_TYPE value_x = std::get<1>(GetParam());
+  Emulator::REG_TYPE value_y = std::get<2>(GetParam());
+  Emulator::OPCODE_TYPE result = std::get<3>(GetParam());
+  int reg_num_x = (opcode & 0x0F00) >> 8;
+  int reg_num_y = (opcode & 0x00F0) >> 4;
+  // Sanity check for tests
+  if ((reg_num_x == reg_num_y) && (value_x != value_y)) {
+    ASSERT_EQ(0, 1);
+  }
+  tester.set_v(reg_num_x, value_x);
+  tester.set_v(reg_num_y, value_y);
+  machine.decode(opcode);
+  int actual_x = tester.get_v(reg_num_x);
+  int actual_y = tester.get_v(reg_num_y);
+  ASSERT_EQ(result, actual_x);
+  ASSERT_EQ(value_y, actual_y);
+}
+INSTANTIATE_TEST_SUITE_P
+(
+    Opcode8XY2Tests,
+    Opcode8XY2ParameterizedTestFixture,
+    ::testing::Values(
+        std::make_tuple(0x8002, 0x00, 0x00, 0x00),
+        std::make_tuple(0x8002, 0xFF, 0xFF, 0xFF),
+        std::make_tuple(0x8012, 0x00, 0xFF, 0x00),
+        std::make_tuple(0x8012, 0xFF, 0x00, 0x00),
+        std::make_tuple(0x8012, 0xFF, 0xFF, 0xFF),
+        std::make_tuple(0x8282, 0xE4, 0xB9, 0xA0),
+        std::make_tuple(0x8992, 0x71, 0x71, 0x71),
+        std::make_tuple(0x8342, 0xD7, 0x59, 0x51),
+        std::make_tuple(0x8722, 0x56, 0x57, 0x56),
+        std::make_tuple(0x8B12, 0x70, 0x4F, 0x40)
+    )
+);
+
 class OneNNNParameterizedTestFixture : public Chip8MachineFixture,
                                        public ::testing::WithParamInterface<Emulator::OPCODE_TYPE> {
 };
@@ -632,10 +675,10 @@ namespace {
 int expected_vals[3] = {0x8C, 0x97, 0xB7};
 int seed_val = 0;
 
-class Opcode3XNNParameterizedTestFixture : public Chip8MachineFixture,
+class OpcodeCXNNParameterizedTestFixture : public Chip8MachineFixture,
     public ::testing::WithParamInterface<Emulator::OPCODE_TYPE> {
 };
-TEST_P(Opcode3XNNParameterizedTestFixture, OpcodeCXNNGeneratesRandomNumberWithNoMask) {
+TEST_P(OpcodeCXNNParameterizedTestFixture, OpcodeCXNNGeneratesRandomNumberWithNoMask) {
   // Putting as part of the fixture (despite not using parameterized tests) so that it
   // runs multiple times, verifying PRNG initialization behaves deterministically
   Emulator::OPCODE_TYPE opcode = 0xC0FF;
@@ -646,7 +689,7 @@ TEST_P(Opcode3XNNParameterizedTestFixture, OpcodeCXNNGeneratesRandomNumberWithNo
     EXPECT_EQ(result, expected);
   }
 }
-TEST_P(Opcode3XNNParameterizedTestFixture, OpcodeCXNNGeneratesRandomNumberWithMask) {
+TEST_P(OpcodeCXNNParameterizedTestFixture, OpcodeCXNNGeneratesRandomNumberWithMask) {
   Emulator::OPCODE_TYPE opcode = GetParam();
   int reg_num = (opcode & 0x0F00) >> 8;
   int mask = opcode & 0x00FF;
@@ -660,8 +703,8 @@ TEST_P(Opcode3XNNParameterizedTestFixture, OpcodeCXNNGeneratesRandomNumberWithMa
 }
 INSTANTIATE_TEST_SUITE_P
 (
-    Opcode3XNNTests,
-    Opcode3XNNParameterizedTestFixture,
+    OpcodeCXNNTests,
+    OpcodeCXNNParameterizedTestFixture,
     ::testing::Values(0xC6FF, 0xC300, 0xCC21, 0xCF56)
 );
 }  // namespace
