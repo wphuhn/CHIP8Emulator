@@ -7,6 +7,7 @@
 #include <chrono>  // NOLINT
 #include <cstdint>
 #include <iomanip>
+#include <random>
 #include <stack>
 #include <stdexcept>
 #include <string>
@@ -62,6 +63,7 @@ class Chip8Machine {
   //        with threads
   void start_timers();
   void kill_timers();
+  void set_seed(int);
 
   std::string display_str() const;
   explicit operator std::string() const;
@@ -78,6 +80,9 @@ class Chip8Machine {
   std::stack<ADDR_TYPE> call_stack;
   unsigned char delay_timer;
   std::vector<std::thread> threads;
+
+  std::mt19937 generator;
+  std::uniform_int_distribution<OPCODE_TYPE> distribution;
 
   OPCODE_TYPE fetch_instruction() const;
 

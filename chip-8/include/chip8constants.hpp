@@ -30,6 +30,10 @@ const int RAM_SIZE = 0x1000;
 /// \brief Starting address where ROM will be loaded in RAM
 const int ROM_START_ADDRESS = 0x200;
 
+/// \var MAX_RANDOM_NUMBER
+/// \brief Maximum value for random number to be generated
+const int MAX_RANDOM_NUMBER = 0xFF;
+
 }  // namespace Emulator
 
 #endif  // CHIP_8_INCLUDE_CHIP8CONSTANTS_HPP_

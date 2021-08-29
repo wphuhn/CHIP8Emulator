@@ -6,7 +6,8 @@ Chip8Machine::Chip8Machine()
     : display_height(MAX_HEIGHT),
       display_width(MAX_WIDTH), memory_size(RAM_SIZE),
       ram(RAM_SIZE, ROM_START_ADDRESS), display(MAX_HEIGHT, MAX_WIDTH),
-      kill_threads(false), timers_started(false), delay_timer(0) {}
+      kill_threads(false), timers_started(false), delay_timer(0),
+      distribution(0, MAX_RANDOM_NUMBER) {}
 
 /// \brief Return the value of the pixel located at (x, y) position
 /// \param x Horizontal position of pixel, where 0 corresponds to left edge
@@ -178,6 +179,10 @@ void Chip8Machine::kill_timers() {
   }
   kill_threads = false;
   timers_started = false;
+}
+
+void Chip8Machine::set_seed(int seed) {
+  generator.seed(seed);
 }
 
 /// \brief Return the contents of the display as an ASCII representation

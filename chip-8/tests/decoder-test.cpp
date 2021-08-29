@@ -624,6 +624,48 @@ INSTANTIATE_TEST_SUITE_P
                       std::make_tuple(0xFF65, 0x2BDD))
 );
 
+namespace {
+// Testing pseudo-randomness is always fun
+// The tests for opcode 0xCXNN assume we are using std::mt19937 as the generator engine,
+// std::uniform_int_distribution(0, 0xFF) as the distribution, and the seed value is
+// fixed to a particular value (here 0 because why not).
+int expected_vals[3] = {0x8C, 0x97, 0xB7};
+int seed_val = 0;
+
+class Opcode3XNNParameterizedTestFixture : public Chip8MachineFixture,
+    public ::testing::WithParamInterface<Emulator::OPCODE_TYPE> {
+};
+TEST_P(Opcode3XNNParameterizedTestFixture, OpcodeCXNNGeneratesRandomNumberWithNoMask) {
+  // Putting as part of the fixture (despite not using parameterized tests) so that it
+  // runs multiple times, verifying PRNG initialization behaves deterministically
+  Emulator::OPCODE_TYPE opcode = 0xC0FF;
+  machine.set_seed(seed_val);
+  for (auto expected : expected_vals) {
+    machine.decode(opcode);
+    int result = tester.get_v(0);
+    EXPECT_EQ(result, expected);
+  }
+}
+TEST_P(Opcode3XNNParameterizedTestFixture, OpcodeCXNNGeneratesRandomNumberWithMask) {
+  Emulator::OPCODE_TYPE opcode = GetParam();
+  int reg_num = (opcode & 0x0F00) >> 8;
+  int mask = opcode & 0x00FF;
+  machine.set_seed(seed_val);
+  for (auto expected : expected_vals) {
+    expected = expected & mask;
+    machine.decode(opcode);
+    int result = tester.get_v(reg_num);
+    EXPECT_EQ(result, expected);
+  }
+}
+INSTANTIATE_TEST_SUITE_P
+(
+    Opcode3XNNTests,
+    Opcode3XNNParameterizedTestFixture,
+    ::testing::Values(0xC6FF, 0xC300, 0xCC21, 0xCF56)
+);
+}  // namespace
+
 #ifndef __CLION_IDE_
 #pragma clang diagnostic pop
 #endif

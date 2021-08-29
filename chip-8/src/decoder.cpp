@@ -62,6 +62,13 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
     i_register.set(opcode & 0x0FFF);
     return;
   }
+  if ((opcode & 0xF000) == 0xC000) {
+    int reg_num = (opcode & 0x0F00) >> 8;
+    int mask = opcode & 0x00FF;
+    int random_number = distribution(generator) & mask;
+    v_register[reg_num].set(random_number);
+    return;
+  }
   if ((opcode & 0xF000) == 0xD000) {
     int x_reg = (opcode & 0x0F00) >> 8;
     int y_reg = (opcode & 0x00F0) >> 4;
