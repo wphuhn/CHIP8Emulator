@@ -71,6 +71,10 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
     int reg_num_y = (opcode & 0x00F0) >> 4;
     int value_x = v_register[reg_num_x].get();
     int value_y = v_register[reg_num_y].get();
+    if ((opcode & 0x000F) == 0) {
+      v_register[reg_num_x].set(value_y);
+      return;
+    }
     if ((opcode & 0x000F) == 2) {
       v_register[reg_num_x].set(value_x & value_y);
       return;

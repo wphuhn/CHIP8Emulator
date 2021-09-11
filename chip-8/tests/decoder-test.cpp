@@ -231,6 +231,9 @@ INSTANTIATE_TEST_SUITE_P
     )
 );
 
+// All opcodes of form 8XYZ have the same form:  modify VX based on the contents
+// of VY for operation Z, leave VY unchanged, possibly change carry flag
+// This fixture runs all tests for opcodes that do not change the carry flag
 class Opcode8XYZNoCarryParameterizedTestFixture : public Chip8MachineFixture,
     public ::testing::WithParamInterface<std::tuple<Emulator::OPCODE_TYPE,
     Emulator::REG_TYPE,
@@ -261,6 +264,17 @@ INSTANTIATE_TEST_SUITE_P
     Opcode8XYZNoCarryTests,
     Opcode8XYZNoCarryParameterizedTestFixture,
     ::testing::Values(
+        // SET
+        std::make_tuple(0x8000, 0x00, 0x00, 0x00),
+        std::make_tuple(0x8000, 0xFF, 0xFF, 0xFF),
+        std::make_tuple(0x8010, 0x00, 0xFF, 0xFF),
+        std::make_tuple(0x8010, 0xFF, 0x00, 0x00),
+        std::make_tuple(0x8010, 0xFF, 0xFF, 0xFF),
+        std::make_tuple(0x82F0, 0x02, 0xDF, 0xDF),
+        std::make_tuple(0x80C0, 0xAA, 0xCD, 0xCD),
+        std::make_tuple(0x8630, 0x4C, 0xA2, 0xA2),
+        std::make_tuple(0x8840, 0x1B, 0x6F, 0x6F),
+        std::make_tuple(0x8960, 0x67, 0x73, 0x73),
         // AND
         std::make_tuple(0x8002, 0x00, 0x00, 0x00),
         std::make_tuple(0x8002, 0xFF, 0xFF, 0xFF),
@@ -275,6 +289,9 @@ INSTANTIATE_TEST_SUITE_P
     )
 );
 
+// All opcodes of form 8XYZ have the same form:  modify VX based on the contents
+// of VY for operation Z, leave VY unchanged, possibly change carry flag
+// This fixture runs all tests for opcodes that change the carry flag
 class Opcode8XYZCarryParameterizedTestFixture : public Chip8MachineFixture,
     public ::testing::WithParamInterface<std::tuple<Emulator::OPCODE_TYPE,
     Emulator::REG_TYPE,
