@@ -87,6 +87,14 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
       v_register[0xF].set(flag);
       return;
     }
+    if ((opcode & 0x000F) == 5) {
+      REG_TYPE flag = 0;
+      if (value_x > value_y)  flag = 1;
+      REG_TYPE result = (value_x - value_y) & 0xFF;
+      v_register[reg_num_x].set(result);
+      v_register[0xF].set(flag);
+      return;
+    }
   }
   if ((opcode & 0xF000) == 0xA000) {
     i_register.set(opcode & 0x0FFF);
@@ -130,6 +138,10 @@ void Chip8Machine::decode(const OPCODE_TYPE opcode) {
   if ((opcode & 0xF0FF) == 0xF015) {
     int reg_num = (opcode & 0x0F00) >> 8;
     set_delay_timer(get_v(reg_num));
+    return;
+  }
+  if ((opcode & 0xF0FF) == 0xF018) {
+    std::cout << "Opcode 0xFX18 not yet implemented!  Leaving sound timer untouched!" << std::endl;
     return;
   }
   if ((opcode & 0xF0FF) == 0xF007) {
