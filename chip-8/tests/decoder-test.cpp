@@ -109,10 +109,10 @@ INSTANTIATE_TEST_SUITE_P
                       std::make_tuple(0x2F94, 0x2FFF))
 );
 
-class Opcode3NNNParameterizedTestFixture : public Chip8MachineFixture,
+class Opcode3XNNParameterizedTestFixture : public Chip8MachineFixture,
  public ::testing::WithParamInterface< std::tuple<Emulator::ADDR_TYPE, Emulator::OPCODE_TYPE> > {
 };
-TEST_P(Opcode3NNNParameterizedTestFixture, Opcode3NNNIncrementsPCWhenValuesEqual) {
+TEST_P(Opcode3XNNParameterizedTestFixture, Opcode3XNNIncrementsPCWhenValuesEqual) {
   auto pc = std::get<0>(GetParam());
   auto opcode = std::get<1>(GetParam());
 
@@ -124,7 +124,7 @@ TEST_P(Opcode3NNNParameterizedTestFixture, Opcode3NNNIncrementsPCWhenValuesEqual
   machine.decode(opcode);
   EXPECT_EQ(tester.get_pc(), pc + TEST_INSTRUCTION_LENGTH);
 }
-TEST_P(Opcode3NNNParameterizedTestFixture, Opcode3NNNDoesNothingWhenValuesNotEqual) {
+TEST_P(Opcode3XNNParameterizedTestFixture, Opcode3XNNDoesNothingWhenValuesNotEqual) {
   auto pc = std::get<0>(GetParam());
   auto opcode = std::get<1>(GetParam());
 
@@ -138,13 +138,50 @@ TEST_P(Opcode3NNNParameterizedTestFixture, Opcode3NNNDoesNothingWhenValuesNotEqu
 }
 INSTANTIATE_TEST_SUITE_P
 (
-    Opcode3NNNTests,
-    Opcode3NNNParameterizedTestFixture,
+    Opcode3XNNTests,
+    Opcode3XNNParameterizedTestFixture,
     ::testing::Values(std::make_tuple(0x215F, 0x3B83),
                       std::make_tuple(0x27C7, 0x3029),
                       std::make_tuple(0x268D, 0x3898),
                       std::make_tuple(0x28C4, 0x3630))
 );
+
+class Opcode4XNNParameterizedTestFixture : public Chip8MachineFixture,
+    public ::testing::WithParamInterface< std::tuple<Emulator::ADDR_TYPE, Emulator::OPCODE_TYPE> > {
+};
+TEST_P(Opcode4XNNParameterizedTestFixture, Opcode4XNNDoesNothingWhenValuesEqual) {
+  auto pc = std::get<0>(GetParam());
+  auto opcode = std::get<1>(GetParam());
+
+  int reg_num = (opcode & 0x0F00) >> 8;
+  int value = opcode & 0x00FF;
+
+  tester.set_pc(pc);
+  tester.set_v(reg_num, value);
+  machine.decode(opcode);
+  EXPECT_EQ(tester.get_pc(), pc);
+}
+TEST_P(Opcode4XNNParameterizedTestFixture, Opcode4XNNIncrementsPCWhenValuesNotEqual) {
+  auto pc = std::get<0>(GetParam());
+  auto opcode = std::get<1>(GetParam());
+
+  int reg_num = (opcode & 0x0F00) >> 8;
+  int value = opcode & 0x00FF;
+
+  tester.set_pc(pc);
+  tester.set_v(reg_num, value + 1);
+  machine.decode(opcode);
+  EXPECT_EQ(tester.get_pc(), pc + TEST_INSTRUCTION_LENGTH);
+}
+INSTANTIATE_TEST_SUITE_P
+(
+    Opcode4XNNTests,
+    Opcode4XNNParameterizedTestFixture,
+    ::testing::Values(std::make_tuple(0x40CE, 0x42CC),
+                      std::make_tuple(0x3239, 0x4528),
+                      std::make_tuple(0xA6DA, 0x486C),
+                      std::make_tuple(0xB02E, 0x4B1E))
+                      );
 
 class Opcode6XNNParameterizedTestFixture : public Chip8MachineFixture,
                                            public ::testing::WithParamInterface<Emulator::OPCODE_TYPE> {
